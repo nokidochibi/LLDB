@@ -1,0 +1,125 @@
+<main>
+<div id="live-detail" style="display:none"></div>
+
+<div id="tab-search" class="tab-content" style="display:block">
+  <p class="text-gray-500 mb-3" style="font-size:32px;text-align:center">※<span id="last-update-date">-</span>までの情報を掲載</p>
+  <div class="card-base p-3 bg-gray-50 border border-gray-200">
+    <div class="flex gap-2 mb-3">
+      <input type="text" id="search-input" placeholder="フリーワードで検索" class="flex-1 border border-gray-300 rounded-lg">
+      <button id="clear-all-btn" class="clear-btn">すべてクリア</button>
+    </div>
+    <div class="mb-3">
+      <select id="tour-select" class="w-full border border-gray-300 rounded-lg">
+        <option value="">すべてのライブイベント</option>
+        <option value="pop">Love Like Pop</option>
+        <option value="rock">Love Like Rock</option>
+        <option value="aloha">Love Like Aloha</option>
+        <option value="other">その他のライブイベント</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <select id="year-select" class="w-full border border-gray-300 rounded-lg"><option value="">すべての年</option></select>
+    </div>
+    <div class="mb-3">
+      <select id="region-select" class="w-full border border-gray-300 rounded-lg"><option value="">すべての都道府県</option></select>
+    </div>
+    <div>
+      <input type="text" id="song-filter-input" placeholder="演奏された曲名で検索" class="w-full border border-gray-300 rounded-lg">
+    </div>
+  </div>
+  <h3 class="font-bold my-5 text-gray-700">🎫 <span id="display-count-text">表示中の公演数</span>: <span id="display-count">0</span> / <span id="total-count">0</span></h3>
+  <div id="live-list-container"></div>
+</div>
+
+<div id="tab-song" class="tab-content" style="display:none">
+  <div class="mb-6">
+    <h3 class="font-bold mb-3 text-gray-700">📊 アルバム別演奏回数</h3>
+    <p class="text-gray-600 mb-2 text-center" style="font-size:28px; line-height:1.5;">※グラフが崩れている場合は、一度他のタブに切り替えて戻ってみて</p>
+    <div class="card-base bg-white p-3">
+      <canvas id="album-chart" style="max-height:600px"></canvas>
+    </div>
+  </div>
+  <div class="card-base p-3 bg-gray-50 border border-gray-200">
+    <div class="flex gap-2 mb-3">
+      <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="flex-1 border border-gray-300 rounded-lg">
+      <button id="song-clear-btn" class="clear-btn">クリア</button>
+    </div>
+    <div class="flex justify-between font-semibold">
+      <span class="text-gray-600" style="font-size:36px">全楽曲: <span id="total-songs">-</span>曲</span>
+      <select id="song-sort" class="text-aiko-pink font-bold" style="font-size:36px">
+        <option value="count-desc">演奏回数 降順</option><option value="count-asc">演奏回数 昇順</option>
+      </select>
+    </div>
+  </div>
+  <h3 class="font-bold mt-6 mb-3 text-gray-700">🎸 演奏回数ランキング</h3>
+  <div id="song-ranking-container"></div>
+</div>
+
+<div id="tab-pattern" class="tab-content" style="display:none">
+  <div class="mb-6">
+    <h3 class="font-bold mb-3 text-gray-700">📊 演奏回数 TOP 5の推移</h3>
+    <div class="card-base bg-white p-3">
+      <canvas id="year-trend-chart" style="max-height:500px"></canvas>
+    </div>
+  </div>
+  <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700">🎬 オープニング曲 TOP 10</h3>
+  <div id="opening-songs" class="card-base bg-white p-3"></div></div>
+  <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700">👏 アンコール曲 TOP 10</h3>
+  <div id="encore-songs" class="card-base bg-white p-3"></div></div>
+  <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700">🏁 大トリ曲 TOP 10</h3>
+  <div id="last-songs" class="card-base bg-white p-3"></div></div>
+</div>
+
+<div id="tab-venue" class="tab-content" style="display:none">
+  <div class="card-base p-3 bg-gray-50 border border-gray-200 mb-4">
+    <div class="flex gap-2">
+      <input type="text" id="venue-search-input" placeholder="会場 または 都道府県名で検索" class="flex-1 border border-gray-300 rounded-lg">
+      <button id="venue-clear-btn" class="clear-btn">クリア</button>
+    </div>
+  </div>
+  <div class="venue-tabs">
+    <div class="venue-tab active" data-venue-tab="venue">会場ランキング</div>
+    <div class="venue-tab" data-venue-tab="region">都道府県ランキング</div>
+  </div>
+  <div id="venue-ranking-container"></div>
+  <div id="region-ranking-container" style="display:none"></div>
+</div>
+</main>
+
+<div id="modal-overlay" class="modal-overlay" style="display:none">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div id="info-modal" class="modal-overlay" style="display:none">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeInfoModal()">&times;</span>
+    <div style="font-size:32px;line-height:1.8">
+      <h3 class="font-bold text-lg mb-4" style="font-size:40px;">▼情報源</h3>
+      <ul>
+        <li>このアプリの情報は開発者が独自の調査で集約したものだよ。</li>
+        <li>一部セトリが見つからなかった公演が含まれているよ。（2006年のPOP10と2008年の裏ROCKなど）
+        </li>
+        <li>まちがっている情報などがあれば、ぜひX（Twitter）の<a href="https://twitter.com/noki_dochibi" target="_blank" style="color:#1DA1F2;text-decoration:underline">@noki_dochibi</a>までお知らせください。</li>
+        <li>テレビ番組/音楽特番の情報はなく、ライブイベント（と思われる）情報のみ載せているよ。</li>
+      </ul>
+      <h3 class="font-bold text-lg mt-6 mb-4" style="font-size:40px;">▼集計方法</h3>
+      <ul>
+        <li>『より道』『相合傘』などバージョン違いがあるものも、１つの曲として統合しているよ。</li>
+        <li>「メドレー」は複数の曲をまとめて１曲として扱っているよ。</li>
+        <li>即興曲などは含んでいないよ。</li>
+        <li>会場は、同じ建物で名称が変わったものは「旧名称 / 新名称」としているよ。同じ場所でも建て替えた新しい建物の場合は、別の会場としているよ。</li>
+      </ul>
+      <h3 class="font-bold text-lg mt-6 mb-4" style="font-size:40px;">▼操作</h3>
+      <ul>
+        <li>セトリのページの左上に「←（戻る）」ボタンがあるけど、ライブ名をタップしても前のページに戻るよ。右手でも押しやすいね。</li>
+      </ul>
+      <h3 class="font-bold text-lg mt-6 mb-4" style="font-size:40px;">▼その他</h3>
+      <ul>
+        <li>他にもいろいろおもちゃがあるよ<br>→<a href="https://lit.link/nokidochibi" target="_blank" style="color:#1DA1F2;text-decoration:underline">https://lit.link/nokidochibi</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
