@@ -9,13 +9,14 @@ function include(filename) {
 
 /**
  * GETリクエストを処理し、ウェブアプリのメインページを表示します。
+ * HTMLをテンプレートとして評価し、正しく表示されるようにします。
  */
 function doGet() {
-  // アイコン設定のために追加したテンプレート処理を削除し、元のシンプルな形に戻します。
-  var html = HtmlService.createHtmlOutputFromFile('Index');
-  return html
-    .setTitle('Love Like Data Base')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  // HTMLを「テンプレート」として読み込み、評価（evaluate）する
+  return HtmlService.createTemplateFromFile('Index')
+      .evaluate() // ← 最も重要なのがこの .evaluate() です！
+      .setTitle('Love Like Data Base')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 /**
