@@ -15,12 +15,51 @@ function loadLiveList() {
     .getLiveRecords();
 }
 
+let loadingAnimationTimers = []; // アニメーションのタイマーを管理する配列
+
 /** ローディング表示 */
 function showLoading(containerId) {
   const container = document.getElementById(containerId);
-  if (container) {
-    container.innerHTML = `<div class="text-center py-8" style="font-size:80px;line-height:1.8"><p class="text-aiko-pink font-bold">男子ー!! 女子ー!!</p><p class="text-aiko-pink font-bold">そうでない人ー!!</p><p class="mt-4"></p><p class="text-aiko-pink font-bold" style="font-size:100px">ぜーいんっ...!!!</p></div>`;
-  }
+  if (!container) return;
+
+  // 以前のアニメーションが残っていれば停止する
+  loadingAnimationTimers.forEach(clearTimeout);
+  loadingAnimationTimers = [];
+
+  // アニメーション用のHTML構造
+  container.innerHTML = `
+    <div class="text-center py-8" style="font-size:80px;line-height:1.8">
+      <p class="text-aiko-pink font-bold">
+        <span id="loading-text-1" class="opacity-0 transition-opacity duration-500">男子ー!!</span>
+      </p>
+      <p class="text-aiko-pink font-bold">
+        <span id="loading-text-2" class="opacity-0 transition-opacity duration-500">女子ー!!</span>
+      </p>
+      <p class="text-aiko-pink font-bold">
+        <span id="loading-text-3" class="opacity-0 transition-opacity duration-500">そうでない人ー!!</span>
+      </p>
+      <p class="mt-4"></p>
+      <p class="text-aiko-pink font-bold" style="font-size:100px">
+        <span id="loading-text-4" class="opacity-0 transition-opacity duration-500">ぜーいんっ...!!!</span>
+      </p>
+    </div>
+  `;
+
+  // 順番にテキストを表示させるタイマーを設定
+  const texts = [
+    { id: 'loading-text-1', delay: 0 },
+    { id: 'loading-text-2', delay: 500 },
+    { id: 'loading-text-3', delay: 1000 },
+    { id: 'loading-text-4', delay: 1800 } // 「ぜーいんっ!!!」は少し間を空ける
+  ];
+
+  texts.forEach(text => {
+    const timer = setTimeout(() => {
+      const el = document.getElementById(text.id);
+      if (el) el.classList.remove('opacity-0');
+    }, text.delay);
+    loadingAnimationTimers.push(timer);
+  });
 }
 
 /** アプリの初期設定 */
