@@ -30,26 +30,26 @@ function showLoading(containerId) {
   loadingAnimationTimers.forEach(clearTimeout);
   loadingAnimationTimers = [];
 
-  // アニメーション用のHTML構造（pタグをdivとbrに変更して余白を調整）
+  // アニメーション用のHTML構造を修正し、不要な余白を削除
   container.innerHTML = `
-    <div class="text-center py-8 text-aiko-pink font-bold" style="line-height:1.6;">
+    <div class="text-center py-8 text-aiko-pink font-bold" style="line-height:1.5;">
       <div style="font-size:80px;">
         <span id="loading-text-1" class="opacity-0">男子ー!!</span> <span id="loading-text-2" class="opacity-0">女子ー!!</span><br>
         <span id="loading-text-3" class="opacity-0">そうでない人ー!!</span>
       </div>
-      <div class="mt-2" style="font-size:100px;">
+      <div style="font-size:100px; margin-top: 0.5rem;">
         <span id="loading-text-4" class="opacity-0">ぜー</span><span id="loading-text-5" class="opacity-0">いんっ...!!!</span>
       </div>
     </div>
   `;
 
-  // 表示するテキストとタイミングのリスト
+  // 表示するテキストとタイミングのリストを更新
   const loadingTexts = [
-    { id: 'loading-text-1', delay: 500 },    // 開始0.5秒後
-    { id: 'loading-text-2', delay: 1000 },   // その0.5秒後
-    { id: 'loading-text-3', delay: 1500 },   // その0.5秒後
-    { id: 'loading-text-4', delay: 2500 },   // その1.0秒後
-    { id: 'loading-text-5', delay: 3000 }    // その0.5秒後
+    { id: 'loading-text-1', delay: 500 },
+    { id: 'loading-text-2', delay: 1000 },
+    { id: 'loading-text-3', delay: 1500 },
+    { id: 'loading-text-4', delay: 2200 },
+    { id: 'loading-text-5', delay: 2700 }
   ];
 
   // 順番に表示する
