@@ -30,18 +30,20 @@ function showLoading(containerId) {
   loadingAnimationTimers.forEach(clearTimeout);
   loadingAnimationTimers = [];
 
-  // アニメーション用のHTML構造を修正し、不要な余白を削除
+  // HTML構造をpタグに戻し、Tailwind CSSで余白を精密に制御
   container.innerHTML = `
-    <div class="text-center py-8 text-aiko-pink font-bold" style="line-height:1.5;">
-      <div style="font-size:80px;">
-        <span id="loading-text-1" class="opacity-0">男子ー!!</span> <span id="loading-text-2" class="opacity-0">女子ー!!</span><br>
-        <span id="loading-text-3" class="opacity-0">そうでない人ー!!</span>
-      </div>
-      <div style="font-size:100px; margin-top: 0.5rem;">
-        <span id="loading-text-4" class="opacity-0">ぜー</span><span id="loading-text-5" class="opacity-0">いんっ...!!!</span>
-      </div>
-    </div>
-  `;
+<div class="text-center py-8 text-aiko-pink font-bold">
+  <p class="m-0" style="font-size:80px; line-height:1.3;">
+    <span id="loading-text-1" class="opacity-0">男子ー!!</span> <span id="loading-text-2" class="opacity-0">女子ー!!</span>
+  </p>
+  <p class="m-0" style="font-size:80px; line-height:1.3;">
+    <span id="loading-text-3" class="opacity-0">そうでない人ー!!</span>
+  </p>
+  <p class="m-0 mt-2" style="font-size:100px; line-height:1.3;">
+    <span id="loading-text-4" class="opacity-0">ぜー</span><span id="loading-text-5" class="opacity-0">いんっ...!!!</span>
+  </p>
+</div>
+`;
 
   // 表示するテキストとタイミングのリストを更新
   const loadingTexts = [
