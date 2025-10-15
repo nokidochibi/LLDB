@@ -177,3 +177,42 @@ function getAlbumData() {
     return [];
   }
 }
+
+/**
+ * スプレッドシートの「アルバム」シートから、どのアルバムにどの曲が含まれているかのリストを取得します。
+ * @return {Array<Object>} アルバムと曲のペアのリスト。例: [{album: '夏服', song: 'カブトムシ'}, ...]
+ */
+function getAlbumSongList() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('アルバム');
+    if (!sheet) {
+      Logger.log('シート「アルバム」が見つかりません');
+      return [];
+    }
+
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return [];
+
+    // D列（アルバム名）とF列（曲名）のデータを取得
+    const data = sheet.getRange(2, 4, lastRow - 1, 3).getValues();
+
+    const albumSongList = [];
+    data.forEach(row => {
+      const albumName = safeTrim(row[0]); // D列
+      const songName = safeTrim(row[2]);  // F列
+      if (albumName && songName) {
+        albumSongList.push({
+          album: albumName,
+          song: songName
+        });
+      }
+    });
+    return albumSongList;
+
+  } catch (e) {
+    Logger.log('アルバム収録曲リストの取得エラー: ' + e.toString());
+    return [];
+  }
+}
+
