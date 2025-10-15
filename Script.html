@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadLiveList();
 });
 
+// 新しいグラフのために albumSongList を追加
 let allLiveRecords = [], songStats = {}, patternStats = {}, albumData = [], chartInstances = {}, albumSongList = [];
 let loadingAnimationTimers = [];
 
@@ -88,19 +89,14 @@ function initializeApp(records) {
   window.addEventListener('resize', checkOrientation);
 
   // サーバーから2種類のアルバムデータを取得
-  google.script.run.withSuccessHandler(data => {
-    albumData = data;
-    // グラフはタブが表示されるときに描画
-  }).getAlbumData();
-  
-  google.script.run.withSuccessHandler(data => {
-    albumSongList = data;
-  }).getAlbumSongList();
+  google.script.run.withSuccessHandler(data => { albumData = data; }).getAlbumData();
+  google.script.run.withSuccessHandler(data => { albumSongList = data; }).getAlbumSongList();
 
   renderSongRanking();
   renderPatternStats();
   renderVenueRanking();
-  renderYearTrendChart();
+  // グラフはタブが表示されるときに描画するため、初期描画からは削除
+ // renderYearTrendChart(); 
 }
 
 /** 画面の向きをチェックしてbodyにクラスを付与 */
@@ -116,8 +112,8 @@ function checkOrientation() {
 /** アルバム別演奏回数グラフを積み上げ形式で描画 */
 function renderAlbumChart() {
   const canvas = document.getElementById('album-chart');
+  // 必要なデータが揃うまで100ミリ秒待って再試行
   if (!canvas || !albumData.length || !albumSongList.length || !Object.keys(songStats).length) {
-    // 必要なデータが揃うまで100ミリ秒待って再試行
     setTimeout(renderAlbumChart, 100);
     return;
   }
@@ -137,7 +133,8 @@ function renderAlbumChart() {
 
   // 2. 各アルバムで曲を演奏回数順にソートし、TOP3とその他に分類
   const chartData = albumData.map(album => {
-    const details = albumDetails[album.albumName] || [];
+    // 元の配列を壊さないようにコピーを作成
+    const details = albumDetails[album.albumName] ? [...albumDetails[album.albumName]] : [];
     details.sort((a, b) => b.count - a.count);
     
     const top1 = details[0] || { song: 'N/A', count: 0 };
@@ -167,10 +164,7 @@ function renderAlbumChart() {
   // 4. グラフを描画
   chartInstances.album = new Chart(canvas, {
     type: 'bar',
-    data: {
-      labels: labels,
-      datasets: datasets
-    },
+    data: { labels, datasets },
     options: {
       indexAxis: 'y',
       responsive: true,
@@ -180,16 +174,11 @@ function renderAlbumChart() {
         y: { stacked: true, ticks: { font: { size: 16 }, autoSkip: false } }
       },
       plugins: {
-        legend: {
-          position: 'top',
-          labels: { font: { size: 14 } }
-        },
+        legend: { position: 'top', labels: { font: { size: 14 } } },
         tooltip: {
           callbacks: {
             label: function(context) {
-              const datasetIndex = context.datasetIndex;
-              const dataIndex = context.dataIndex;
-              const songInfo = context.chart.data.datasets[datasetIndex].songData[dataIndex];
+              const songInfo = context.chart.data.datasets[context.datasetIndex].songData[context.dataIndex];
               return `${songInfo.song}: ${songInfo.count}回`;
             }
           }
@@ -478,28 +467,30 @@ function searchByKeyword(keyword) {
 
 /** タブ切り替え */
 function switchToTab(tabId) {
-  let chartRendered = false;
-  if (tabId === 'song' && !chartInstances.album) {
-    renderAlbumChart();
-    chartRendered = true;
-  }
-  if (tabId === 'pattern' && !chartInstances.yearTrend) {
-    renderYearTrendChart();
-    chartRendered = true;
-  }
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   document.querySelector(`.tab-item[data-tab="${tabId}"]`).classList.add('active');
   document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-  document.getElementById(`tab-${tabId}`).style.display = 'block';
+  const targetTab = document.getElementById(`tab-${tabId}`);
+  if(targetTab) targetTab.style.display = 'block';
+  
+  // タブが表示された後で、グラフの描画/リサイズを行う
+  if (tabId === 'song') {
+    if (!chartInstances.album) {
+      renderAlbumChart(); // 初回のみ描画
+    } else {
+      chartInstances.album.resize(); // 2回目以降はリサイズ
+    }
+  }
+  if (tabId === 'pattern') {
+     if (!chartInstances.yearTrend) {
+      renderYearTrendChart();
+    } else {
+      chartInstances.yearTrend.resize();
+    }
+  }
+  
   document.getElementById('app').scrollTop = 0;
   lucide.createIcons();
-
-  if(chartRendered) {
-      setTimeout(() => {
-          if (chartInstances.album) chartInstances.album.resize();
-          if (chartInstances.yearTrend) chartInstances.yearTrend.resize();
-      }, 0);
-  }
 }
 
 function showModal(song, type) {
