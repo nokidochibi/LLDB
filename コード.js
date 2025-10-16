@@ -21,9 +21,16 @@ function doGet() {
  * スプレッドシートの「アルバム」シートから、グラフ用の集計済みデータを取得します。
  * @return {Array<Object>} グラフ描画に必要なデータ配列。
  */
+// ... 既存の include, doGet, safeTrim, getLiveRecords 関数はそのまま ...
+
+/**
+ * スプレッドシートの「アルバム」シートから、グラフ用の集計済みデータを取得します。
+ * @return {Array<Object>} グラフ描画に必要なデータ配列。
+ */
 function getAlbumChartData() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
+    // 'アルバムグラフ'シートではなく、元の'アルバム'シートを参照します
     const sheet = ss.getSheetByName('アルバム'); 
     if (!sheet) {
       Logger.log('シート「アルバム」が見つかりません');
