@@ -18,38 +18,37 @@ function doGet() {
 }
 
 /**
- * スプレッドシートの「アルバムグラフ」シートから、グラフ用の集計済みデータを取得します。
+ * スプレッドシートの「アルバム」シートから、グラフ用の集計済みデータを取得します。
  * @return {Array<Object>} グラフ描画に必要なデータ配列。
  */
 function getAlbumChartData() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    // 新しいシート名「アルバムグラフ」に変更
-    const sheet = ss.getSheetByName('アルバムグラフ'); 
+    const sheet = ss.getSheetByName('アルバム'); 
     if (!sheet) {
-      Logger.log('シート「アルバムグラフ」が見つかりません');
+      Logger.log('シート「アルバム」が見つかりません');
       return [];
     }
 
     const lastRow = sheet.getLastRow();
     if (lastRow < 2) return [];
 
-    // J列からR列までのデータを取得 (10列分)
-    const data = sheet.getRange(2, 10, lastRow - 1, 9).getValues();
+    // I列からR列までのデータを取得 (10列分)
+    const data = sheet.getRange(2, 9, lastRow - 1, 10).getValues();
 
     const chartData = data
-      .filter(row => safeTrim(row[0]) !== '1' && (parseInt(row[1]) || 0) > 0) // 無視フラグと演奏曲数0を除外
+      // I列(index 0)が'1'でない、かつK列(index 2)の演奏曲数が0より大きい行のみをフィルタリング
+      .filter(row => safeTrim(row[0]) !== '1' && (parseInt(row[2]) || 0) > 0) 
       .map(row => {
         return {
-          albumName:   safeTrim(row[0]),
-          totalPlays:  parseInt(row[1]) || 0,
-          top1_song:   safeTrim(row[2]),
-          top1_count:  parseInt(row[3]) || 0,
-          top2_song:   safeTrim(row[4]),
-          top2_count:  parseInt(row[5]) || 0,
-          top3_song:   safeTrim(row[6]),
-          top3_count:  parseInt(row[7]) || 0,
-          others_count:parseInt(row[8]) || 0,
+          albumName:    safeTrim(row[1]),  // J列: アルバム名
+          top1_song:    safeTrim(row[3]),  // L列: 1位曲名
+          top1_count:   parseInt(row[4]) || 0,  // M列: 1位回数
+          top2_song:    safeTrim(row[5]),  // N列: 2位曲名
+          top2_count:   parseInt(row[6]) || 0,  // O列: 2位回数
+          top3_song:    safeTrim(row[7]),  // P列: 3位曲名
+          top3_count:   parseInt(row[8]) || 0,  // Q列: 3位回数
+          others_count: parseInt(row[9]) || 0,  // R列: その他回数
         };
       });
     return chartData;

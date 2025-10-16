@@ -114,8 +114,11 @@ function renderAlbumChart() {
   }
   if (chartInstances.album) chartInstances.album.destroy();
 
-  // スプレッドシートからのデータをそのまま使う
   const chartData = albumChartData;
+  
+  // グラフの高さを動的に計算 (アルバム数 * 1本あたりの高さ + 余白)
+  const optimalHeight = chartData.length * 50 + 80;
+  canvas.parentElement.style.height = `${optimalHeight}px`;
   
   const labels = chartData.map(d => d.albumName);
   const datasets = [
