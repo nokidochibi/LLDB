@@ -139,14 +139,13 @@ function getLiveRecords() {
 }
 
 /**
- * スプレッドシートからアルバムデータを取得します。
- * E列が1のアルバムは除外します。
+ * スプレッドシートから積み上げグラフ用のアルバムデータを取得します。
  * @return {Array<Object>} アルバムデータの配列。
  */
 function getAlbumData() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName('アルバム');
+    var sheet = ss.getSheetByName('アルバムグラフ');
     
     if (!sheet) {
       return [];
@@ -155,25 +154,26 @@ function getAlbumData() {
     var lastRow = sheet.getLastRow();
     if (lastRow < 2) return [];
     
-    // I列からK列まで取得 (無視フラグ, アルバム名, 演奏曲数)
-    var data = sheet.getRange(2, 9, lastRow - 1, 3).getValues();
+    // J列からR列まで（9列）取得
+    var data = sheet.getRange(2, 10, lastRow - 1, 9).getValues();
     
     return data
       .filter(function(row) {
-        // I列（インデックス0）が '1' でないものをフィルタリング
-        return safeTrim(row[0]) !== '1';
+        // アルバム名(J列=row[0])があり、合計演奏回数(K列=row[1])が0より大きいものを抽出
+        return safeTrim(row[0]) && (parseInt(row[1], 10) || 0) > 0;
       })
       .map(function(row) {
         return {
-          albumName: safeTrim(row[1]), // J列はインデックス1
-          playCount: parseInt(row[2]) || 0 // K列はインデックス2
+          albumName: safeTrim(row[0]),           // J列: アルバム名
+          totalCount: parseInt(row[1], 10) || 0, // K列: 合計演奏回数
+          rank1Count: parseInt(row[3], 10) || 0, // M列: 1位回数
+          rank2Count: parseInt(row[5], 10) || 0, // O列: 2位回数
+          rank3Count: parseInt(row[7], 10) || 0, // Q列: 3位回数
+          otherCount: parseInt(row[8], 10) || 0  // R列: その他回数
         };
-      })
-      .filter(function(item) {
-        return item.albumName && item.playCount > 0;
       });
   } catch (e) {
-    Logger.log('アルバムデータ取得エラー: ' + e.toString());
+    Logger.log('アルバムグラフデータ取得エラー: ' + e.toString());
     return [];
   }
 }
