@@ -148,22 +148,30 @@ function getAlbumData() {
     var sheet = ss.getSheetByName('アルバムグラフ');
     
     if (!sheet) {
+      Logger.log('シート「アルバムグラフ」が見つかりません');
       return [];
     }
     
     var lastRow = sheet.getLastRow();
-    if (lastRow < 2) return [];
+    Logger.log('lastRow: ' + lastRow);
     
-    // J列からR列まで（9列）取得
+    if (lastRow < 2) {
+      Logger.log('データ行がありません');
+      return [];
+    }
+    
+    // J列(10)からR列(18)まで（9列）取得
     var data = sheet.getRange(2, 10, lastRow - 1, 9).getValues();
+    Logger.log('取得したデータ行数: ' + data.length);
     
-    return data
+    var result = data
       .filter(function(row) {
-        // アルバム名(J列=row[0])があり、合計演奏回数(K列=row[1])が0より大きいものを抽出
-        return safeTrim(row[0]) && (parseInt(row[1], 10) || 0) > 0;
+        var hasName = safeTrim(row[0]) !== '';
+        var hasCount = (parseInt(row[1], 10) || 0) > 0;
+        return hasName && hasCount;
       })
       .map(function(row) {
-        return {
+        var item = {
           albumName: safeTrim(row[0]),           // J列: アルバム名
           totalCount: parseInt(row[1], 10) || 0, // K列: 合計演奏回数
           rank1Count: parseInt(row[3], 10) || 0, // M列: 1位回数
@@ -171,9 +179,15 @@ function getAlbumData() {
           rank3Count: parseInt(row[7], 10) || 0, // Q列: 3位回数
           otherCount: parseInt(row[8], 10) || 0  // R列: その他回数
         };
+        Logger.log('処理したアルバム: ' + JSON.stringify(item));
+        return item;
       });
+    
+    Logger.log('返却するアルバム数: ' + result.length);
+    return result;
+    
   } catch (e) {
-    Logger.log('アルバムグラフデータ取得エラー: ' + e.toString());
+    Logger.log('アルバムグラフデータ取得エラー: ' + e.toString() + '\nStack: ' + e.stack);
     return [];
   }
 }
