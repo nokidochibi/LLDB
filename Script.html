@@ -169,13 +169,7 @@ function renderLiveCountChart() {
     borderWidth: 1,
     stack: 'stack1',
     datalabels: {
-      display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-      color: 'white',
-      anchor: 'end',
-      align: 'end',
-      offset: -40,
-      font: { size: 20, weight: 'bold' },
-      formatter: val => val
+      display: false
     }
   }, {
     label: 'ライブ開催回数（その他）',
