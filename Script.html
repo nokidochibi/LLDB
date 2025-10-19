@@ -39,7 +39,7 @@ function showLoading(containerId) {
   <p class="m-0" style="font-size:80px; line-height:1.3;">
     <span id="loading-text-3" class="opacity-0">そうでない人ー!!</span>
   </p>
-  <p class="m-0 mt-2" style="font-size:100px; line-height:1.3;">
+  <p class="m-0" style="font-size:100px; line-height:1.3;">
     <span id="loading-text-4" class="opacity-0">ぜー</span><span id="loading-text-5" class="opacity-0">いんっ...!!!</span>
   </p>
 </div>
@@ -171,8 +171,9 @@ function renderLiveCountChart() {
     datalabels: {
       display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
       color: 'white',
-      anchor: 'center',
-      align: 'center',
+      anchor: 'end',
+      align: 'end',
+      offset: 10,
       font: { size: 20, weight: 'bold' },
       formatter: val => val
     }
@@ -184,20 +185,16 @@ function renderLiveCountChart() {
     borderWidth: 1,
     stack: 'stack1',
     datalabels: {
-      display: false
-    }
-  }, {
-    label: '合計ライブ回数',
-    data: totalLiveData,
-    hidden: true, 
-    datalabels: {
         display: true,
         color: '#000000',
         anchor: 'end',
         align: 'end',
         offset: -5,
         font: { size: 24, weight: 'bold' },
-        formatter: (value) => value > 0 ? value : ''
+        formatter: (value, context) => {
+            const total = context.chart.data.datasets[0].data[context.dataIndex] + context.chart.data.datasets[1].data[context.dataIndex];
+            return total > 0 ? total : '';
+        }
     }
   }];
 
