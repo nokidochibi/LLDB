@@ -168,7 +168,14 @@ function renderLiveCountChart() {
     borderColor: 'rgba(255, 105, 180, 1)',
     borderWidth: 1,
     stack: 'all',
-    datalabels: { color: 'white', display: ctx => ctx.dataset.data[ctx.dataIndex] > 0, font: { size: 24, weight: 'bold' }, formatter: val => val }
+    datalabels: {
+      display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+      color: 'white',
+      anchor: 'center',
+      align: 'center',
+      font: { size: 24, weight: 'bold' },
+      formatter: val => val
+    }
   }, {
     label: 'ライブ開催回数（その他）',
     data: totalLiveData.map((total, i) => total - songPlayData[i]),
@@ -176,7 +183,9 @@ function renderLiveCountChart() {
     borderColor: 'rgba(200, 200, 200, 1)',
     borderWidth: 1,
     stack: 'all',
-    datalabels: { display: false }
+    datalabels: {
+      display: false
+    }
   }];
 
   chartInstances.liveCount = new Chart(canvas, {
@@ -188,45 +197,34 @@ function renderLiveCountChart() {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
+        tooltip: { enabled: false },
         datalabels: {
-          anchor: 'end', align: 'end', offset: -5, color: '#374151',
+          display: ctx => ctx.datasetIndex === datasets.length - 1,
+          color: '#374151',
+          anchor: 'end',
+          align: 'end',
+          offset: -5,
           font: { size: 24, weight: 'bold' },
-          formatter: (val, ctx) => {
-            const total = ctx.chart.data.datasets.reduce((sum, ds) => sum + ds.data[ctx.dataIndex], 0);
+          formatter: (value, context) => {
+            const total = context.chart.data.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
             return total > 0 ? total : '';
-          },
-          display: ctx => ctx.datasetIndex === datasets.length - 1
-        },
-        tooltip: {
-          callbacks: {
-            title: (tooltipItems) => {
-              return tooltipItems[0].label + '年';
-            },
-            afterTitle: (tooltipItems) => {
-              const total = tooltipItems.reduce((sum, item) => sum + item.raw, 0);
-              return `合計ライブ数 ${total} 回中`;
-            },
-            label: (context) => {
-              const songValue = context.chart.data.datasets[0].data[context.dataIndex];
-              if (context.datasetIndex === 0 && songToSearch && songValue > 0) {
-                 return `${songToSearch}：${songValue} 回`;
-              }
-              return null;
-            }
-          },
-          titleFont: { size: 24 }, bodyFont: { size: 22 }, footerFont: { size: 22, weight: 'bold' }
+          }
         }
       },
       scales: {
-        x: { 
-          stacked: true, 
-          ticks: { 
+        x: {
+          stacked: true,
+          ticks: {
             font: { size: 20 },
             maxRotation: 90,
             minRotation: 90
-          } 
+          }
         },
-        y: { stacked: true, beginAtZero: true, ticks: { font: { size: 20 }, stepSize: 5 } }
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          ticks: { font: { size: 20 }, stepSize: 5 }
+        }
       }
     }
   });
