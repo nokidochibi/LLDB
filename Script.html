@@ -94,7 +94,6 @@ function initializeApp(records) {
   renderPatternStats();
   renderVenueRanking();
   renderVenueLiveCountChart();
-  renderYearTrendChart();
 }
 
 /** 画面の向きをチェックしてbodyにクラスを付与 */
@@ -172,11 +171,11 @@ function renderLiveCountChart() {
     stack: 'stack1',
     datalabels: {
       display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-      color: 'gray',
+      color: 'white',
       anchor: 'end',
       align: 'end',
-      offset: 5,
-      font: { size: 24, weight: 'bold' },
+      offset: -30,
+      font: { size: 20, weight: 'bold' },
       formatter: val => val
     }
   }, {
@@ -267,11 +266,11 @@ function renderVenueLiveCountChart() {
     stack: 'stack1',
     datalabels: {
       display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-      color: 'gray',
+      color: 'white',
       anchor: 'end',
       align: 'end',
-      offset: 5,
-      font: { size: 24, weight: 'bold' },
+      offset: -30,
+      font: { size: 20, weight: 'bold' },
       formatter: val => val
     }
   }, {
@@ -567,7 +566,6 @@ function switchToTab(tabId) {
   if (tabId === 'song' && chartInstances.liveCount) chartInstances.liveCount.resize();
   if (tabId === 'pattern') {
     if (chartInstances.album) chartInstances.album.resize();
-    if (chartInstances.yearTrend) chartInstances.yearTrend.resize();
   }
   if (tabId === 'venue' && chartInstances.venueLiveCount) {
     chartInstances.venueLiveCount.resize();
@@ -673,66 +671,6 @@ function renderVenueRanking() {
     regionContainer.innerHTML = regionHtml;
 }
 
-/** 年別傾向グラフを描画 (100%積み上げ棒グラフ) */
-function renderYearTrendChart() {
-  const canvas = document.getElementById('year-trend-chart');
-  if (!canvas) return;
-  if (chartInstances.yearTrend) chartInstances.yearTrend.destroy();
-
-  const yearSongData = {};
-  allLiveRecords.forEach(rec => {
-    if (!rec.year) return;
-    yearSongData[rec.year] = yearSongData[rec.year] || {};
-    rec.setlist.forEach(s => {
-      const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
-      if (clean && !s.startsWith('__MEDLEY_') && clean !== 'メドレー') yearSongData[rec.year][clean] = (yearSongData[rec.year][clean] || 0) + 1;
-    });
-  });
-
-  const totalCounts = Object.entries(yearSongData).flatMap(entry => Object.entries(entry[1])).reduce((acc, [song, count]) => {
-      acc[song] = (acc[song] || 0) + count;
-      return acc;
-  }, {});
-
-  const topSongs = Object.entries(totalCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
-  const years = Object.keys(yearSongData).map(Number).sort((a, b) => a - b);
-  const colors = ['#87CEFA', '#FFB6C1', '#98FB98', '#FFDAB9', '#DDA0DD'];
-  
-  const datasets = topSongs.map((song, i) => ({
-    label: song,
-    data: years.map(year => yearSongData[year][song] || 0),
-    backgroundColor: colors[i % colors.length]
-  }));
-
-  const updateChartData = () => {
-    const visibleSongs = datasets.filter((ds, i) => !chartInstances.yearTrend.isDatasetVisible(i)).map(ds => ds.label);
-    datasets.forEach(ds => {
-      ds.data = years.map(year => {
-        const yearData = yearSongData[year];
-        const visibleTotal = visibleSongs.reduce((sum, song) => sum + (yearData[song] || 0), 0);
-        return visibleTotal > 0 ? (yearData[ds.label] || 0) / visibleTotal * 100 : 0;
-      });
-    });
-  };
-
-  chartInstances.yearTrend = new Chart(canvas, {
-    type: 'bar',
-    data: { labels: years, datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 20 }, boxWidth: 20, padding: 10 } },
-        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%` } }
-      },
-      scales: {
-        x: { stacked: true, ticks: { font: { size: 18 } } },
-        y: { stacked: true, min: 0, max: 100, ticks: { font: { size: 18 }, callback: val => val + '%' } }
-      }
-    }
-  });
-}
-
 /** イベントリスナーを設定 */
 function setupEventListeners() {
   ['search-input', 'tour-select', 'year-select', 'region-select', 'song-filter-input'].forEach(id => {
@@ -835,3 +773,4 @@ function showModal(song, type) {
   document.getElementById('modal-overlay').style.display = 'flex';
 }
 </script>
+
