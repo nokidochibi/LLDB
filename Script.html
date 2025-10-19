@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let allLiveRecords = [], songStats = {}, patternStats = {}, albumData = [], chartInstances = {};
+let selectedVenueInfo = null;
 
 /** データをロードしてアプリを初期化 */
 function loadLiveList() {
@@ -92,6 +93,7 @@ function initializeApp(records) {
   renderSongRanking();
   renderPatternStats();
   renderVenueRanking();
+  renderVenueLiveCountChart();
   renderYearTrendChart();
 }
 
@@ -190,6 +192,101 @@ function renderLiveCountChart() {
   }];
 
   chartInstances.liveCount = new Chart(canvas, {
+    type: 'bar',
+    data: { labels: years, datasets },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: {
+            font: { size: 20 },
+            maxRotation: 90,
+            minRotation: 90
+          }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          min: 0,
+          ticks: { font: { size: 20 }, stepSize: 5 }
+        }
+      }
+    }
+  });
+}
+
+/** 年別ライブ開催回数グラフ（場所タブ）を描画 */
+function renderVenueLiveCountChart() {
+  const canvas = document.getElementById('venue-live-count-chart');
+  if (!canvas) return;
+  if (chartInstances.venueLiveCount) chartInstances.venueLiveCount.destroy();
+
+  const liveCountsByYear = allLiveRecords.reduce((acc, rec) => {
+    if (rec.year) acc[rec.year] = (acc[rec.year] || 0) + 1;
+    return acc;
+  }, {});
+
+  const selectedPlaysByYear = {};
+  if (selectedVenueInfo) {
+    allLiveRecords.forEach(rec => {
+      if (!rec.year) return;
+      let isMatch = false;
+      if (selectedVenueInfo.type === 'venue') {
+        const venueKey = rec.region === 'オンライン' ? 'オンライン' : `${rec.venue} (${rec.region})`;
+        if (venueKey === selectedVenueInfo.name) {
+          isMatch = true;
+        }
+      } else if (selectedVenueInfo.type === 'region') {
+        if (rec.region === selectedVenueInfo.name) {
+          isMatch = true;
+        }
+      }
+      if (isMatch) {
+        selectedPlaysByYear[rec.year] = (selectedPlaysByYear[rec.year] || 0) + 1;
+      }
+    });
+  }
+
+  const years = Object.keys(liveCountsByYear).sort((a, b) => a - b);
+  const totalLiveData = years.map(year => liveCountsByYear[year]);
+  const selectedPlayData = years.map(year => selectedPlaysByYear[year] || 0);
+
+  const datasets = [{
+    label: '選択場所の開催回数',
+    data: selectedPlayData,
+    backgroundColor: 'rgba(255, 105, 180, 0.8)',
+    borderColor: 'rgba(255, 105, 180, 1)',
+    borderWidth: 1,
+    stack: 'stack1',
+    datalabels: {
+      display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+      color: 'white',
+      anchor: 'end',
+      align: 'end',
+      offset: -30,
+      font: { size: 20, weight: 'bold' },
+      formatter: val => val
+    }
+  }, {
+    label: 'ライブ開催回数（その他）',
+    data: totalLiveData.map((total, i) => Math.max(0, total - selectedPlayData[i])),
+    backgroundColor: 'rgba(200, 200, 200, 0.6)',
+    borderColor: 'rgba(200, 200, 200, 1)',
+    borderWidth: 1,
+    stack: 'stack1',
+    datalabels: {
+      display: false
+    }
+  }];
+
+  chartInstances.venueLiveCount = new Chart(canvas, {
     type: 'bar',
     data: { labels: years, datasets },
     plugins: [ChartDataLabels],
@@ -440,6 +537,24 @@ function selectSong(songName) {
   document.getElementById('show-setlist-btn').style.display = 'inline-block';
 }
 
+/** 場所タブで会場を選択したときの処理 */
+function selectVenue(fullVenueName) {
+  selectedVenueInfo = { type: 'venue', name: fullVenueName };
+  document.getElementById('venue-search-input').value = fullVenueName;
+  renderVenueRanking();
+  renderVenueLiveCountChart();
+  document.getElementById('venue-show-setlist-btn').style.display = 'inline-block';
+}
+
+/** 場所タブで都道府県を選択したときの処理 */
+function selectRegion(regionName) {
+  selectedVenueInfo = { type: 'region', name: regionName };
+  document.getElementById('venue-search-input').value = regionName;
+  renderVenueRanking();
+  renderVenueLiveCountChart();
+  document.getElementById('venue-show-setlist-btn').style.display = 'inline-block';
+}
+
 /** タブ切り替え */
 function switchToTab(tabId) {
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
@@ -453,6 +568,9 @@ function switchToTab(tabId) {
   if (tabId === 'pattern') {
     if (chartInstances.album) chartInstances.album.resize();
     if (chartInstances.yearTrend) chartInstances.yearTrend.resize();
+  }
+  if (tabId === 'venue' && chartInstances.venueLiveCount) {
+    chartInstances.venueLiveCount.resize();
   }
 }
 
@@ -506,43 +624,51 @@ function renderVenueRanking() {
     if (!venueContainer || !regionContainer) return;
 
     const vcs = {}, rcs = {};
-    const searchTerm = document.getElementById('venue-search-input').value.toLowerCase();
     allLiveRecords.forEach(rec => {
-        if (searchTerm && !rec.venue.toLowerCase().includes(searchTerm) && !rec.region.toLowerCase().includes(searchTerm)) return;
         const venueKey = rec.region === 'オンライン' ? 'オンライン' : `${rec.venue} (${rec.region})`;
         vcs[venueKey] = (vcs[venueKey] || 0) + 1;
         if (rec.region) rcs[rec.region] = (rcs[rec.region] || 0) + 1;
     });
-    
-    const rankColors = ['text-aiko-pink', 'text-aiko-yellow', 'text-aiko-blue'];
-    const renderRanking = (data, container, clickHandler) => {
-        container.innerHTML = Object.entries(data).sort((a, b) => b[1] - a[1]).map(([name, count], i) => `
-            <div class="card-base p-3 mb-2 clickable-item flex items-center" onclick="${clickHandler}('${name.split(' (')[0].replace(/'/g, "\\'")}')">
-                <span class="rank-number font-bold ${i < 3 ? rankColors[i] : 'text-gray-400'}" style="font-size:44px">${i + 1}</span>
-                <span class="venue-name" style="font-size:34px">${name}</span>
-                <span class="song-count font-bold text-gray-800" style="font-size:44px">${count} <span class="text-gray-500" style="font-size:32px">回</span></span>
-            </div>`).join('');
-    };
-    renderRanking(vcs, venueContainer, 'searchVenue');
 
-    const allRegions = ['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
-    let regionHtml = Object.entries(rcs).sort((a, b) => b[1] - a[1]).map(([name, count], i) => `
-      <div class="card-base p-3 mb-2 clickable-item flex items-center" onclick="searchRegion('${name.replace(/'/g, "\\'")}')">
-        <span class="rank-number font-bold ${i < 3 ? rankColors[i] : 'text-gray-400'}" style="font-size:44px">${i + 1}</span>
+    const searchTerm = document.getElementById('venue-search-input').value.toLowerCase();
+    const rankColors = ['text-aiko-pink', 'text-aiko-yellow', 'text-aiko-blue'];
+
+    const filteredVenues = Object.entries(vcs)
+        .filter(([name]) => name.toLowerCase().includes(searchTerm))
+        .sort((a, b) => b[1] - a[1]);
+    
+    venueContainer.innerHTML = filteredVenues.map(([name, count], i) => `
+        <div class="card-base p-3 mb-2 clickable-item flex items-center" onclick="selectVenue('${name.replace(/'/g, "\\'")}')">
+            <span class="rank-number font-bold ${i < 3 && searchTerm === '' ? rankColors[i] : 'text-gray-400'}" style="font-size:44px">${filteredVenues.findIndex(v => v[0] === name) + 1}</span>
+            <span class="venue-name" style="font-size:34px">${name}</span>
+            <span class="song-count font-bold text-gray-800" style="font-size:44px">${count} <span class="text-gray-500" style="font-size:32px">回</span></span>
+        </div>`).join('');
+
+    const filteredRegions = Object.entries(rcs)
+        .filter(([name]) => name.toLowerCase().includes(searchTerm))
+        .sort((a, b) => b[1] - a[1]);
+
+    let regionHtml = filteredRegions.map(([name, count], i) => `
+      <div class="card-base p-3 mb-2 clickable-item flex items-center" onclick="selectRegion('${name.replace(/'/g, "\\'")}')">
+        <span class="rank-number font-bold ${i < 3 && searchTerm === '' ? rankColors[i] : 'text-gray-400'}" style="font-size:44px">${filteredRegions.findIndex(r => r[0] === name) + 1}</span>
         <span class="venue-name" style="font-size:34px">${name}</span>
         <span class="song-count font-bold text-gray-800" style="font-size:44px">${count} <span class="text-gray-500" style="font-size:32px">回</span></span>
       </div>`).join('');
-
-    const zeroRegions = allRegions.filter(r => !rcs[r] && r !== 'オンライン');
-    if (zeroRegions.length > 0) {
-      regionHtml += '<div class="mt-6 mb-3"><h4 class="font-bold text-gray-600" style="font-size:36px">開催なし</h4></div>';
-      regionHtml += zeroRegions.sort().map(region =>
-        `<div class="card-base p-3 mb-2 flex items-center opacity-50">
-          <span class="rank-number font-bold text-gray-400" style="font-size:44px">-</span>
-          <span class="venue-name" style="font-size:34px">${region}</span>
-          <span class="song-count font-bold text-gray-500" style="font-size:44px">0 <span style="font-size:32px">回</span></span>
-        </div>`
-      ).join('');
+    
+    if (searchTerm === '') {
+      const allRegions = ['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
+      const heldRegions = new Set(Object.keys(rcs));
+      const zeroRegions = allRegions.filter(r => !heldRegions.has(r));
+      if (zeroRegions.length > 0) {
+        regionHtml += '<div class="mt-6 mb-3"><h4 class="font-bold text-gray-600" style="font-size:36px">開催なし</h4></div>';
+        regionHtml += zeroRegions.sort().map(region =>
+          `<div class="card-base p-3 mb-2 flex items-center opacity-50">
+            <span class="rank-number font-bold text-gray-400" style="font-size:44px">-</span>
+            <span class="venue-name" style="font-size:34px">${region}</span>
+            <span class="song-count font-bold text-gray-500" style="font-size:44px">0 <span style="font-size:32px">回</span></span>
+          </div>`
+        ).join('');
+      }
     }
     regionContainer.innerHTML = regionHtml;
 }
@@ -646,7 +772,20 @@ function setupEventListeners() {
   document.getElementById('venue-search-input').addEventListener('input', renderVenueRanking);
   document.getElementById('venue-clear-btn').addEventListener('click', () => {
     document.getElementById('venue-search-input').value = '';
+    selectedVenueInfo = null;
+    document.getElementById('venue-show-setlist-btn').style.display = 'none';
     renderVenueRanking();
+    renderVenueLiveCountChart();
+  });
+
+  document.getElementById('venue-show-setlist-btn').addEventListener('click', () => {
+    if (!selectedVenueInfo) return;
+    if (selectedVenueInfo.type === 'venue') {
+      const venueOnlyName = selectedVenueInfo.name.split(' (')[0];
+      searchVenue(venueOnlyName);
+    } else if (selectedVenueInfo.type === 'region') {
+      searchRegion(selectedVenueInfo.name);
+    }
   });
 
   document.querySelectorAll('.venue-tab').forEach(tab => {
