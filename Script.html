@@ -177,6 +177,17 @@ function renderLiveCountChart() {
       font: { size: 20, weight: 'bold' },
       formatter: val => val
     }
+  }, {
+    label: 'ライブ開催回数（その他）',
+    data: totalLiveData.map((total, i) => Math.max(0, total - songPlayData[i])),
+    backgroundColor: 'rgba(200, 200, 200, 0.6)',
+    borderColor: 'rgba(200, 200, 200, 1)',
+    borderWidth: 1,
+    stack: 'stack1',
+    datalabels: {
+            display: false
+        }
+  }];
 
   chartInstances.liveCount = new Chart(canvas, {
     type: 'bar',
