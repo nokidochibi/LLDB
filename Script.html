@@ -173,7 +173,7 @@ function renderLiveCountChart() {
       color: 'white',
       anchor: 'end',
       align: 'end',
-      offset: 10,
+      offset: -15,
       font: { size: 20, weight: 'bold' },
       formatter: val => val
     }
@@ -190,7 +190,7 @@ function renderLiveCountChart() {
         anchor: 'end',
         align: 'end',
         offset: -5,
-        font: { size: 24, weight: 'bold' },
+        font: { size: 20, weight: 'normal' },
         formatter: (value, context) => {
             const total = context.chart.data.datasets[0].data[context.dataIndex] + context.chart.data.datasets[1].data[context.dataIndex];
             return total > 0 ? total : '';
