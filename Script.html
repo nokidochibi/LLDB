@@ -254,7 +254,15 @@ function renderLiveCountChart() {
       },
       scales: {
         x: { stacked: true, ticks: { font: { size: 20 } } },
-        y: { stacked: true, beginAtZero: true, ticks: { font: { size: 20 } } }
+        y: { 
+          stacked: true, 
+          beginAtZero: true, 
+          max: 50, // [変更点] Y軸の最大値を50に固定
+          ticks: { 
+            font: { size: 20 },
+            stepSize: 5 // [変更点] 目盛りの間隔を5に設定
+          } 
+        }
       }
     }
   });
