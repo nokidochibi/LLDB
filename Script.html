@@ -254,7 +254,7 @@ function renderLiveCountChart() {
       },
       scales: {
         x: { stacked: true, ticks: { font: { size: 20 } } },
-        y: { stacked: true, beginAtZero: true, ticks: { font: { size: 20 }, stepSize: 10 } }
+        y: { stacked: true, beginAtZero: true, ticks: { font: { size: 20 } } }
       }
     }
   });
@@ -819,3 +819,4 @@ function handleError(error) {
   document.getElementById('live-list-container').innerHTML = `<p class="text-center text-red-500 py-8">データ読み込み中にエラーが発生しました。<br>(${error.message})</p>`;
 }
 </script>
+
