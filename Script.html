@@ -95,6 +95,7 @@ function initializeApp(records) {
     renderAlbumChart();
   }).getAlbumData();
 
+  renderLiveCountChart();
   renderSongRanking();
   renderPatternStats();
   renderVenueRanking();
@@ -148,6 +149,117 @@ function renderAlbumChart() {
     }
   });
 }
+
+/** [新規] 年別ライブ開催回数・楽曲演奏回数グラフを描画 */
+function renderLiveCountChart() {
+  const canvas = document.getElementById('live-count-chart');
+  if (!canvas) return;
+  if (chartInstances.liveCount) chartInstances.liveCount.destroy();
+
+  // 年ごとのライブ開催回数を集計
+  const liveCountsByYear = allLiveRecords.reduce((acc, rec) => {
+    if (!rec.year) return acc;
+    acc[rec.year] = (acc[rec.year] || 0) + 1;
+    return acc;
+  }, {});
+
+  // 検索された曲の年ごとの演奏回数を集計
+  const songToSearch = document.getElementById('song-search-input').value.trim().toLowerCase();
+  const songPlaysByYear = {};
+  if (songToSearch) {
+    allLiveRecords.forEach(rec => {
+      if (!rec.year) return;
+      const songCountInLive = rec.setlist.filter(s => {
+        const cleanSong = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim().toLowerCase();
+        return cleanSong.includes(songToSearch);
+      }).length;
+      if (songCountInLive > 0) {
+        songPlaysByYear[rec.year] = (songPlaysByYear[rec.year] || 0) + songCountInLive;
+      }
+    });
+  }
+
+  const years = Object.keys(liveCountsByYear).sort((a, b) => a - b);
+  const totalLiveData = years.map(year => liveCountsByYear[year]);
+  const songPlayData = years.map(year => songPlaysByYear[year] || 0);
+
+  // Chart.jsのデータセットを作成
+  const datasets = [{
+    label: '楽曲の演奏回数',
+    data: songPlayData,
+    backgroundColor: 'rgba(255, 105, 180, 0.8)', // aiko pink
+    borderColor: 'rgba(255, 105, 180, 1)',
+    borderWidth: 1,
+    stack: 'all',
+    datalabels: {
+      color: 'white',
+      display: (context) => context.dataset.data[context.dataIndex] > 0,
+      font: { size: 24, weight: 'bold' },
+      formatter: (value) => value
+    }
+  }, {
+    label: 'ライブ開催回数（その他）',
+    data: totalLiveData.map((total, i) => total - songPlayData[i]),
+    backgroundColor: 'rgba(200, 200, 200, 0.6)', // gray
+    borderColor: 'rgba(200, 200, 200, 1)',
+    borderWidth: 1,
+    stack: 'all',
+    datalabels: { display: false }
+  }];
+
+  chartInstances.liveCount = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: years.map(y => `${y}年`),
+      datasets: datasets
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          offset: -5,
+          color: '#4b5563',
+          font: { size: 24, weight: 'bold' },
+          formatter: (value, context) => {
+            const total = context.chart.data.datasets.reduce((sum, dataset) => sum + dataset.data[context.dataIndex], 0);
+            return total > 0 ? total : '';
+          },
+          display: (context) => context.datasetIndex === datasets.length - 1
+        },
+        tooltip: {
+            callbacks: {
+                label: function(context) {
+                    const value = context.raw;
+                    if (context.datasetIndex === 0 && songToSearch) {
+                       return ` ${songToSearch}: ${value} 回`;
+                    } else if (context.datasetIndex === 0) {
+                       return ` 楽曲演奏: ${value} 回`;
+                    }
+                    return ` その他ライブ: ${value} 回`;
+                },
+                footer: function(tooltipItems) {
+                    const total = tooltipItems.reduce((sum, item) => sum + item.raw, 0);
+                    return `合計ライブ: ${total} 回`;
+                }
+            },
+            titleFont: { size: 24 },
+            bodyFont: { size: 22 },
+            footerFont: { size: 22, weight: 'bold' }
+        }
+      },
+      scales: {
+        x: { stacked: true, ticks: { font: { size: 20 } } },
+        y: { stacked: true, beginAtZero: true, ticks: { font: { size: 20 }, stepSize: 10 } }
+      }
+    }
+  });
+}
+
 
 /** 楽曲データの統計を分析 */
 function analyzeSongStats(records) {
@@ -430,7 +542,6 @@ function searchByKeyword(keyword) {
 
 /** タブ切り替え */
 function switchToTab(tabId) {
-  if (tabId === 'song' && chartInstances.album) chartInstances.album.resize();
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   document.querySelector(`.tab-item[data-tab="${tabId}"]`).classList.add('active');
   document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
@@ -438,7 +549,12 @@ function switchToTab(tabId) {
   document.getElementById('app').scrollTop = 0;
   lucide.createIcons();
 
-  if (tabId === 'pattern' && chartInstances.yearTrend) chartInstances.yearTrend.resize();
+  // [変更点] グラフのリサイズ処理を修正
+  if (tabId === 'song' && chartInstances.liveCount) chartInstances.liveCount.resize();
+  if (tabId === 'pattern') {
+    if (chartInstances.album) chartInstances.album.resize();
+    if (chartInstances.yearTrend) chartInstances.yearTrend.resize();
+  }
 }
 
 function showModal(song, type) {
@@ -655,11 +771,16 @@ function setupEventListeners() {
     applyFilters();
   });
 
-  document.getElementById('song-search-input').addEventListener('input', renderSongRanking);
+  // [変更点] 新しいグラフの更新処理を追加
+  document.getElementById('song-search-input').addEventListener('input', () => {
+    renderSongRanking();
+    renderLiveCountChart();
+  });
   document.getElementById('song-sort').addEventListener('change', renderSongRanking);
   document.getElementById('song-clear-btn').addEventListener('click', () => {
     document.getElementById('song-search-input').value = '';
     renderSongRanking();
+    renderLiveCountChart();
   });
 
   document.getElementById('venue-search-input').addEventListener('input', renderVenueRanking);
