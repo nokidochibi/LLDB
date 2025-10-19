@@ -24,7 +24,7 @@
       <select id="region-select" class="w-full border border-gray-300 rounded-lg"><option value="">すべての都道府県</option></select>
     </div>
     <div>
-      <input type="text" id="song-filter-input" placeholder="演奏された曲名で検索" class="w-full border border-gray-300 rounded-lg">
+      <input type="text" id="song-filter-input" placeholder="演奏された曲名で検索（楽曲タブから選択）" class="w-full border border-gray-300 rounded-lg bg-gray-200" readonly>
     </div>
   </div>
   <h3 class="font-bold my-5 text-gray-700">🎫 <span id="display-count-text">表示中の公演数</span>: <span id="display-count">0</span> / <span id="total-count">0</span></h3>
@@ -44,6 +44,7 @@
     <div class="flex gap-2 mb-3">
       <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="flex-1 border border-gray-300 rounded-lg">
       <button id="song-clear-btn" class="clear-btn">クリア</button>
+      <button id="show-setlist-btn" class="setlist-btn" style="display: none;">セトリ表示</button>
     </div>
     <div class="flex justify-between font-semibold">
       <span class="text-gray-600" style="font-size:36px">全楽曲: <span id="total-songs">-</span>曲</span>
@@ -132,4 +133,4 @@
     </div>
   </div>
 </div>
-```eof
+
