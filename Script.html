@@ -171,14 +171,15 @@ function renderLiveCountChart() {
     datalabels: {
       display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
       color: 'white',
-      anchor: 'center',
-      align: 'center',
-      font: { size: 24, weight: 'bold' },
+      anchor: 'end',
+      align: 'end',
+      offset: 5,
+      font: { size: 20, weight: 'bold' },
       formatter: val => val
     }
   }, {
     label: 'ライブ開催回数（その他）',
-    data: totalLiveData.map((total, i) => total - songPlayData[i]),
+    data: totalLiveData.map((total, i) => Math.max(0, total - songPlayData[i])),
     backgroundColor: 'rgba(200, 200, 200, 0.6)',
     borderColor: 'rgba(200, 200, 200, 1)',
     borderWidth: 1,
@@ -200,7 +201,7 @@ function renderLiveCountChart() {
         tooltip: { enabled: false },
         datalabels: {
           display: ctx => ctx.datasetIndex === datasets.length - 1,
-          color: '#374151',
+          color: '#000000',
           anchor: 'end',
           align: 'end',
           offset: -5,
@@ -223,6 +224,7 @@ function renderLiveCountChart() {
         y: {
           stacked: true,
           beginAtZero: true,
+          min: 0,
           ticks: { font: { size: 20 }, stepSize: 5 }
         }
       }
