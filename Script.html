@@ -169,28 +169,14 @@ function renderLiveCountChart() {
     borderWidth: 1,
     stack: 'stack1',
     datalabels: {
-      display: false
+      display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+      color: 'white',
+      anchor: 'end',
+      align: 'end',
+      offset: -40,
+      font: { size: 20, weight: 'bold' },
+      formatter: val => val
     }
-  }, {
-    label: 'ライブ開催回数（その他）',
-    data: totalLiveData.map((total, i) => Math.max(0, total - songPlayData[i])),
-    backgroundColor: 'rgba(200, 200, 200, 0.6)',
-    borderColor: 'rgba(200, 200, 200, 1)',
-    borderWidth: 1,
-    stack: 'stack1',
-    datalabels: {
-        display: true,
-        color: '#787575',
-        anchor: 'end',
-        align: 'end',
-        offset: -5,
-        font: { size: 20, weight: 'normal' },
-        formatter: (value, context) => {
-            const total = context.chart.data.datasets[0].data[context.dataIndex] + context.chart.data.datasets[1].data[context.dataIndex];
-            return total > 0 ? total : '';
-        }
-    }
-  }];
 
   chartInstances.liveCount = new Chart(canvas, {
     type: 'bar',
