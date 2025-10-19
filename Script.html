@@ -167,13 +167,12 @@ function renderLiveCountChart() {
     backgroundColor: 'rgba(255, 105, 180, 0.8)',
     borderColor: 'rgba(255, 105, 180, 1)',
     borderWidth: 1,
-    stack: 'all',
+    stack: 'stack1',
     datalabels: {
       display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
       color: 'white',
-      anchor: 'end',
-      align: 'end',
-      offset: 5,
+      anchor: 'center',
+      align: 'center',
       font: { size: 20, weight: 'bold' },
       formatter: val => val
     }
@@ -183,9 +182,23 @@ function renderLiveCountChart() {
     backgroundColor: 'rgba(200, 200, 200, 0.6)',
     borderColor: 'rgba(200, 200, 200, 1)',
     borderWidth: 1,
-    stack: 'all',
+    stack: 'stack1',
     datalabels: {
       display: false
+    }
+  }, {
+    label: '合計ライブ回数',
+    data: totalLiveData,
+    stack: 'stack2',
+    hidden: true,
+    datalabels: {
+        display: true,
+        color: '#000000',
+        anchor: 'end',
+        align: 'end',
+        offset: -5,
+        font: { size: 24, weight: 'bold' },
+        formatter: (value) => value > 0 ? value : ''
     }
   }];
 
@@ -199,18 +212,6 @@ function renderLiveCountChart() {
       plugins: {
         legend: { display: false },
         tooltip: { enabled: false },
-        datalabels: {
-          display: ctx => ctx.datasetIndex === datasets.length - 1,
-          color: '#000000',
-          anchor: 'end',
-          align: 'end',
-          offset: -5,
-          font: { size: 24, weight: 'bold' },
-          formatter: (value, context) => {
-            const total = context.chart.data.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
-            return total > 0 ? total : '';
-          }
-        }
       },
       scales: {
         x: {
