@@ -147,12 +147,12 @@ function renderLiveCountChart() {
     return acc;
   }, {});
 
-  const songToSearch = document.getElementById('song-search-input').value.trim().toLowerCase();
+  const songToSearch = document.getElementById('song-search-input').value.trim();
   const songPlaysByYear = {};
   if (songToSearch) {
     allLiveRecords.forEach(rec => {
       if (!rec.year) return;
-      const songCountInLive = rec.setlist.filter(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim().toLowerCase() === songToSearch).length;
+      const songCountInLive = rec.setlist.filter(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim().toLowerCase() === songToSearch.toLowerCase()).length;
       if (songCountInLive > 0) songPlaysByYear[rec.year] = (songPlaysByYear[rec.year] || 0) + songCountInLive;
     });
   }
@@ -181,7 +181,7 @@ function renderLiveCountChart() {
 
   chartInstances.liveCount = new Chart(canvas, {
     type: 'bar',
-    data: { labels: years.map(y => `${y}年`), datasets },
+    data: { labels: years, datasets },
     plugins: [ChartDataLabels],
     options: {
       responsive: true,
@@ -189,7 +189,8 @@ function renderLiveCountChart() {
       plugins: {
         legend: { display: false },
         datalabels: {
-          anchor: 'end', align: 'end', offset: -5, color: '#4b5563', font: { size: 24, weight: 'bold' },
+          anchor: 'end', align: 'end', offset: -5, color: '#374151',
+          font: { size: 24, weight: 'bold' },
           formatter: (val, ctx) => {
             const total = ctx.chart.data.datasets.reduce((sum, ds) => sum + ds.data[ctx.dataIndex], 0);
             return total > 0 ? total : '';
@@ -198,18 +199,33 @@ function renderLiveCountChart() {
         },
         tooltip: {
           callbacks: {
-            label: ctx => {
-              const val = ctx.raw;
-              if (ctx.datasetIndex === 0) return songToSearch ? ` ${songToSearch}: ${val} 回` : ` 楽曲演奏: ${val} 回`;
-              return ` その他ライブ: ${val} 回`;
+            title: (tooltipItems) => {
+              return tooltipItems[0].label + '年';
             },
-            footer: items => `合計ライブ: ${items.reduce((sum, item) => sum + item.raw, 0)} 回`
+            afterTitle: (tooltipItems) => {
+              const total = tooltipItems.reduce((sum, item) => sum + item.raw, 0);
+              return `合計ライブ数 ${total} 回中`;
+            },
+            label: (context) => {
+              const songValue = context.chart.data.datasets[0].data[context.dataIndex];
+              if (context.datasetIndex === 0 && songToSearch && songValue > 0) {
+                 return `${songToSearch}：${songValue} 回`;
+              }
+              return null;
+            }
           },
           titleFont: { size: 24 }, bodyFont: { size: 22 }, footerFont: { size: 22, weight: 'bold' }
         }
       },
       scales: {
-        x: { stacked: true, ticks: { font: { size: 20 } } },
+        x: { 
+          stacked: true, 
+          ticks: { 
+            font: { size: 20 },
+            maxRotation: 90,
+            minRotation: 90
+          } 
+        },
         y: { stacked: true, beginAtZero: true, ticks: { font: { size: 20 }, stepSize: 5 } }
       }
     }
@@ -272,7 +288,7 @@ function populateFilters(records, skipApply = false) {
 function applyFilters() {
   const songFilterInput = document.getElementById('song-filter-input');
   let songFilterValue = songFilterInput.value;
-  if (songFilterValue.endsWith('（楽曲タブから選択）')) {
+  if (songFilterValue.includes('（楽曲タブから選択）')) {
     songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '');
   }
 
@@ -617,8 +633,7 @@ function setupEventListeners() {
     const songName = document.getElementById('song-search-input').value;
     if (songName) {
       const songInput = document.getElementById('song-filter-input');
-      songInput.value = songName;
-      songInput.placeholder = `${songName}（楽曲タブから選択）`;
+      songInput.value = `${songName}（楽曲タブから選択）`;
       switchToTab('search');
       applyFilters();
     }
