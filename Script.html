@@ -171,9 +171,8 @@ function renderLiveCountChart() {
     datalabels: {
       display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
       color: 'white',
-      anchor: 'end',
-      align: 'end',
-      offset: -10,
+      anchor: 'center',
+      align: 'center',
       font: { size: 20, weight: 'bold' },
       formatter: val => val
     }
