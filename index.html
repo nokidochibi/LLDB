@@ -26,7 +26,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
   background-color: var(--aiko-bg);
-  color: #374151;
+  color: #374151; /* text-gray-700 */
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -40,6 +40,7 @@ body {
 body.detail-view header, body.detail-view nav { display: none !important; }
 body.detail-view { padding-top: 0; }
 
+/* スマホ・タブレットの横向き対応 */
 @media screen and (max-device-width: 1024px) and (orientation: landscape) {
   body.landscape header, body.landscape nav { display: none !important; }
   body.landscape { padding-top: 0; }
@@ -48,6 +49,7 @@ body.detail-view { padding-top: 0; }
 
 .mobile-frame { width: 100%; max-width: 100%; height: 100vh; background-color: white; position: relative; overflow-y: scroll; overflow-x: hidden; }
 
+/* 紙吹雪用のキャンバス（最前面、クリック透過） */
 #confetti-canvas {
   position: fixed;
   top: 0;
@@ -58,6 +60,7 @@ body.detail-view { padding-top: 0; }
   z-index: 9999;
 }
 
+/* カードのスタイル */
 .card-base { 
   background-color: white; 
   border-radius: 12px; 
@@ -66,6 +69,7 @@ body.detail-view { padding-top: 0; }
   margin-bottom: 16px; 
 }
 
+/* タブナビゲーション */
 nav {
   padding-bottom: env(safe-area-inset-bottom);
   position: fixed !important;
@@ -103,6 +107,7 @@ nav > div {
 .tab-item.active { color: white; background-color: #4B5563; }
 .tab-item.active i { color: white; }
 
+/* セットリストのスタイル */
 .setlist-item { 
   padding: 4px 0;
   margin-bottom: 0;
@@ -125,6 +130,7 @@ nav > div {
 }
 .setlist-item-title { flex: 1; font-weight: 500; color: #1f2937; }
 
+/* メドレー・アンコール（帯のみ残す） */
 .setlist-medley { 
   background-color: transparent; 
   border-left: 5px solid var(--aiko-yellow); 
@@ -136,6 +142,7 @@ nav > div {
   padding-left: 12px;
 }
 
+/* セクションタイトル */
 .setlist-medley-title { 
   background-color: transparent; 
   border-left: 5px solid var(--aiko-yellow); 
@@ -160,6 +167,7 @@ nav > div {
   padding-bottom: 4px;
 }
 
+/* ヘッダー */
 header { 
   background-color: var(--aiko-red) !important; 
   color: white !important; 
@@ -176,12 +184,14 @@ header {
 main { padding: 16px; padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
 body.detail-view main { padding-top: 80px; padding-bottom: 40px; }
 
+/* フォーム要素 */
 input, select { font-size: 15px !important; padding: 10px 12px !important; border-radius: 8px !important; border: 1px solid #d1d5db !important; }
 button { font-size: 14px !important; }
 
 .clickable-item { cursor: pointer; transition: background-color 0.2s; }
 .clickable-item:hover { background-color: #f3f4f6; }
 
+/* ボタン共通スタイル */
 .action-btn {
   padding: 10px 10px;
   border-radius: 8px;
@@ -196,10 +206,12 @@ button { font-size: 14px !important; }
 .clear-btn { background-color: #ef4444; color: white; }
 .setlist-btn { background-color: var(--aiko-blue); color: white; }
 
+/* 会場タブ */
 .venue-tabs { display: flex; border-bottom: 3px solid #e5e7eb; margin-bottom: 20px; gap: 0; position: sticky; top: 0px; background: white; z-index: 40; }
 .venue-tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 600; font-size: 15px; color: #6b7280; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: all 0.2s; background: white; }
 .venue-tab.active { color: var(--aiko-pink); border-bottom-color: var(--aiko-pink); }
 
+/* 戻るボタン */
 .back-button-circle {
   width: 50px; height: 50px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.95);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
@@ -207,15 +219,18 @@ button { font-size: 14px !important; }
 }
 .back-button-circle svg { width: 28px; height: 28px; stroke: var(--aiko-red); stroke-width: 3; }
 
+/* モーダル */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
 .modal-content { background: white; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
 .modal-close { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #6b7280; cursor: pointer; }
 
+/* ランキング表示 */
 .rank-number { display: inline-block; min-width: 36px; text-align: right; margin-right: 14px; flex-shrink: 0; font-size: 20px; font-weight: 800; font-style: italic; }
 .song-title, .venue-name { flex: 1; word-break: break-word; font-size: 16px; font-weight: 600; line-height: 1.4; }
 .song-count { white-space: nowrap; flex-shrink: 0; font-size: 18px; font-weight: bold; color: #4B5563; }
 .song-count span { font-size: 13px; font-weight: normal; margin-left: 2px; }
 
+/* 公演カードのラベル */
 .live-card { position: relative; overflow: hidden; padding-bottom: 16px; }
 .live-card-label {
   position: absolute;
@@ -238,6 +253,7 @@ button { font-size: 14px !important; }
 
 .text-aiko-pink { color: var(--aiko-pink); }
 
+/* ローディング画面のフェードアウトアニメーション */
 .fade-out {
   opacity: 0;
   transition: opacity 0.8s ease-out;
@@ -251,22 +267,26 @@ button { font-size: 14px !important; }
 
 <div id="app" class="mobile-frame">
   
+  <!-- ヘッダー -->
   <header id="main-header" class="shadow-sm">
     <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.2.0</h1>
     <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
   </header>
 
+  <!-- メインコンテンツ（最初は非表示） -->
   <main id="main-content" style="opacity: 0; transition: opacity 1s;">
     <div id="live-detail" style="display:none"></div>
 
     <div id="tab-search" class="tab-content" style="display:block">
       <p class="text-gray-500 mb-4 text-sm text-center">※<span id="last-update-date">-</span>までの情報を掲載</p>
       <div class="card-base bg-gray-50 border border-gray-200">
+        <!-- 検索フォーム行 -->
         <div class="flex gap-1 mb-2 items-center">
           <input type="text" id="search-input" placeholder="フリーワードで検索" class="flex-1 min-w-0">
           <button id="clear-all-btn" class="action-btn clear-btn">すべてクリア</button>
         </div>
         
+        <!-- フィルター行 -->
         <div class="flex flex-col gap-2 mb-2">
           <select id="tour-select" class="w-full text-gray-700 bg-white"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
           <div class="flex gap-2">
@@ -275,6 +295,7 @@ button { font-size: 14px !important; }
           </div>
         </div>
         
+        <!-- 楽曲フィルター行 -->
         <div>
           <input type="text" id="song-filter-input" placeholder="演奏された曲名で検索（楽曲タブから選択）" class="w-full bg-gray-100 text-gray-500" readonly>
         </div>
@@ -351,6 +372,7 @@ button { font-size: 14px !important; }
     </div>
   </main>
 
+  <!-- ローディング画面（背景色を暗く変更） -->
   <div id="loading-container" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; z-index:9000; display:flex; align-items:center; justify-content:center;">
     <div class="text-center py-20 font-bold select-none overflow-hidden" style="color: #FF69B4; text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);">
       <p class="m-0 transition-opacity duration-300" style="font-size:42px; line-height:1.2;">
@@ -425,8 +447,8 @@ button { font-size: 14px !important; }
 </div>
 
 <script>
-// GASのAPIエンドポイント（更新済み）
-const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
+// GASのAPIエンドポイント
+const API_URL = "https://script.google.com/macros/s/AKfycbwwgVHJ2MfnbYawn97Ui1fTvO3YPPDStM14HnQtj07OoYsTKEEOVs_26gdtFGQxGvYq/exec";
 
 // アプリの初期化Promise
 let appInitializedResolver;
@@ -443,7 +465,7 @@ const animationFinishedPromise = new Promise(resolve => {
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   startLoadingAnimation(); // 演出スタート
-  loadAllData(); // 【高速化】全データを一括取得スタート
+  loadLiveList(); // データ取得スタート（並行）
   
   // 両方終わったら画面遷移
   Promise.all([appInitializedPromise, animationFinishedPromise]).then(() => {
@@ -454,28 +476,26 @@ document.addEventListener('DOMContentLoaded', () => {
 let allLiveRecords = [], songStats = {}, patternStats = {}, albumData = [], chartInstances = {};
 let selectedVenueInfo = null;
 
-// 【高速化】一括データ取得関数に変更
-async function loadAllData() {
+async function loadLiveList() {
   try {
-    const response = await fetch(`${API_URL}?action=getAllData`);
+    const response = await fetch(`${API_URL}?action=getLiveRecords`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
-    
-    // データが { liveRecords: [], albumData: [] } の形式で返ってくる
-    initializeApp(data.liveRecords, data.albumData);
-    appInitializedResolver();
+    initializeApp(data);
+    appInitializedResolver(); // データ準備完了！
   } catch (error) {
     handleError(error);
   }
 }
 
 function startLoadingAnimation() {
+  // タイミング調整：1秒間隔＋最後のタメ
   const loadingTexts = [
-    { id: 'loading-text-1', delay: 100 },
-    { id: 'loading-text-2', delay: 1100 },
-    { id: 'loading-text-3', delay: 2100 },
-    { id: 'loading-text-4', delay: 3100 },
-    { id: 'loading-text-5', delay: 3600 }
+    { id: 'loading-text-1', delay: 100 },   // 男子ー!!
+    { id: 'loading-text-2', delay: 1100 },  // 女子ー!!
+    { id: 'loading-text-3', delay: 2100 },  // そうでない人ー!!
+    { id: 'loading-text-4', delay: 3100 },  // ぜー
+    { id: 'loading-text-5', delay: 3800 }   // いんっ...!!! (0.5秒後)
   ];
 
   loadingTexts.forEach(item => {
@@ -485,26 +505,32 @@ function startLoadingAnimation() {
     }, item.delay);
   });
 
+  // 全てのアニメーションが表示され、余韻も含めた時間が経過したら完了とする
+  // 3600ms + 余韻(約1秒) = 4500ms
   setTimeout(() => {
-    animationFinishedResolver();
+    animationFinishedResolver(); // 演出完了！
   }, 4500);
 }
 
 function finishLoading() {
+  // 1. 紙吹雪発射！
   startConfetti();
+  
+  // 2. ローディング画面をフェードアウト
   const loadingDiv = document.getElementById('loading-container');
   loadingDiv.classList.add('fade-out');
+  
+  // 3. メインコンテンツをフェードイン
   document.getElementById('main-content').style.opacity = '1';
+  
+  // 4. 少し待ってローディング画面を完全削除
   setTimeout(() => {
     loadingDiv.style.display = 'none';
   }, 500);
 }
 
-// 初期化関数を修正：アルバムデータも引数で受け取る
-function initializeApp(records, albums) {
+function initializeApp(records) {
   allLiveRecords = records;
-  albumData = albums || [];
-
   if (records.length > 0) {
     const latestDate = records.reduce((latest, rec) => {
         const d = new Date(rec.date);
@@ -521,9 +547,15 @@ function initializeApp(records, albums) {
   checkOrientation();
   window.addEventListener('resize', checkOrientation);
 
-  // すべてのグラフを初期化
+  fetch(`${API_URL}?action=getAlbumData`)
+    .then(res => res.json())
+    .then(data => {
+        albumData = data;
+        renderAlbumChart();
+    })
+    .catch(err => console.error("Album Data Error:", err));
+
   renderLiveCountChart();
-  renderAlbumChart(); // 【修正】ここで確実に描画
   renderSongRanking();
   renderPatternStats();
   renderVenueRanking();
@@ -531,7 +563,7 @@ function initializeApp(records, albums) {
 }
 
 // -----------------------------------------------------------
-// 紙吹雪アニメーション
+// 紙吹雪アニメーション (Simple Confetti) - さらに増量版 (400)
 // -----------------------------------------------------------
 function startConfetti() {
   const canvas = document.getElementById('confetti-canvas');
@@ -543,7 +575,7 @@ function startConfetti() {
   canvas.height = height;
 
   const particles = [];
-  const particleCount = 400;
+  const particleCount = 400; // さらに増量
   const colors = ['#FFD700', '#C0C0C0', '#FF69B4', '#ef4444', '#FFA500'];
 
   class Particle {
@@ -557,7 +589,7 @@ function startConfetti() {
       const velocity = Math.random() * 15 + 8;
       this.vx = Math.cos(angle) * velocity;
       this.vy = Math.sin(angle) * velocity - 5; 
-      this.gravity = 0.35;
+      this.gravity = 0.35; // 少しだけふわっとさせる
       this.friction = 0.95;
       this.rotation = Math.random() * 360;
       this.rotationSpeed = (Math.random() - 0.5) * 15;
@@ -568,9 +600,11 @@ function startConfetti() {
       this.vx *= this.friction;
       this.vy *= this.friction;
       this.vy += this.gravity;
+      
       this.x += this.vx;
       this.y += this.vy;
       this.rotation += this.rotationSpeed;
+      
       if (this.y > height + 20) this.alpha = 0; 
     }
 
@@ -592,18 +626,22 @@ function startConfetti() {
   function animate() {
     ctx.clearRect(0, 0, width, height);
     let activeParticles = 0;
+    
     particles.forEach(p => {
       p.update();
       p.draw(ctx);
       if (p.y < height + 50) activeParticles++;
     });
+
     if (activeParticles > 0) {
       requestAnimationFrame(animate);
     } else {
       ctx.clearRect(0, 0, width, height);
     }
   }
+
   animate();
+  
   window.addEventListener('resize', () => {
     width = window.innerWidth;
     height = window.innerHeight;
@@ -620,6 +658,7 @@ function checkOrientation() {
   }
 }
 
+// グラフ設定の共通フォントサイズ調整
 const chartCommonOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -630,7 +669,6 @@ const chartCommonOptions = {
   }
 };
 
-// アルバムチャートの描画
 function renderAlbumChart() {
   const canvas = document.getElementById('album-chart');
   if (!canvas || !albumData.length) return;
@@ -703,7 +741,7 @@ function renderLiveCountChart() {
   }, {
     label: 'その他',
     data: totalLiveData.map((total, i) => Math.max(0, total - songPlayData[i])),
-    backgroundColor: 'rgba(229, 231, 235, 0.8)', 
+    backgroundColor: 'rgba(229, 231, 235, 0.8)', // gray-200
     borderColor: 'rgba(229, 231, 235, 1)',
     borderWidth: 1,
     stack: 'stack1',
@@ -719,7 +757,7 @@ function renderLiveCountChart() {
       scales: {
         x: { 
           stacked: true, 
-          ticks: { font: { size: 10 }, maxRotation: 90, minRotation: 90, autoSkip: false }
+          ticks: { font: { size: 10 }, maxRotation: 90, minRotation: 90, autoSkip: false } // 全年表示
         },
         y: { stacked: true, beginAtZero: true, min: 0, ticks: { font: { size: 10 }, stepSize: 5 } }
       }
@@ -791,7 +829,7 @@ function renderVenueLiveCountChart() {
       scales: {
         x: { 
           stacked: true, 
-          ticks: { font: { size: 10 }, maxRotation: 90, minRotation: 90, autoSkip: false }
+          ticks: { font: { size: 10 }, maxRotation: 90, minRotation: 90, autoSkip: false } // 全年表示
         },
         y: { stacked: true, beginAtZero: true, min: 0, ticks: { font: { size: 10 }, stepSize: 5 } }
       }
@@ -1036,12 +1074,14 @@ function switchToTab(tabId) {
 
   if (tabId === 'song' && chartInstances.liveCount) chartInstances.liveCount.resize();
   if (tabId === 'pattern') {
-    // 【修正】タブ切り替え時にもリサイズと再描画を確認
-    if (chartInstances.album) {
-       chartInstances.album.resize();
-    } else {
-       renderAlbumChart();
-    }
+    // グラフが表示されない問題への対策：DOM更新後にリサイズを実行
+    setTimeout(() => {
+      if (chartInstances.album) {
+         chartInstances.album.resize();
+      } else if (albumData.length > 0) {
+         renderAlbumChart();
+      }
+    }, 0);
   }
   if (tabId === 'venue' && chartInstances.venueLiveCount) {
     chartInstances.venueLiveCount.resize();
@@ -1170,13 +1210,14 @@ function setupEventListeners() {
     document.getElementById('show-setlist-btn').style.display = 'none';
   });
   
+  // 「公演表示」ボタンクリック時の処理（機能追加）
   document.getElementById('show-setlist-btn').addEventListener('click', () => {
     const songName = document.getElementById('song-search-input').value;
     if (songName) {
       const songInput = document.getElementById('song-filter-input');
       songInput.value = `${songName}（楽曲タブから選択）`;
-      switchToTab('search');
-      applyFilters();
+      switchToTab('search'); // 公演タブへ切り替え
+      applyFilters(); // フィルタ適用
     }
   });
 
@@ -1189,6 +1230,7 @@ function setupEventListeners() {
     renderVenueLiveCountChart();
   });
 
+  // 「公演表示」ボタンクリック時の処理（機能追加・場所タブ）
   document.getElementById('venue-show-setlist-btn').addEventListener('click', () => {
     if (!selectedVenueInfo) return;
     if (selectedVenueInfo.type === 'venue') {
@@ -1238,7 +1280,7 @@ function showModal(song, type) {
     if (isMatch) matchedRecords.push(rec);
   });
 
-  matchedRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+  matchedRecords.sort((a, b) => new Date(b.date) - new Date(a.date)); // 日付の新しい順（降順）
   const matches = new Set(matchedRecords.map(r => r.tourName));
 
   const top5 = Array.from(matches).slice(0, 5);
@@ -1260,3 +1302,5 @@ function closeInfoModal() {
 </script>
 </body>
 </html>
+
+
