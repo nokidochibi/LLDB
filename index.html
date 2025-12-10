@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.2.0</title>
+<title>Love Like DataBase vol.2.1</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -345,7 +345,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.2.0</h1>
+  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.2.1</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -1163,27 +1163,32 @@ function showLiveDetail(rec) {
   const minYear = 1998;
   const maxYear = new Date().getFullYear();
 
-  // 年に応じた色を取得する関数 (単色化)
-  function getTimelineColor(percent) {
-    return '#FF69B4'; // 常にaiko-pink
+  // 📝 修正箇所: 楽曲タイプ正規化関数
+  // スプレッドシートの表記ゆれ（「カップリング」「C/W」など）を統一的なタイプ名に変換する
+  function normalizeType(rawType) {
+    if (!rawType) return 'その他';
+    if (rawType.includes('表題') || rawType.includes('シングル')) return '表題曲';
+    if (rawType.includes('カップリング') || rawType.includes('C/W') || rawType.includes('B面')) return 'カップリング曲';
+    if (rawType.includes('アルバム') || rawType.includes('Album')) return 'アルバム曲';
+    return 'その他';
   }
 
   // タイムラインバーHTML生成関数
   function createTimelineHtml(songName) {
     const songInfo = songData[songName];
-    if (!songInfo || !songInfo.year) return ''; // データがなければ空
+    if (!songInfo || !songInfo.year) return ''; 
     
     const songYear = songInfo.year;
-    // 1998年を0%、現在を100%とした位置を計算
     let percent = ((songYear - minYear) / (maxYear - minYear)) * 100;
     percent = Math.max(0, Math.min(100, percent)); 
     
-    let dotColor = '#D1D5DB'; // デフォルトはグレー
-    if (songInfo.type === '表題曲') dotColor = '#FF69B4'; // ピンク
-    else if (songInfo.type === 'カップリング曲') dotColor = '#3B82F6'; // 青
-    else if (songInfo.type === 'アルバム曲') dotColor = '#EAB308'; // 黄色
+    const type = normalizeType(songInfo.type); // 正規化
     
-    // タップで表示する吹き出しを追加
+    let dotColor = '#D1D5DB'; // デフォルトはグレー
+    if (type === '表題曲') dotColor = '#FF69B4'; // ピンク
+    else if (type === 'カップリング曲') dotColor = '#3B82F6'; // 青
+    else if (type === 'アルバム曲') dotColor = '#EAB308'; // 黄色
+    
     return `
       <div class="timeline-container" onclick="this.querySelector('.timeline-dot').classList.toggle('active'); event.stopPropagation();">
         <div class="timeline-bar">
@@ -1219,11 +1224,12 @@ function showLiveDetail(rec) {
 
     const cleanSong = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
     
-    // 集計処理
+    // 集計処理 (修正: 正規化してからカウント)
     const songInfo = songData[cleanSong];
     if (songInfo) {
-      if (typeCounts[songInfo.type] !== undefined) {
-        typeCounts[songInfo.type]++;
+      const normalizedType = normalizeType(songInfo.type);
+      if (typeCounts[normalizedType] !== undefined) {
+        typeCounts[normalizedType]++;
       } else {
         typeCounts['その他']++;
       }
@@ -1248,7 +1254,7 @@ function showLiveDetail(rec) {
       </div>`;
   });
 
-  // 凡例エリアの生成 (レイアウト修正: 左右50%分割で配置を揃える)
+  // 凡例エリアの生成
   const legendHtml = `
     <div class="flex items-center mb-2 px-0">
       <div class="w-1/2 text-right pr-2 text-xs text-gray-400 font-medium">リリース年</div>
