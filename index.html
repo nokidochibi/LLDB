@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base vol.2.0</title>
+<title>Love Like Data Base vol.2.5</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -96,32 +96,75 @@ nav > div {
 .tab-item.active { color: white; background-color: #4B5563; }
 .tab-item.active i { color: white; }
 
-/* セットリストのスタイル（v1風に余白を詰める） */
+/* セットリストのスタイル（v1風調整：背景なし、文字大きく、幅狭く） */
 .setlist-item { 
-  padding: 8px 10px;
-  margin-bottom: 4px;
-  border-radius: 6px; 
-  background-color: #f9fafb; 
-  font-size: 14px; 
+  padding: 4px 0; /* 上下の余白を詰める（幅狭く） */
+  margin-bottom: 0; /* 間隔をなくす */
+  background-color: transparent; /* 背景なし */
+  border-bottom: 1px solid #f3f4f6; /* 薄い区切り線 */
+  font-size: 17px; /* 文字大きく */
   line-height: 1.4;
   display: flex;
   align-items: baseline;
 }
-.setlist-item-number { display: inline-block; min-width: 24px; flex-shrink: 0; font-weight: bold; color: #9CA3AF; font-size: 12px; }
-.setlist-item-title { flex: 1; font-weight: 500; }
-.setlist-medley { background-color: #fffbeb; border-left: 4px solid var(--aiko-yellow); padding-left: 10px; }
-.setlist-encore { background-color: #fdf2f8; border-left: 4px solid var(--aiko-pink); }
-.setlist-medley-title { background-color: #fef3c7; border-left: 4px solid var(--aiko-yellow); font-weight: bold; font-size: 14px; }
-.setlist-encore-header { background-color: #fce7f3; border-left: 4px solid var(--aiko-pink); font-weight: bold; font-size: 14px; padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; color: #db2777; }
+/* 最後の要素だけボーダーを消す */
+.setlist-item:last-child { border-bottom: none; }
 
-/* ヘッダー（タイトル左寄せ） */
+.setlist-item-number { 
+  display: inline-block; 
+  min-width: 28px; 
+  flex-shrink: 0; 
+  font-weight: normal; 
+  color: #9CA3AF; 
+  font-size: 14px; /* 番号は少し控えめに */
+}
+.setlist-item-title { flex: 1; font-weight: 500; color: #1f2937; }
+
+/* メドレー・アンコール（帯のみ残す） */
+.setlist-medley { 
+  background-color: transparent; /* 背景削除 */
+  border-left: 5px solid var(--aiko-yellow); /* 帯を残す */
+  padding-left: 12px; 
+}
+.setlist-encore { 
+  background-color: transparent; /* 背景削除 */
+  border-left: 5px solid var(--aiko-pink); /* 帯を残す */
+  padding-left: 12px;
+}
+
+/* セクションタイトル */
+.setlist-medley-title { 
+  background-color: transparent; 
+  border-left: 5px solid var(--aiko-yellow); 
+  padding-left: 12px;
+  font-weight: bold; 
+  font-size: 18px; 
+  margin-top: 12px;
+  margin-bottom: 2px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.setlist-encore-header { 
+  background-color: transparent; 
+  border-left: 5px solid var(--aiko-pink); 
+  padding-left: 12px;
+  font-weight: bold; 
+  font-size: 18px; 
+  color: var(--aiko-pink);
+  margin-top: 16px; 
+  margin-bottom: 4px; 
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+/* ヘッダー */
 header { 
   background-color: var(--aiko-red) !important; 
   color: white !important; 
   height: 64px; 
   display: flex; 
   align-items: center; 
-  justify-content: space-between; /* 両端揃え */
+  justify-content: space-between; 
   padding: 0 16px; 
   position: sticky; 
   top: 0; 
@@ -138,16 +181,16 @@ button { font-size: 14px !important; }
 .clickable-item { cursor: pointer; transition: background-color 0.2s; }
 .clickable-item:hover { background-color: #f3f4f6; }
 
-/* ボタン共通スタイル（改行禁止、縮小禁止、パディング調整） */
+/* ボタン共通スタイル */
 .action-btn {
-  padding: 10px 10px; /* 横パディングを詰めて収まりよく */
+  padding: 10px 10px;
   border-radius: 8px;
-  font-size: 13px; /* 少し小さくして1行に収める */
+  font-size: 13px;
   font-weight: bold;
   cursor: pointer;
   border: none;
-  white-space: nowrap; /* 改行禁止 */
-  flex-shrink: 0; /* 縮小禁止 */
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .clear-btn { background-color: #ef4444; color: white; }
@@ -204,7 +247,7 @@ button { font-size: 14px !important; }
 <body>
 <div id="app" class="mobile-frame">
   
-  <!-- ヘッダー（左寄せタイトル + 右寄せボタン） -->
+  <!-- ヘッダー -->
   <header id="main-header" class="shadow-sm">
     <h1 class="font-bold text-left" style="font-size:18px; color:white; flex:1;">Love Like Data Base vol.2.0</h1>
     <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
@@ -220,13 +263,11 @@ button { font-size: 14px !important; }
         <!-- 検索フォーム行 -->
         <div class="flex gap-1 mb-2 items-center">
           <input type="text" id="search-input" placeholder="フリーワードで検索" class="flex-1 min-w-0">
-          <!-- ボタン -->
           <button id="clear-all-btn" class="action-btn clear-btn">すべてクリア</button>
         </div>
         
         <!-- フィルター行 -->
         <div class="flex flex-wrap gap-2 mb-2">
-          <!-- 文言修正反映 -->
           <select id="tour-select" class="flex-1 min-w-[130px] text-gray-700 bg-white"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
           <select id="year-select" class="flex-1 min-w-[90px] text-gray-700 bg-white"><option value="">すべての年</option></select>
           <select id="region-select" class="flex-1 min-w-[110px] text-gray-700 bg-white"><option value="">すべての都道府県</option></select>
@@ -253,13 +294,9 @@ button { font-size: 14px !important; }
       </div>
 
       <div class="card-base bg-gray-50 border border-gray-200 mb-6">
-        <!-- 入力欄とボタンを横並びにするためのフレックスコンテナ (gap-1 で詰める) -->
         <div class="flex gap-1 mb-4 items-center">
-          <!-- 入力欄の幅を自動調整 (flex-1) -->
           <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="flex-1 min-w-0">
-          <!-- ボタン -->
           <button id="song-clear-btn" class="action-btn clear-btn">クリア</button>
-          <!-- 文言修正：公演表示 -->
           <button id="show-setlist-btn" class="action-btn setlist-btn" style="display: none;">公演表示</button>
         </div>
         <div class="flex justify-between items-center text-base font-semibold">
@@ -298,13 +335,9 @@ button { font-size: 14px !important; }
         </div>
       </div>
       <div class="card-base bg-gray-50 border border-gray-200 mb-0 rounded-b-none">
-        <!-- 入力欄とボタンを横並びにするためのフレックスコンテナ (gap-1) -->
         <div class="flex gap-1 items-center">
-          <!-- 入力欄 -->
           <input type="text" id="venue-search-input" placeholder="会場 または 都道府県名で検索" class="flex-1 min-w-0">
-          <!-- ボタン -->
           <button id="venue-clear-btn" class="action-btn clear-btn">クリア</button>
-          <!-- 文言修正：公演表示 -->
           <button id="venue-show-setlist-btn" class="action-btn setlist-btn" style="display: none;">公演表示</button>
         </div>
       </div>
