@@ -19,7 +19,7 @@
   --aiko-yellow: #FFD700;
   --aiko-blue: #00BFFF;
   --aiko-bg: #F8F8F8;
-  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.06);
 }
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
@@ -48,23 +48,34 @@ body.detail-view { padding-top: 0; }
 }
 
 .mobile-frame { width: 100%; max-width: 100%; height: 100vh; background-color: white; position: relative; overflow-y: scroll; overflow-x: hidden; }
-.card-base { background-color: white; border-radius: 12px; box-shadow: var(--card-shadow); padding: 16px; margin-bottom: 16px; }
 
-/* タブナビゲーションの調整（均等配置を強制） */
+/* カードのスタイル */
+.card-base { 
+  background-color: white; 
+  border-radius: 12px; 
+  box-shadow: var(--card-shadow); 
+  padding: 16px; /* 少しタイトに */
+  margin-bottom: 16px; 
+}
+
+/* タブナビゲーション */
 nav {
   padding-bottom: env(safe-area-inset-bottom);
   position: fixed !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex !important;
-  border-top: 1px solid #e5e7eb;
-  height: calc(60px + env(safe-area-inset-bottom));
+  border-top: 2px solid #e5e7eb;
+  height: calc(64px + env(safe-area-inset-bottom));
   z-index: 50;
-  width: 100%; /* 幅を確実に100%に */
+  width: 100%;
   background-color: white;
 }
 nav > div {
   display: flex;
   width: 100%;
-  justify-content: space-between; /* 子要素を均等に配置 */
+  justify-content: space-between;
 }
 .tab-item {
   display: flex;
@@ -78,82 +89,82 @@ nav > div {
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
-  flex: 1 1 0px; /* 幅を均等に伸縮させる */
-  width: 0; /* flexアイテムの幅計算用 */
-  height: 60px;
+  flex: 1 1 0px;
+  width: 0;
+  height: 100%;
 }
-.tab-item.active { color: var(--aiko-red); background-color: #FFF5F5; }
-.tab-item.active i { color: var(--aiko-red); }
+.tab-item.active { color: white; background-color: #4B5563; }
+.tab-item.active i { color: white; }
 
-/* セットリストのスタイル調整 */
+/* セットリストのスタイル */
 .setlist-item { 
-  padding: 8px 12px; 
-  margin-bottom: 4px; 
+  padding: 10px 14px; 
+  margin-bottom: 6px; 
   border-radius: 8px; 
   background-color: #f9fafb; 
-  font-size: 14px; 
+  font-size: 15px; 
   line-height: 1.5;
   display: flex;
   align-items: baseline;
 }
-.setlist-item-number { display: inline-block; min-width: 24px; flex-shrink: 0; font-weight: bold; color: #9CA3AF; font-size: 12px; }
+.setlist-item-number { display: inline-block; min-width: 28px; flex-shrink: 0; font-weight: bold; color: #9CA3AF; font-size: 13px; }
 .setlist-item-title { flex: 1; font-weight: 500; }
-.setlist-medley { background-color: #fffbeb; border-left: 3px solid var(--aiko-yellow); padding-left: 12px; }
-.setlist-encore { background-color: #fdf2f8; border-left: 3px solid var(--aiko-pink); }
-.setlist-medley-title { background-color: #fef3c7; border-left: 3px solid var(--aiko-yellow); font-weight: bold; font-size: 14px; }
-.setlist-encore-header { background-color: #fce7f3; border-left: 3px solid var(--aiko-pink); font-weight: bold; font-size: 14px; padding: 8px 12px; margin-bottom: 8px; border-radius: 8px; color: #db2777; }
+.setlist-medley { background-color: #fffbeb; border-left: 4px solid var(--aiko-yellow); padding-left: 14px; }
+.setlist-encore { background-color: #fdf2f8; border-left: 4px solid var(--aiko-pink); }
+.setlist-medley-title { background-color: #fef3c7; border-left: 4px solid var(--aiko-yellow); font-weight: bold; font-size: 15px; }
+.setlist-encore-header { background-color: #fce7f3; border-left: 4px solid var(--aiko-pink); font-weight: bold; font-size: 15px; padding: 10px 14px; margin-bottom: 8px; border-radius: 8px; color: #db2777; }
 
-header { background-color: var(--aiko-red) !important; color: white !important; height: 60px; display: flex; align-items: center; justify-content: center; padding: 0 16px; }
-main { padding: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+header { background-color: var(--aiko-red) !important; color: white !important; height: 64px; display: flex; align-items: center; justify-content: center; padding: 0 16px; position: sticky; top: 0; z-index: 40; }
+main { padding: 16px; padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
 body.detail-view main { padding-top: 80px; padding-bottom: 40px; }
 
 /* フォーム要素の最適化 */
-input, select { font-size: 16px !important; padding: 10px 12px !important; border-radius: 8px !important; border: 1px solid #d1d5db !important; }
+input, select { font-size: 15px !important; padding: 10px 12px !important; border-radius: 8px !important; border: 1px solid #d1d5db !important; }
 button { font-size: 14px !important; }
 
 .clickable-item { cursor: pointer; transition: background-color 0.2s; }
 .clickable-item:hover { background-color: #f3f4f6; }
 
-.clear-btn { background-color: #ef4444; color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
-.setlist-btn { background-color: var(--aiko-blue); color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+.clear-btn { background-color: #ef4444; color: white; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; white-space: nowrap; }
+.setlist-btn { background-color: var(--aiko-blue); color: white; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
 
 /* 会場タブの調整 */
-.venue-tabs { display: flex; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px; gap: 0; position: sticky; top: 0px; background: white; z-index: 40; }
-.venue-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 14px; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; background: white; }
+.venue-tabs { display: flex; border-bottom: 3px solid #e5e7eb; margin-bottom: 20px; gap: 0; position: sticky; top: 0px; background: white; z-index: 40; }
+.venue-tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 600; font-size: 15px; color: #6b7280; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: all 0.2s; background: white; }
 .venue-tab.active { color: var(--aiko-pink); border-bottom-color: var(--aiko-pink); }
 
 /* 戻るボタン */
 .back-button-circle {
-  width: 44px; height: 44px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
-  cursor: pointer; position: fixed; top: 16px; left: 16px; z-index: 1001; backdrop-filter: blur(4px); border: 1px solid #f3f4f6;
+  width: 50px; height: 50px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: fixed; top: 20px; left: 20px; z-index: 1001; backdrop-filter: blur(4px); border: 1px solid #f3f4f6;
 }
-.back-button-circle svg { width: 24px; height: 24px; stroke: #374151; stroke-width: 2.5; }
+.back-button-circle svg { width: 28px; height: 28px; stroke: var(--aiko-red); stroke-width: 3; }
 
 /* モーダル */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(2px); }
-.modal-content { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-.modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #6b7280; cursor: pointer; }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+.modal-content { background: white; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+.modal-close { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #6b7280; cursor: pointer; }
 
 /* ランキング表示の調整 */
-.rank-number { display: inline-block; min-width: 30px; text-align: right; margin-right: 12px; flex-shrink: 0; font-size: 18px; font-weight: 800; font-style: italic; }
-.song-title, .venue-name { flex: 1; word-break: break-word; font-size: 15px; font-weight: 600; line-height: 1.4; }
-.song-count { white-space: nowrap; flex-shrink: 0; font-size: 16px; font-weight: bold; color: #4B5563; }
-.song-count span { font-size: 12px; font-weight: normal; margin-left: 2px; }
+.rank-number { display: inline-block; min-width: 36px; text-align: right; margin-right: 14px; flex-shrink: 0; font-size: 20px; font-weight: 800; font-style: italic; }
+.song-title, .venue-name { flex: 1; word-break: break-word; font-size: 16px; font-weight: 600; line-height: 1.4; }
+.song-count { white-space: nowrap; flex-shrink: 0; font-size: 18px; font-weight: bold; color: #4B5563; }
+.song-count span { font-size: 13px; font-weight: normal; margin-left: 2px; }
 
 /* 公演カードのラベル（右上の斜め帯スタイル） */
-.live-card { position: relative; overflow: hidden; }
+.live-card { position: relative; overflow: hidden; padding-bottom: 16px; }
 .live-card-label {
   position: absolute;
-  top: 15px;
-  right: -35px;
+  top: 18px;
+  right: -40px;
   transform: rotate(45deg);
   background-color: var(--aiko-pink);
   color: white;
   padding: 4px 0;
-  width: 120px;
+  width: 140px;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   z-index: 1;
@@ -171,8 +182,8 @@ button { font-size: 14px !important; }
   <!-- ヘッダー -->
   <header id="main-header" class="shadow-sm">
     <div style="position:relative; width:100%; display:flex; align-items:center; justify-content:center;">
-      <h1 class="font-bold text-center" style="font-size:18px; color:white;">Love Like Data Base vol.2.0</h1>
-      <button id="info-btn" style="position:absolute; right:0; background-color:rgba(255,255,255,0.2); color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold; border:none; cursor:pointer;">読んでね</button>
+      <h1 class="font-bold text-center" style="font-size:20px; color:white;">Love Like Data Base vol.2.0</h1>
+      <button id="info-btn" style="position:absolute; right:0; background-color:white; color:#ef4444; padding:8px 16px; border-radius:8px; font-size:14px; font-weight:bold; border:none; cursor:pointer;">読んでね</button>
     </div>
   </header>
 
@@ -181,95 +192,96 @@ button { font-size: 14px !important; }
     <div id="live-detail" style="display:none"></div>
 
     <div id="tab-search" class="tab-content" style="display:block">
-      <p class="text-gray-400 mb-3 text-xs text-center">※<span id="last-update-date">-</span>までの情報を掲載</p>
-      <div class="card-base bg-gray-50 border border-gray-100">
-        <div class="flex gap-2 mb-3">
-          <input type="text" id="search-input" placeholder="フリーワード" class="flex-1">
-          <button id="clear-all-btn" class="clear-btn">クリア</button>
+      <p class="text-gray-500 mb-4 text-sm text-center">※<span id="last-update-date">-</span>までの情報を掲載</p>
+      <div class="card-base bg-gray-50 border border-gray-200">
+        <!-- 検索フォーム行 -->
+        <div class="flex gap-2 mb-2">
+          <input type="text" id="search-input" placeholder="フリーワードで検索" class="flex-1 min-w-0">
+          <button id="clear-all-btn" class="clear-btn flex-shrink-0">すべてクリア</button>
         </div>
-        <div class="grid grid-cols-2 gap-2 mb-3">
-          <select id="tour-select" class="w-full"><option value="">全イベント</option><option value="pop">LLP</option><option value="rock">LLR</option><option value="aloha">LLA</option><option value="other">その他</option></select>
-          <select id="year-select" class="w-full"><option value="">全期間</option></select>
+        
+        <!-- フィルター行（Flex Wrapで最適化） -->
+        <div class="flex flex-wrap gap-2 mb-2">
+          <!-- 幅を指定して、いい感じで折り返すように設定 -->
+          <select id="tour-select" class="flex-1 min-w-[140px] text-gray-700 bg-white"><option value="">すべてのライブイベント</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブイベント</option></select>
+          <select id="year-select" class="flex-1 min-w-[100px] text-gray-700 bg-white"><option value="">すべての年</option></select>
+          <select id="region-select" class="flex-1 min-w-[120px] text-gray-700 bg-white"><option value="">すべての都道府県</option></select>
         </div>
-        <div class="mb-3">
-          <select id="region-select" class="w-full"><option value="">すべての都道府県</option></select>
-        </div>
+        
+        <!-- 楽曲フィルター行 -->
         <div>
-          <input type="text" id="song-filter-input" placeholder="曲名で絞り込み（楽曲タブで選択）" class="w-full bg-gray-100 text-gray-500" readonly>
+          <input type="text" id="song-filter-input" placeholder="演奏された曲名で検索（楽曲タブから選択）" class="w-full bg-gray-100 text-gray-500" readonly>
         </div>
       </div>
       
-      <div class="flex items-center justify-between my-4 px-1">
-        <h3 class="font-bold text-gray-700 text-lg">🎫 公演リスト</h3>
-        <span class="text-xs bg-gray-200 px-2 py-1 rounded-full text-gray-600"><span id="display-count" class="font-bold">0</span> / <span id="total-count">0</span></span>
-      </div>
+      <h3 class="font-bold my-6 text-gray-700 text-xl">🎫 <span id="display-count-text">表示中の公演数</span>: <span id="display-count">0</span> / <span id="total-count">0</span></h3>
       
-      <div id="live-list-container" class="space-y-3"></div>
+      <div id="live-list-container" class="space-y-4"></div>
     </div>
 
     <div id="tab-song" class="tab-content" style="display:none">
-      <div class="mb-6">
-        <h3 class="font-bold mb-2 text-gray-700 text-lg">📊 年別推移</h3>
-        <p class="text-gray-400 mb-2 text-center text-xs">※下のランキングから曲を選ぶとグラフが変わるよ</p>
-        <div class="card-base bg-white p-2">
-          <canvas id="live-count-chart" style="height:200px; max-height:200px"></canvas>
+      <div class="mb-8">
+        <h3 class="font-bold mb-3 text-gray-700 text-xl">📊 年別ライブ開催・楽曲演奏回数</h3>
+        <p class="text-gray-500 mb-3 text-center text-sm">※演奏回数ランキングから曲を選ぶと、グラフに反映されるよ</p>
+        <div class="card-base bg-white p-3">
+          <canvas id="live-count-chart" style="height:220px; max-height:220px"></canvas>
         </div>
       </div>
 
-      <div class="card-base bg-gray-50 border border-gray-100 mb-4">
-        <div class="flex gap-2 mb-3">
-          <input type="text" id="song-search-input" placeholder="曲名検索" class="flex-1">
+      <div class="card-base bg-gray-50 border border-gray-200 mb-6">
+        <div class="flex gap-2 mb-4">
+          <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="flex-1">
           <button id="song-clear-btn" class="clear-btn">クリア</button>
-          <button id="show-setlist-btn" class="setlist-btn" style="display: none;">セトリ</button>
+          <button id="show-setlist-btn" class="setlist-btn" style="display: none;">セトリ表示</button>
         </div>
-        <div class="flex justify-between items-center text-sm">
-          <span class="text-gray-600">全 <span id="total-songs" class="font-bold">-</span> 曲</span>
-          <select id="song-sort" class="text-aiko-pink font-bold border-none bg-transparent" style="padding:0!important">
-            <option value="count-desc">多い順</option><option value="count-asc">少ない順</option>
+        <div class="flex justify-between items-center text-base font-semibold">
+          <span class="text-gray-600">全楽曲: <span id="total-songs" class="font-bold">-</span> 曲</span>
+          <select id="song-sort" class="text-aiko-pink font-bold border-none bg-transparent" style="padding:0!important; width:auto!important; border:none!important;">
+            <option value="count-desc">演奏回数 降順</option><option value="count-asc">演奏回数 昇順</option>
           </select>
         </div>
       </div>
-      <h3 class="font-bold mt-6 mb-3 text-gray-700 text-lg">🎸 演奏回数ランキング</h3>
+      <h3 class="font-bold mt-8 mb-4 text-gray-700 text-xl">🎸 演奏回数ランキング</h3>
       <div id="song-ranking-container"></div>
     </div>
 
     <div id="tab-pattern" class="tab-content" style="display:none">
-      <div class="mb-6">
-        <h3 class="font-bold mb-2 text-gray-700 text-lg">📊 アルバム別</h3>
-        <div class="card-base bg-white p-2">
-          <canvas id="album-chart" style="height:300px; max-height:300px"></canvas>
+      <div class="mb-8">
+        <h3 class="font-bold mb-3 text-gray-700 text-xl">📊 アルバム別演奏回数</h3>
+        <div class="card-base bg-white p-3">
+          <canvas id="album-chart" style="height:320px; max-height:320px"></canvas>
         </div>
       </div>
 
-      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700 text-lg">🎬 オープニング曲 TOP 10</h3>
-      <div id="opening-songs" class="card-base bg-white p-0 overflow-hidden"></div></div>
-      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700 text-lg">👏 アンコール曲 TOP 10</h3>
-      <div id="encore-songs" class="card-base bg-white p-0 overflow-hidden"></div></div>
-      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700 text-lg">🏁 大トリ曲 TOP 10</h3>
-      <div id="last-songs" class="card-base bg-white p-0 overflow-hidden"></div></div>
+      <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700 text-xl">🎬 オープニング曲 TOP 10</h3>
+      <div id="opening-songs" class="card-base bg-white p-2"></div></div>
+      <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700 text-xl">👏 アンコール曲 TOP 10</h3>
+      <div id="encore-songs" class="card-base bg-white p-2"></div></div>
+      <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700 text-xl">🏁 大トリ曲 TOP 10</h3>
+      <div id="last-songs" class="card-base bg-white p-2"></div></div>
     </div>
 
     <div id="tab-venue" class="tab-content" style="display:none">
-      <div class="mb-6">
-        <h3 class="font-bold mb-2 text-gray-700 text-lg">📊 開催頻度</h3>
-        <p class="text-gray-400 mb-2 text-center text-xs">※下のランキングから選ぶとグラフが変わるよ</p>
-        <div class="card-base bg-white p-2">
-          <canvas id="venue-live-count-chart" style="height:200px; max-height:200px"></canvas>
+      <div class="mb-8">
+        <h3 class="font-bold mb-3 text-gray-700 text-xl">📊 年別ライブ開催回数</h3>
+        <p class="text-gray-500 mb-3 text-center text-sm">※ランキングから会場/都道府県を選ぶと、グラフに反映されるよ</p>
+        <div class="card-base bg-white p-3">
+          <canvas id="venue-live-count-chart" style="height:220px; max-height:220px"></canvas>
         </div>
       </div>
-      <div class="card-base bg-gray-50 border border-gray-100 mb-0 rounded-b-none">
+      <div class="card-base bg-gray-50 border border-gray-200 mb-0 rounded-b-none">
         <div class="flex gap-2">
-          <input type="text" id="venue-search-input" placeholder="会場/都道府県" class="flex-1">
+          <input type="text" id="venue-search-input" placeholder="会場 または 都道府県名で検索" class="flex-1">
           <button id="venue-clear-btn" class="clear-btn">クリア</button>
-          <button id="venue-show-setlist-btn" class="setlist-btn" style="display: none;">セトリ</button>
+          <button id="venue-show-setlist-btn" class="setlist-btn" style="display: none;">セトリ表示</button>
         </div>
       </div>
       <div class="venue-tabs">
-        <div class="venue-tab active" data-venue-tab="venue">会場別</div>
-        <div class="venue-tab" data-venue-tab="region">都道府県別</div>
+        <div class="venue-tab active" data-venue-tab="venue">会場ランキング</div>
+        <div class="venue-tab" data-venue-tab="region">都道府県ランキング</div>
       </div>
-      <div id="venue-ranking-container" class="mt-2"></div>
-      <div id="region-ranking-container" class="mt-2" style="display:none"></div>
+      <div id="venue-ranking-container" class="mt-4"></div>
+      <div id="region-ranking-container" class="mt-4" style="display:none"></div>
     </div>
   </main>
 
@@ -283,23 +295,27 @@ button { font-size: 14px !important; }
   <div id="info-modal" class="modal-overlay" style="display:none">
     <div class="modal-content">
       <span class="modal-close" onclick="closeInfoModal()">&times;</span>
-      <div class="text-sm leading-relaxed text-gray-700">
-        <h3 class="font-bold text-base mb-2 text-aiko-red">▼情報源</h3>
-        <ul class="list-disc pl-4 mb-4 space-y-1">
-          <li>開発者の独自調査によるものです。</li>
-          <li>アカペラ等、公式情報と異なる場合があります。</li>
-          <li>誤りはX(<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-400 underline">@noki_dochibi</a>)まで。</li>
-          <li>テレビ/特番情報は含みません。</li>
+      <div class="text-base leading-relaxed text-gray-700">
+        <h3 class="font-bold text-lg mb-3 text-aiko-red">▼情報源</h3>
+        <ul class="list-disc pl-5 mb-6 space-y-2">
+          <li>このアプリの情報は開発者が独自の調査で集約したものだよ。</li>
+          <li>アカペラで歌った曲が入っているなど、一部セトリボードと異なる場合があるよ。</li>
+          <li>まちがっている情報などがあれば、ぜひX（Twitter）の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>までお知らせください。</li>
+          <li>テレビ番組/音楽特番の情報はなく、ライブイベント（と思われる）情報のみ載せているよ。</li>
         </ul>
-        <h3 class="font-bold text-base mb-2 text-aiko-red">▼集計ルール</h3>
-        <ul class="list-disc pl-4 mb-4 space-y-1">
-          <li>Ver違い（より道/相合傘など）は統合しています。</li>
-          <li>メドレーはまとめて1曲扱いです。</li>
-          <li>即興曲は除外しています。</li>
-          <li>会場名は「旧名称 / 新名称」で併記しています。</li>
+        <h3 class="font-bold text-lg mb-3 text-aiko-red">▼集計方法</h3>
+        <ul class="list-disc pl-5 mb-6 space-y-2">
+          <li>『より道』『相合傘』などバージョン違いがあるものも、１つの曲として統合しているよ。</li>
+          <li>「メドレー」は複数の曲をまとめて１曲として扱っているよ。</li>
+          <li>即興曲などは含んでいないよ。</li>
+          <li>会場は、同じ建物で名称が変わったものは「旧名称 / 新名称」としているよ。同じ場所でも建て替えた新しい建物の場合は、別の会場としているよ。</li>
         </ul>
-        <h3 class="font-bold text-base mb-2 text-aiko-red">▼その他</h3>
-        <p>他にもいろいろ作ってます<br>→<a href="https://lit.link/nokidochibi" target="_blank" class="text-blue-400 underline">Lit.link</a></p>
+        <h3 class="font-bold text-lg mb-3 text-aiko-red">▼操作</h3>
+        <ul class="list-disc pl-5 mb-6 space-y-2">
+            <li>セトリのページの左上に「←（戻る）」ボタンがあるけど、ライブ名をタップしても前のページに戻るよ。右手でも押しやすいね。</li>
+        </ul>
+        <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
+        <p>他にもいろいろおもちゃがあるよ<br>→<a href="https://lit.link/nokidochibi" target="_blank" class="text-blue-500 underline">https://lit.link/nokidochibi</a></p>
       </div>
     </div>
   </div>
@@ -308,20 +324,20 @@ button { font-size: 14px !important; }
   <nav class="bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
     <div class="flex w-full">
       <a href="#" class="tab-item active" data-tab="search">
-        <i data-lucide="calendar-days" style="width:24px;height:24px"></i>
-        <span class="text-[10px] font-bold">公演</span>
+        <i data-lucide="calendar-days" style="width:26px;height:26px"></i>
+        <span class="text-[11px] font-bold">公演</span>
       </a>
       <a href="#" class="tab-item" data-tab="song">
-        <i data-lucide="music" style="width:24px;height:24px"></i>
-        <span class="text-[10px] font-bold">楽曲</span>
+        <i data-lucide="music" style="width:26px;height:26px"></i>
+        <span class="text-[11px] font-bold">楽曲</span>
       </a>
       <a href="#" class="tab-item" data-tab="pattern">
-        <i data-lucide="shuffle" style="width:24px;height:24px"></i>
-        <span class="text-[10px] font-bold">傾向</span>
+        <i data-lucide="shuffle" style="width:26px;height:26px"></i>
+        <span class="text-[11px] font-bold">傾向</span>
       </a>
       <a href="#" class="tab-item" data-tab="venue">
-        <i data-lucide="map-pin" style="width:24px;height:24px"></i>
-        <span class="text-[10px] font-bold">場所</span>
+        <i data-lucide="map-pin" style="width:26px;height:26px"></i>
+        <span class="text-[11px] font-bold">場所</span>
       </a>
     </div>
   </nav>
@@ -359,7 +375,7 @@ function showLoading(containerId) {
   loadingAnimationTimers.forEach(clearTimeout);
   loadingAnimationTimers = [];
 
-  // アニメーション文字サイズもスマホ最適化
+  // アニメーション文字サイズ
   container.innerHTML = `
 <div class="text-center py-12 text-aiko-pink font-bold select-none overflow-hidden">
   <p class="m-0 transition-opacity duration-300" style="font-size:32px; line-height:1.2;">
@@ -437,8 +453,8 @@ const chartCommonOptions = {
   maintainAspectRatio: false,
   plugins: { legend: { display: false } },
   scales: {
-    x: { ticks: { font: { size: 10 } } }, // 20px -> 10px
-    y: { ticks: { font: { size: 10 } } }  // 18px -> 10px
+    x: { ticks: { font: { size: 10 } } },
+    y: { ticks: { font: { size: 10 } } }
   }
 };
 
@@ -656,8 +672,8 @@ function populateFilters(records, skipApply = false) {
 function applyFilters() {
   const songFilterInput = document.getElementById('song-filter-input');
   let songFilterValue = songFilterInput.value;
-  if (songFilterValue.includes('（楽曲タブで選択）')) {
-    songFilterValue = songFilterValue.replace('（楽曲タブで選択）', '');
+  if (songFilterValue.includes('（楽曲タブから選択）')) {
+    songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '');
   }
 
   const filters = {
@@ -709,7 +725,7 @@ function renderLiveList(records) {
     card.innerHTML = `
       <div class="live-card-label ${labelType}">${labelText}</div>
       <p class="text-gray-500 font-medium text-xs">${rec.date} (${rec.dayOfWeek})</p>
-      <p class="font-bold mt-1 text-gray-800 text-base leading-tight">${rec.tourName}</p>
+      <p class="font-bold mt-1 text-gray-800 text-lg leading-tight">${rec.tourName}</p>
       <p class="text-gray-600 text-sm mt-1">${rec.venue} (${rec.region})</p>
       <p class="mt-2 font-semibold text-aiko-pink text-sm">セットリスト: ${rec.songCount}曲</p>`;
     card.onclick = () => showLiveDetail(rec);
@@ -766,8 +782,8 @@ function showLiveDetail(rec) {
   });
 
   const setlistSection = setlistHtml.trim()
-    ? `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base p-2 shadow-none border border-gray-100">${setlistHtml}</div>`
-    : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed p-4">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
+    ? `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base shadow-none border border-gray-100">${setlistHtml}</div>`
+    : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
 
   detailContainer.innerHTML = `
     <div id="detail-header-area" class="pt-2 -mt-2 cursor-pointer">
