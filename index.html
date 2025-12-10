@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.2.0</title>
+<title>Love Like DataBase vol.2.1</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -527,7 +527,7 @@ button { font-size: 14px !important; }
 // GASのAPIエンドポイント (前回と同じならそのままでOK)
 const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
 // キャッシュキー (ここを変更して強制更新させる)
-const CACHE_KEY = 'lldb_data_v3_2';
+const CACHE_KEY = 'lldb_data_v3_3';
 
 // アプリの初期化Promise
 let appInitializedResolver;
@@ -609,17 +609,30 @@ async function loadAllData(isAlreadyDisplayed) {
 }
 
 function startLoadingAnimation(mode) {
-  // 廃止リクエストに対応: キャッシュ有無に関わらず、常に「通常モード」で演出を行う
-  // これにより、キャッシュがある場合でも時間をかけてローディング画面が表示され、
-  // その間に裏での最新データ取得が完了しやすくなる。
-  const loadingTexts = [
-      { id: 'loading-text-1', delay: 100 },
-      { id: 'loading-text-2', delay: 900 },
-      { id: 'loading-text-3', delay: 1700 },
-      { id: 'loading-text-4', delay: 2500 },
-      { id: 'loading-text-5', delay: 3000 }
-  ];
-  const totalDuration = 3800;
+  let loadingTexts;
+  let totalDuration;
+
+  if (mode === 'fast') {
+    // キャッシュあり（2回目以降）: 0.5秒間隔でテンポよく
+    loadingTexts = [
+        { id: 'loading-text-1', delay: 0 },     // 男子ー!!
+        { id: 'loading-text-2', delay: 500 },   // 女子ー!!
+        { id: 'loading-text-3', delay: 1000 },  // そうでない人ー!!
+        { id: 'loading-text-4', delay: 1500 },  // ぜー
+        { id: 'loading-text-5', delay: 2000 }   // いんっ...!!!
+    ];
+    totalDuration = 2800; // 完了までの時間（余韻含む）
+  } else {
+    // キャッシュなし（初回）: 少し待たせつつ期待感を煽る
+    loadingTexts = [
+        { id: 'loading-text-1', delay: 100 },   // 男子ー!!
+        { id: 'loading-text-2', delay: 900 },   // 女子ー!!
+        { id: 'loading-text-3', delay: 1700 },  // そうでない人ー!!
+        { id: 'loading-text-4', delay: 2500 },  // ぜー
+        { id: 'loading-text-5', delay: 3000 }   // いんっ...!!!
+    ];
+    totalDuration = 3800;
+  }
 
   loadingTexts.forEach(item => {
     setTimeout(() => {
