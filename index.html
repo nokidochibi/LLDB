@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base vol.2.2</title>
+<title>Love Like Data Base vol.2.3</title>
 <meta name="theme-color" content="#ef4444">
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -103,23 +103,24 @@ nav > div {
 .tab-item.active i { color: white; }
 
 .setlist-item {
-  padding: 8px 0; /* 少し広げた */
+  padding: 8px 0;
   margin-bottom: 0;
   background-color: transparent;
   border-bottom: 1px solid #f3f4f6;
   font-size: 16px;
   line-height: 1.4;
   display: flex;
-  align-items: center; /* 垂直中央揃え */
-  justify-content: space-between; /* 両端揃え */
+  align-items: center;
+  justify-content: space-between;
 }
 .setlist-item:last-child { border-bottom: none; }
 
+/* レイアウト調整: 左側(曲名)と右側(タイムライン)を半々に */
 .setlist-left-content {
   display: flex;
   align-items: baseline;
-  flex: 1;
-  min-width: 0;
+  width: 50%; /* 画面の半分 */
+  flex: none; /* 幅を固定 */
   padding-right: 8px;
 }
 
@@ -139,16 +140,16 @@ nav > div {
 
 /* タイムラインバー用スタイル */
 .timeline-container {
-  width: 60px; /* バーの長さ */
+  flex: 1; /* 残りのスペースを全て使う */
   height: 20px;
   display: flex;
   align-items: center;
   position: relative;
-  flex-shrink: 0;
+  padding-left: 4px; /* 少し隙間 */
 }
 .timeline-bar {
   width: 100%;
-  height: 3px;
+  height: 2px; /* 少し細くして上品に */
   background-color: #e5e7eb;
   border-radius: 2px;
   position: relative;
@@ -161,7 +162,7 @@ nav > div {
   top: 50%;
   transform: translate(-50%, -50%);
   border: 1px solid white;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .setlist-medley {
@@ -295,7 +296,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.2.2</h1>
+  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.2.3</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -467,7 +468,7 @@ button { font-size: 14px !important; }
 </div>
 
 <script>
-// GASのAPIエンドポイント
+// GASのAPIエンドポイント (前回と同じならそのままでOK)
 const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
 // キャッシュキー
 const CACHE_KEY = 'lldb_data_v3';
@@ -1030,22 +1031,20 @@ function showLiveDetail(rec) {
 
   // --- 年代計算用の定数 ---
   const minYear = 1998;
-  const maxYear = new Date().getFullYear(); // 現在の年
+  const maxYear = new Date().getFullYear();
 
-  // 年に応じた色を取得する関数
+  // 年に応じた色を取得する関数 (単色化)
   function getTimelineColor(percent) {
-    if (percent < 35) return '#00BFFF'; // 青 (初期)
-    if (percent < 70) return '#FFD700'; // 黄 (中期)
-    return '#FF69B4'; // ピンク (後期)
+    return '#FF69B4'; // 常にaiko-pink
   }
 
   // タイムラインバーHTML生成関数
   function createTimelineHtml(songName) {
-    if (!songData[songName]) return ''; // データがなければ空
+    if (!songData[songName]) return ''; 
     const songYear = songData[songName];
     // 1998年を0%、現在を100%とした位置を計算
     let percent = ((songYear - minYear) / (maxYear - minYear)) * 100;
-    percent = Math.max(0, Math.min(100, percent)); // 0-100に収める
+    percent = Math.max(0, Math.min(100, percent)); 
     
     const dotColor = getTimelineColor(percent);
     
@@ -1101,7 +1100,7 @@ function showLiveDetail(rec) {
 
   const setlistSection = setlistHtml.trim()
     ? `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3>
-       <div class="text-xs text-right text-gray-400 mb-1 pr-1">1998 ─── ● ─── ${maxYear}</div>
+       <div class="text-xs text-right text-gray-400 mb-1 pr-1">リリース年: 1998 ─── ● ─── ${maxYear}</div>
        <div class="card-base shadow-none border border-gray-100">${setlistHtml}</div>`
     : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
 
