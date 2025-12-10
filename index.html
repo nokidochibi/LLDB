@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.2.2</title>
+<title>Love Like DataBase vol.2.3</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -327,6 +327,15 @@ button { font-size: 14px !important; }
   transition: opacity 0.5s ease-out;
   pointer-events: none;
 }
+
+/* おみくじ回転アニメーション */
+.spin-once {
+  animation: spin 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
@@ -364,7 +373,12 @@ button { font-size: 14px !important; }
       </div>
     </div>
 
-    <h3 class="font-bold my-6 text-gray-700 text-xl">🎫 <span id="display-count-text">表示中の公演数</span>: <span id="display-count">0</span> / <span id="total-count">0</span></h3>
+    <!-- おみくじトリガーのh3 -->
+    <h3 class="font-bold my-6 text-gray-700 text-xl select-none" id="omikuji-header">
+      <span id="omikuji-trigger" class="inline-block cursor-pointer">🎫</span>
+      <span id="display-count-text">表示中の公演数</span>: 
+      <span id="display-count">0</span> / <span id="total-count">0</span>
+    </h3>
 
     <div id="live-list-container" class="space-y-4"></div>
   </div>
@@ -477,6 +491,7 @@ button { font-size: 14px !important; }
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼操作</h3>
       <ul class="list-disc pl-5 mb-6 space-y-2">
         <li>セトリのページの左上に「←（戻る）」ボタンがあるけど、ライブ名をタップしても前のページに戻るよ。右手でも押しやすいね。</li>
+        <li>「表示中の公演数」の前の「🎫」を3回タップすると...？</li>
       </ul>
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
       <p>他にもいろいろおもちゃがあるよ<br>→<a href="https://lit.link/nokidochibi" target="_blank" class="text-blue-500 underline">https://lit.link/nokidochibi</a></p>
@@ -528,6 +543,9 @@ const animationFinishedPromise = new Promise(resolve => {
 
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
+  
+  // おみくじ機能のセットアップ
+  setupOmikuji();
 
   // 1. キャッシュがあれば即表示
   const cachedData = localStorage.getItem(CACHE_KEY);
@@ -671,6 +689,77 @@ function initializeApp(records, albums, songs) {
   renderPatternStats();
   renderVenueRanking();
   renderVenueLiveCountChart();
+}
+
+// -----------------------------------------------------------
+// おみくじ機能
+// -----------------------------------------------------------
+let ticketClickCount = 0;
+let ticketClickTimer = null;
+
+function setupOmikuji() {
+  const trigger = document.getElementById('omikuji-trigger');
+  if(!trigger) return;
+
+  trigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    ticketClickCount++;
+    
+    // 1.5秒以内に次のクリックがなければリセット
+    if (ticketClickTimer) clearTimeout(ticketClickTimer);
+    ticketClickTimer = setTimeout(() => {
+        ticketClickCount = 0;
+    }, 1500);
+
+    if (ticketClickCount >= 3) {
+        ticketClickCount = 0;
+        clearTimeout(ticketClickTimer);
+        playOmikuji();
+    }
+  });
+}
+
+function playOmikuji() {
+    const trigger = document.getElementById('omikuji-trigger');
+    
+    // 回転アニメーション
+    trigger.classList.remove('spin-once');
+    void trigger.offsetWidth; // リフロー発生
+    trigger.classList.add('spin-once');
+
+    // ランダム選出
+    const randomLive = allLiveRecords[Math.floor(Math.random() * allLiveRecords.length)];
+
+    // 少し待ってから結果表示
+    setTimeout(() => {
+        showOmikujiResult(randomLive);
+    }, 600);
+}
+
+function showOmikujiResult(rec) {
+    const tourNameLower = rec.tourName.toLowerCase();
+    let labelType = 'other', labelText = 'その他';
+    if (tourNameLower.includes('love like pop')) { labelType = 'pop'; labelText = 'POP'; }
+    else if (tourNameLower.includes('love like rock')) { labelType = 'rock'; labelText = 'ROCK'; }
+    else if (tourNameLower.includes('love like aloha')) { labelType = 'aloha'; labelText = 'ALOHA'; }
+
+    // カードHTML生成
+    const cardHtml = `
+      <div class="card-base live-card cursor-pointer shadow-md" onclick="closeModal(); showLiveDetail(allLiveRecords.find(r => r.date === '${rec.date}' && r.tourName === '${rec.tourName}'))">
+        <div class="live-card-label ${labelType}">${labelText}</div>
+        <p class="text-gray-500 font-medium text-xs">${rec.date} (${rec.dayOfWeek})</p>
+        <p class="font-bold mt-1 text-gray-800 text-lg leading-tight">${rec.tourName}</p>
+        <p class="text-gray-600 text-sm mt-1">${rec.venue} (${rec.region})</p>
+        <p class="mt-2 font-semibold text-aiko-pink text-sm">セットリスト: ${rec.songCount}曲</p>
+      </div>
+      <p class="text-center text-gray-400 text-xs mt-2">👆 タップで詳細へ</p>
+    `;
+
+    document.getElementById('modal-body').innerHTML = `
+        <h2 class="font-bold text-center text-xl mb-4 text-aiko-pink">今日のラッキーセトリ🤞</h2>
+        ${cardHtml}
+    `;
+    document.getElementById('modal-overlay').style.display = 'flex';
 }
 
 // -----------------------------------------------------------
@@ -1089,7 +1178,10 @@ function showLiveDetail(rec) {
     let percent = ((songYear - minYear) / (maxYear - minYear)) * 100;
     percent = Math.max(0, Math.min(100, percent)); 
     
-    const dotColor = getTimelineColor(percent);
+    let dotColor = '#D1D5DB'; // デフォルトはグレー
+    if (songInfo.type === '表題曲') dotColor = '#FF69B4'; // ピンク
+    else if (songInfo.type === 'カップリング曲') dotColor = '#3B82F6'; // 青
+    else if (songInfo.type === 'アルバム曲') dotColor = '#EAB308'; // 黄色
     
     // タップで表示する吹き出しを追加
     return `
@@ -1180,12 +1272,13 @@ function showLiveDetail(rec) {
   `;
 
   const setlistSection = setlistHtml.trim()
-    ? `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3>
+    ? `
+       ${summaryHtml}
+       <h3 class="font-bold mb-3 mt-8 text-gray-700 text-lg">🎵 セットリスト</h3>
        ${legendHtml}
        <div class="card-base shadow-none border border-gray-100 pb-2">
          ${setlistHtml}
-       </div>
-       ${summaryHtml}`
+       </div>`
     : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
 
   detailContainer.innerHTML = `
