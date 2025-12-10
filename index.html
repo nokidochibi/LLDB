@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.2.0</title>
+<title>Love Like DataBase vol.2.1</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -116,12 +116,12 @@ nav > div {
 }
 .setlist-item:last-child { border-bottom: none; }
 
-/* レイアウト調整: 左側(曲名)と右側(タイムライン)を半々に */
+/* レイアウト調整 */
 .setlist-left-content {
   display: flex;
   align-items: baseline;
-  width: 50%; /* 画面の半分 */
-  flex: none; /* 幅を固定 */
+  width: 50%;
+  flex: none;
   padding-right: 8px;
 }
 
@@ -141,29 +141,67 @@ nav > div {
 
 /* タイムラインバー用スタイル */
 .timeline-container {
-  flex: 1; /* 残りのスペースを全て使う */
-  height: 20px;
+  flex: 1;
+  height: 30px; /* タップしやすいように少し高く */
   display: flex;
   align-items: center;
   position: relative;
-  padding-left: 4px; /* 少し隙間 */
+  padding-left: 4px;
+  cursor: pointer;
 }
 .timeline-bar {
   width: 100%;
-  height: 2px; /* 少し細くして上品に */
+  height: 2px;
   background-color: #e5e7eb;
   border-radius: 2px;
   position: relative;
 }
 .timeline-dot {
-  width: 14px; /* サイズUP */
-  height: 14px; /* サイズUP */
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  border: 2px solid white; /* 境界線を少し太く */
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15); /* 影を調整 */
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  background-color: var(--aiko-pink);
+  z-index: 10;
+  transition: transform 0.1s;
+}
+/* タップ時の年表示吹き出し */
+.year-tooltip {
+  position: absolute;
+  bottom: 18px; /* ドットの上に表示 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #374151;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 20;
+}
+.year-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -4px;
+  border-width: 4px;
+  border-style: solid;
+  border-color: #374151 transparent transparent transparent;
+}
+.timeline-dot.active {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+.timeline-dot.active .year-tooltip {
+  opacity: 1;
 }
 
 .setlist-medley {
@@ -298,7 +336,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.2.0</h1>
+  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.2.1</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -1043,18 +1081,23 @@ function showLiveDetail(rec) {
 
   // タイムラインバーHTML生成関数
   function createTimelineHtml(songName) {
-    if (!songData[songName]) return ''; 
-    const songYear = songData[songName];
+    const songInfo = songData[songName];
+    if (!songInfo || !songInfo.year) return ''; // データがなければ空
+    
+    const songYear = songInfo.year;
     // 1998年を0%、現在を100%とした位置を計算
     let percent = ((songYear - minYear) / (maxYear - minYear)) * 100;
     percent = Math.max(0, Math.min(100, percent)); 
     
     const dotColor = getTimelineColor(percent);
     
+    // タップで表示する吹き出しを追加
     return `
-      <div class="timeline-container">
+      <div class="timeline-container" onclick="this.querySelector('.timeline-dot').classList.toggle('active'); event.stopPropagation();">
         <div class="timeline-bar">
-          <div class="timeline-dot" style="left: ${percent}%; background-color: ${dotColor};"></div>
+          <div class="timeline-dot" style="left: ${percent}%; background-color: ${dotColor};">
+            <div class="year-tooltip">${songYear}</div>
+          </div>
         </div>
       </div>
     `;
@@ -1062,6 +1105,7 @@ function showLiveDetail(rec) {
   // ----------------------
 
   let setlistHtml = '', songNum = 1, inMedley = false, medleyNum = 1, encoreNum = 0;
+  let typeCounts = { '表題曲': 0, 'カップリング曲': 0, 'アルバム曲': 0, 'その他': 0 };
   
   rec.setlist.forEach((s, idx) => {
     if (!s || !s.trim()) return;
@@ -1082,6 +1126,17 @@ function showLiveDetail(rec) {
     }
 
     const cleanSong = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
+    
+    // 集計処理
+    const songInfo = songData[cleanSong];
+    if (songInfo) {
+      if (typeCounts[songInfo.type] !== undefined) {
+        typeCounts[songInfo.type]++;
+      } else {
+        typeCounts['その他']++;
+      }
+    }
+
     let currentEncore = s.includes('_アンコール') ? (s.includes('#3') ? 3 : s.includes('#2') ? 2 : 1) : 0;
     if (currentEncore > encoreNum && !inMedley) {
       encoreNum = currentEncore;
@@ -1114,10 +1169,23 @@ function showLiveDetail(rec) {
       </div>
     </div>`;
 
+  // 集計エリアの生成
+  const summaryHtml = `
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600 font-bold text-center border border-gray-100">
+      <div class="mb-1">📊 このライブの成分表</div>
+      <span class="text-aiko-pink">表題曲: ${typeCounts['表題曲']}</span> / 
+      <span class="text-blue-500">カップリング: ${typeCounts['カップリング曲']}</span> / 
+      <span class="text-yellow-500">アルバム: ${typeCounts['アルバム曲']}</span>
+    </div>
+  `;
+
   const setlistSection = setlistHtml.trim()
     ? `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3>
        ${legendHtml}
-       <div class="card-base shadow-none border border-gray-100">${setlistHtml}</div>`
+       <div class="card-base shadow-none border border-gray-100 pb-2">
+         ${setlistHtml}
+       </div>
+       ${summaryHtml}`
     : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
 
   detailContainer.innerHTML = `
