@@ -402,4 +402,997 @@ button { font-size: 14px !important; }
     <p class="m-0 transition-opacity duration-300" style="font-size:42px; line-height:1.2;">
       <span id="loading-text-3" class="opacity-0">そうでない人ー!!</span>
     </p>
-    <p class="m-0 transition-opacity duration-300" style="font-size:56
+    <p class="m-0 transition-opacity duration-300" style="font-size:56px; line-height:1.2; margin-top:16px;">
+      <span id="loading-text-4" class="opacity-0">ぜー</span><span id="loading-text-5" class="opacity-0">いんっ...!!!</span>
+    </p>
+  </div>
+</div>
+
+<div id="modal-overlay" class="modal-overlay" style="display:none">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div id="info-modal" class="modal-overlay" style="display:none">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeInfoModal()">&times;</span>
+    <div class="text-base leading-relaxed text-gray-700">
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">▼情報源</h3>
+      <ul class="list-disc pl-5 mb-6 space-y-2">
+        <li>このアプリの情報は開発者が独自の調査で集約したものだよ。</li>
+        <li>アカペラで歌った曲が入っているなど、一部セトリボードと異なる場合があるよ。</li>
+        <li>まちがっている情報などがあれば、ぜひX（Twitter）の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>までお知らせください。</li>
+        <li>テレビ番組/音楽特番の情報はなく、ライブイベント（と思われる）情報のみ載せているよ。</li>
+      </ul>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">▼集計方法</h3>
+      <ul class="list-disc pl-5 mb-6 space-y-2">
+        <li>『より道』『相合傘』などバージョン違いがあるものも、１つの曲として統合しているよ。</li>
+        <li>「メドレー」は複数の曲をまとめて１曲として扱っているよ。</li>
+        <li>即興曲などは含んでいないよ。</li>
+        <li>会場は、同じ建物で名称が変わったものは「旧名称 / 新名称」としているよ。同じ場所でも建て替えた新しい建物の場合は、別の会場としているよ。</li>
+      </ul>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">▼操作</h3>
+      <ul class="list-disc pl-5 mb-6 space-y-2">
+        <li>セトリのページの左上に「←（戻る）」ボタンがあるけど、ライブ名をタップしても前のページに戻るよ。右手でも押しやすいね。</li>
+      </ul>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
+      <p>他にもいろいろおもちゃがあるよ<br>→<a href="https://lit.link/nokidochibi" target="_blank" class="text-blue-500 underline">https://lit.link/nokidochibi</a></p>
+    </div>
+  </div>
+</div>
+
+<nav class="bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+  <div class="flex w-full">
+    <a href="#" class="tab-item active" data-tab="search">
+      <i data-lucide="calendar-days" style="width:26px;height:26px"></i>
+      <span class="text-[11px] font-bold">公演</span>
+    </a>
+    <a href="#" class="tab-item" data-tab="song">
+      <i data-lucide="music" style="width:26px;height:26px"></i>
+      <span class="text-[11px] font-bold">楽曲</span>
+    </a>
+    <a href="#" class="tab-item" data-tab="pattern">
+      <i data-lucide="shuffle" style="width:26px;height:26px"></i>
+      <span class="text-[11px] font-bold">傾向</span>
+    </a>
+    <a href="#" class="tab-item" data-tab="venue">
+      <i data-lucide="map-pin" style="width:26px;height:26px"></i>
+      <span class="text-[11px] font-bold">場所</span>
+    </a>
+  </div>
+</nav>
+
+</div>
+
+<script>
+// GASのAPIエンドポイント
+const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
+// キャッシュキー
+const CACHE_KEY = 'lldb_data_v3';
+
+// アプリの初期化Promise
+let appInitializedResolver;
+const appInitializedPromise = new Promise(resolve => {
+  appInitializedResolver = resolve;
+});
+
+// アニメーション完了Promise
+let animationFinishedResolver;
+const animationFinishedPromise = new Promise(resolve => {
+  animationFinishedResolver = resolve;
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+
+  // 1. キャッシュがあれば即表示
+  const cachedData = localStorage.getItem(CACHE_KEY);
+  let isCachedLoaded = false;
+
+  if (cachedData) {
+    try {
+      const parsed = JSON.parse(cachedData);
+      if (parsed.liveRecords && parsed.liveRecords.length > 0) {
+        // キャッシュデータで初期化 (songDataも渡す)
+        initializeApp(parsed.liveRecords, parsed.albumData, parsed.songData);
+        appInitializedResolver(); // データ準備完了
+        isCachedLoaded = true;
+      }
+    } catch (e) {
+      console.error("Cache parse error", e);
+    }
+  }
+
+  // 2. ローディング演出の開始（キャッシュ有無でモード分岐）
+  startLoadingAnimation(isCachedLoaded ? 'fast' : 'normal');
+
+  // 3. 裏で最新データを取得して更新（Stale-While-Revalidate）
+  loadAllData(isCachedLoaded);
+
+  // 両方終わったら画面遷移
+  Promise.all([appInitializedPromise, animationFinishedPromise]).then(() => {
+    finishLoading();
+  });
+});
+
+let allLiveRecords = [], songStats = {}, patternStats = {}, albumData = [], songData = {}, chartInstances = {};
+let selectedVenueInfo = null;
+
+// 一括データ取得＆キャッシュ更新
+async function loadAllData(isAlreadyDisplayed) {
+  try {
+    const response = await fetch(`${API_URL}?action=getAllData`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+
+    // データをキャッシュに保存
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+
+    // 最新データで初期化
+    initializeApp(data.liveRecords, data.albumData, data.songData);
+
+    // まだ表示されていなければ（キャッシュなしの場合）、ここで準備完了とする
+    if (!isAlreadyDisplayed) {
+      appInitializedResolver();
+    }
+
+  } catch (error) {
+    // キャッシュもない、通信も失敗した場合のみエラー表示
+    if (!isAlreadyDisplayed) {
+      handleError(error);
+    } else {
+      console.log("Background update failed, keeping cached data.");
+    }
+  }
+}
+
+function startLoadingAnimation(mode) {
+  let loadingTexts;
+  let totalDuration;
+
+  if (mode === 'fast') {
+    // キャッシュあり（2回目以降）
+    loadingTexts = [
+      { id: 'loading-text-1', delay: 0 },
+      { id: 'loading-text-2', delay: 500 },
+      { id: 'loading-text-3', delay: 1000 },
+      { id: 'loading-text-4', delay: 1500 },
+      { id: 'loading-text-5', delay: 2000 }
+    ];
+    totalDuration = 2800;
+  } else {
+    // キャッシュなし（初回）
+    loadingTexts = [
+      { id: 'loading-text-1', delay: 100 },
+      { id: 'loading-text-2', delay: 900 },
+      { id: 'loading-text-3', delay: 1700 },
+      { id: 'loading-text-4', delay: 2500 },
+      { id: 'loading-text-5', delay: 3000 }
+    ];
+    totalDuration = 3800;
+  }
+
+  loadingTexts.forEach(item => {
+    setTimeout(() => {
+      const element = document.getElementById(item.id);
+      if (element) element.classList.remove('opacity-0');
+    }, item.delay);
+  });
+
+  setTimeout(() => {
+    animationFinishedResolver();
+  }, totalDuration);
+}
+
+function finishLoading() {
+  startConfetti();
+  const loadingDiv = document.getElementById('loading-container');
+  loadingDiv.classList.add('fade-out');
+  document.getElementById('main-content').style.opacity = '1';
+  setTimeout(() => {
+    loadingDiv.style.display = 'none';
+  }, 500);
+}
+
+function initializeApp(records, albums, songs) {
+  allLiveRecords = records || [];
+  albumData = albums || [];
+  songData = songs || {}; // 楽曲データ保存
+
+  if (records.length > 0) {
+    const latestDate = records.reduce((latest, rec) => {
+      const d = new Date(rec.date);
+      return d > latest ? d : latest;
+    }, new Date(0));
+    document.getElementById('last-update-date').textContent = `${latestDate.getFullYear()}/${('0' + (latestDate.getMonth() + 1)).slice(-2)}/${('0' + latestDate.getDate()).slice(-2)}`;
+  }
+
+  analyzeSongStats(records);
+  analyzePatterns(records);
+  populateFilters(records);
+  
+  if (!document.getElementById('search-input').hasAttribute('data-listener-attached')) {
+    setupEventListeners();
+    document.getElementById('search-input').setAttribute('data-listener-attached', 'true');
+  }
+
+  applyFilters();
+  checkOrientation();
+  window.addEventListener('resize', checkOrientation);
+
+  // すべてのグラフを初期化
+  renderLiveCountChart();
+  renderAlbumChart();
+  renderSongRanking();
+  renderPatternStats();
+  renderVenueRanking();
+  renderVenueLiveCountChart();
+}
+
+// -----------------------------------------------------------
+// 紙吹雪アニメーション
+// -----------------------------------------------------------
+function startConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+
+  const particles = [];
+  const particleCount = 400;
+  const colors = ['#FFD700', '#C0C0C0', '#FF69B4', '#ef4444', '#FFA500'];
+
+  class Particle {
+    constructor() {
+      this.x = width / 2;
+      this.y = height / 2;
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.w = Math.random() * 10 + 5;
+      this.h = Math.random() * 4 + 2;
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = Math.random() * 15 + 8;
+      this.vx = Math.cos(angle) * velocity;
+      this.vy = Math.sin(angle) * velocity - 5;
+      this.gravity = 0.35;
+      this.friction = 0.95;
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = (Math.random() - 0.5) * 15;
+      this.alpha = 1;
+    }
+    update() {
+      this.vx *= this.friction;
+      this.vy *= this.friction;
+      this.vy += this.gravity;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.rotation += this.rotationSpeed;
+      if (this.y > height + 20) this.alpha = 0;
+    }
+    draw(ctx) {
+      if (this.alpha <= 0) return;
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate((this.rotation * Math.PI) / 180);
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+      ctx.restore();
+    }
+  }
+  for (let i = 0; i < particleCount; i++) {
+    particles.push(new Particle());
+  }
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+    let activeParticles = 0;
+    particles.forEach(p => {
+      p.update();
+      p.draw(ctx);
+      if (p.y < height + 50) activeParticles++;
+    });
+    if (activeParticles > 0) {
+      requestAnimationFrame(animate);
+    } else {
+      ctx.clearRect(0, 0, width, height);
+    }
+  }
+  animate();
+  window.addEventListener('resize', () => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  });
+}
+
+function checkOrientation() {
+  if ('ontouchend' in document && window.innerWidth > window.innerHeight) {
+    document.body.classList.add('landscape');
+  } else {
+    document.body.classList.remove('landscape');
+  }
+}
+
+const chartCommonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { font: { size: 10 } } },
+    y: { ticks: { font: { size: 10 } } }
+  }
+};
+
+function renderAlbumChart() {
+  const canvas = document.getElementById('album-chart');
+  if (!canvas || !albumData.length) return;
+  if (chartInstances.album) {
+    chartInstances.album.destroy();
+    chartInstances.album = null;
+  }
+  chartInstances.album = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: albumData.map(item => item.albumName),
+      datasets: [{
+        label: '演奏回数',
+        data: albumData.map(item => item.playCount),
+        backgroundColor: 'rgba(255, 105, 180, 0.8)',
+        borderColor: 'rgba(255, 105, 180, 1)',
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      ...chartCommonOptions,
+      indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, ticks: { font: { size: 10 } } },
+        y: { ticks: { font: { size: 10 }, autoSkip: false } }
+      }
+    }
+  });
+}
+
+function renderLiveCountChart() {
+  const canvas = document.getElementById('live-count-chart');
+  if (!canvas) return;
+  if (chartInstances.liveCount) chartInstances.liveCount.destroy();
+
+  const liveCountsByYear = allLiveRecords.reduce((acc, rec) => {
+    if (rec.year) acc[rec.year] = (acc[rec.year] || 0) + 1;
+    return acc;
+  }, {});
+
+  const songToSearch = document.getElementById('song-search-input').value.trim();
+  const songPlaysByYear = {};
+  if (songToSearch) {
+    allLiveRecords.forEach(rec => {
+      if (!rec.year) return;
+      const songCountInLive = rec.setlist.filter(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim().toLowerCase() === songToSearch.toLowerCase()).length;
+      if (songCountInLive > 0) songPlaysByYear[rec.year] = (songPlaysByYear[rec.year] || 0) + songCountInLive;
+    });
+  }
+
+  const years = Object.keys(liveCountsByYear).sort((a, b) => a - b);
+  const totalLiveData = years.map(year => liveCountsByYear[year]);
+  const songPlayData = years.map(year => songPlaysByYear[year] || 0);
+
+  const datasets = [{
+    label: '楽曲演奏',
+    data: songPlayData,
+    backgroundColor: 'rgba(255, 105, 180, 0.8)',
+    borderColor: 'rgba(255, 105, 180, 1)',
+    borderWidth: 1,
+    stack: 'stack1',
+    datalabels: {
+      display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+      color: 'gray',
+      anchor: 'end',
+      align: 'end',
+      offset: -2,
+      font: { size: 10, weight: 'bold' },
+      formatter: val => val
+    }
+  }, {
+    label: 'その他',
+    data: totalLiveData.map((total, i) => Math.max(0, total - songPlayData[i])),
+    backgroundColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: 'rgba(229, 231, 235, 1)',
+    borderWidth: 1,
+    stack: 'stack1',
+    datalabels: { display: false }
+  }];
+
+  chartInstances.liveCount = new Chart(canvas, {
+    type: 'bar',
+    data: { labels: years, datasets },
+    plugins: [ChartDataLabels],
+    options: {
+      ...chartCommonOptions,
+      scales: {
+        x: {
+          stacked: true,
+          ticks: { font: { size: 10 }, maxRotation: 90, minRotation: 90, autoSkip: false }
+        },
+        y: { stacked: true, beginAtZero: true, min: 0, ticks: { font: { size: 10 }, stepSize: 5 } }
+      }
+    }
+  });
+}
+
+function renderVenueLiveCountChart() {
+  const canvas = document.getElementById('venue-live-count-chart');
+  if (!canvas) return;
+  if (chartInstances.venueLiveCount) chartInstances.venueLiveCount.destroy();
+
+  const liveCountsByYear = allLiveRecords.reduce((acc, rec) => {
+    if (rec.year) acc[rec.year] = (acc[rec.year] || 0) + 1;
+    return acc;
+  }, {});
+
+  const selectedPlaysByYear = {};
+  if (selectedVenueInfo) {
+    allLiveRecords.forEach(rec => {
+      if (!rec.year) return;
+      let isMatch = false;
+      if (selectedVenueInfo.type === 'venue') {
+        const venueKey = rec.region === 'オンライン' ? 'オンライン' : `${rec.venue} (${rec.region})`;
+        if (venueKey === selectedVenueInfo.name) isMatch = true;
+      } else if (selectedVenueInfo.type === 'region') {
+        if (rec.region === selectedVenueInfo.name) isMatch = true;
+      }
+      if (isMatch) selectedPlaysByYear[rec.year] = (selectedPlaysByYear[rec.year] || 0) + 1;
+    });
+  }
+
+  const years = Object.keys(liveCountsByYear).sort((a, b) => a - b);
+  const totalLiveData = years.map(year => liveCountsByYear[year]);
+  const selectedPlayData = years.map(year => selectedPlaysByYear[year] || 0);
+
+  const datasets = [{
+    label: '選択場所',
+    data: selectedPlayData,
+    backgroundColor: 'rgba(255, 105, 180, 0.8)',
+    borderColor: 'rgba(255, 105, 180, 1)',
+    borderWidth: 1,
+    stack: 'stack1',
+    datalabels: {
+      display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+      color: 'gray',
+      anchor: 'end',
+      align: 'end',
+      offset: -2,
+      font: { size: 10, weight: 'bold' },
+      formatter: val => val
+    }
+  }, {
+    label: 'その他',
+    data: totalLiveData.map((total, i) => Math.max(0, total - selectedPlayData[i])),
+    backgroundColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: 'rgba(229, 231, 235, 1)',
+    borderWidth: 1,
+    stack: 'stack1',
+    datalabels: { display: false }
+  }];
+
+  chartInstances.venueLiveCount = new Chart(canvas, {
+    type: 'bar',
+    data: { labels: years, datasets },
+    plugins: [ChartDataLabels],
+    options: {
+      ...chartCommonOptions,
+      scales: {
+        x: {
+          stacked: true,
+          ticks: { font: { size: 10 }, maxRotation: 90, minRotation: 90, autoSkip: false }
+        },
+        y: { stacked: true, beginAtZero: true, min: 0, ticks: { font: { size: 10 }, stepSize: 5 } }
+      }
+    }
+  });
+}
+
+function analyzeSongStats(records) {
+  songStats = {};
+  records.forEach(rec => {
+    rec.setlist.forEach(s => {
+      const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
+      if (clean && !s.startsWith('__MEDLEY_') && clean !== 'メドレー') {
+        songStats[clean] = (songStats[clean] || 0) + 1;
+      }
+    });
+  });
+}
+
+function analyzePatterns(records) {
+  const o = {}, e = {}, l = {};
+  records.forEach(rec => {
+    const cleanSetlist = rec.setlist.filter(s => !s.startsWith('__MEDLEY_')).map(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim());
+    if (cleanSetlist.length > 0 && cleanSetlist[0] && cleanSetlist[0] !== 'メドレー') o[cleanSetlist[0]] = (o[cleanSetlist[0]] || 0) + 1;
+    if (cleanSetlist.length > 0 && cleanSetlist[cleanSetlist.length - 1] && cleanSetlist[cleanSetlist.length-1] !== 'メドレー') l[cleanSetlist[cleanSetlist.length-1]] = (l[cleanSetlist[cleanSetlist.length-1]] || 0) + 1;
+    rec.setlist.forEach(s => {
+      if (s.includes('_アンコール')) {
+        const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
+        if (clean && clean !== 'メドレー') e[clean] = (e[clean] || 0) + 1;
+      }
+    });
+  });
+  patternStats = { openingSongs: o, encoreSongs: e, lastSongs: l };
+}
+
+function populateFilters(records, skipApply = false) {
+  const yearSelect = document.getElementById('year-select');
+  const regionSelect = document.getElementById('region-select');
+  const years = new Set(), regions = new Set();
+  records.forEach(rec => {
+    if (rec.year) years.add(rec.year);
+    if (rec.region) regions.add(rec.region);
+  });
+
+  const createOptions = (select, current, data, suffix) => {
+    select.innerHTML = `<option value="">すべての${suffix}</option>`;
+    data.forEach(item => {
+      select.innerHTML += `<option value="${item}" ${item == current ? 'selected' : ''}>${item}${suffix === '年' ? '年' : ''}</option>`;
+    });
+  };
+
+  createOptions(yearSelect, yearSelect.value, Array.from(years).sort((a, b) => b - a), '年');
+  createOptions(regionSelect, regionSelect.value, Array.from(regions).sort(), '都道府県');
+  if (!skipApply) applyFilters();
+}
+
+function applyFilters() {
+  const songFilterInput = document.getElementById('song-filter-input');
+  let songFilterValue = songFilterInput.value;
+  if (songFilterInput.value.includes('（楽曲タブから選択）')) {
+    songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '');
+  }
+
+  const filters = {
+    search: document.getElementById('search-input').value.toLowerCase(),
+    tour: document.getElementById('tour-select').value,
+    year: document.getElementById('year-select').value,
+    region: document.getElementById('region-select').value,
+    song: songFilterValue.toLowerCase(),
+  };
+
+  const filteredRecords = allLiveRecords.filter(rec => {
+    const tourName = rec.tourName.toLowerCase();
+    let tourMatch = true;
+    if (filters.tour === 'pop') tourMatch = tourName.includes('love like pop');
+    else if (filters.tour === 'rock') tourMatch = tourName.includes('love like rock');
+    else if (filters.tour === 'aloha') tourMatch = tourName.includes('love like aloha');
+    else if (filters.tour === 'other') tourMatch = !/love like (pop|rock|aloha)/.test(tourName);
+
+    const songMatch = !filters.song || rec.setlist.some(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim().toLowerCase() === filters.song);
+    const searchMatch = !filters.search || (rec.tourName + ' ' + rec.date + ' ' + rec.venue + ' ' + rec.region).toLowerCase().includes(filters.search);
+
+    return tourMatch && songMatch && searchMatch &&
+      (!filters.year || rec.year == filters.year) &&
+      (!filters.region || rec.region == filters.region);
+  });
+
+  document.getElementById('display-count').textContent = filteredRecords.length;
+  document.getElementById('total-count').textContent = allLiveRecords.length;
+  renderLiveList(filteredRecords);
+}
+
+function renderLiveList(records) {
+  const container = document.getElementById('live-list-container');
+  container.innerHTML = '';
+  if (!records.length) {
+    container.innerHTML = '<p class="text-center text-gray-500 py-8 text-sm">該当する公演が見つかりませんでした。</p>';
+    return;
+  }
+
+  records.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(rec => {
+    const tourNameLower = rec.tourName.toLowerCase();
+    let labelType = 'other', labelText = 'その他';
+    if (tourNameLower.includes('love like pop')) { labelType = 'pop'; labelText = 'POP'; }
+    else if (tourNameLower.includes('love like rock')) { labelType = 'rock'; labelText = 'ROCK'; }
+    else if (tourNameLower.includes('love like aloha')) { labelType = 'aloha'; labelText = 'ALOHA'; }
+
+    const card = document.createElement('div');
+    card.className = 'card-base live-card cursor-pointer hover:shadow-md transition';
+    card.innerHTML = `
+      <div class="live-card-label ${labelType}">${labelText}</div>
+      <p class="text-gray-500 font-medium text-xs">${rec.date} (${rec.dayOfWeek})</p>
+      <p class="font-bold mt-1 text-gray-800 text-lg leading-tight">${rec.tourName}</p>
+      <p class="text-gray-600 text-sm mt-1">${rec.venue} (${rec.region})</p>
+      <p class="mt-2 font-semibold text-aiko-pink text-sm">セットリスト: ${rec.songCount}曲</p>`;
+    card.onclick = () => showLiveDetail(rec);
+    container.appendChild(card);
+  });
+}
+
+function showLiveDetail(rec) {
+  document.body.classList.add('detail-view');
+  document.querySelectorAll('.tab-content, #main-header, nav').forEach(el => el.style.display = 'none');
+
+  let backBtn = document.getElementById('back-button-fixed');
+  if (!backBtn) {
+    backBtn = document.createElement('div');
+    backBtn.id = 'back-button-fixed';
+    backBtn.className = 'back-button-circle';
+    backBtn.innerHTML = '<i data-lucide="arrow-left"></i>';
+    document.body.appendChild(backBtn);
+    lucide.createIcons();
+    backBtn.onclick = hideDetailView;
+  }
+  backBtn.style.display = 'flex';
+
+  const detailContainer = document.getElementById('live-detail');
+  detailContainer.style.display = 'block';
+
+  // --- 年代計算用の定数 ---
+  const minYear = 1998;
+  const maxYear = new Date().getFullYear(); // 現在の年
+
+  // 年に応じた色を取得する関数
+  function getTimelineColor(percent) {
+    if (percent < 35) return '#00BFFF'; // 青 (初期)
+    if (percent < 70) return '#FFD700'; // 黄 (中期)
+    return '#FF69B4'; // ピンク (後期)
+  }
+
+  // タイムラインバーHTML生成関数
+  function createTimelineHtml(songName) {
+    if (!songData[songName]) return ''; // データがなければ空
+    const songYear = songData[songName];
+    // 1998年を0%、現在を100%とした位置を計算
+    let percent = ((songYear - minYear) / (maxYear - minYear)) * 100;
+    percent = Math.max(0, Math.min(100, percent)); // 0-100に収める
+    
+    const dotColor = getTimelineColor(percent);
+    
+    return `
+      <div class="timeline-container">
+        <div class="timeline-bar">
+          <div class="timeline-dot" style="left: ${percent}%; background-color: ${dotColor};"></div>
+        </div>
+      </div>
+    `;
+  }
+  // ----------------------
+
+  let setlistHtml = '', songNum = 1, inMedley = false, medleyNum = 1, encoreNum = 0;
+  
+  rec.setlist.forEach((s, idx) => {
+    if (!s || !s.trim()) return;
+    if (s === '__MEDLEY_END__') { inMedley = false; return; }
+    if (s === '__MEDLEY_START__') {
+      const nextSongIsEncore = idx + 1 < rec.setlist.length && rec.setlist[idx + 1].includes('_アンコール');
+      if (nextSongIsEncore) {
+        let currentEncore = rec.setlist[idx+1].includes('#3') ? 3 : rec.setlist[idx+1].includes('#2') ? 2 : 1;
+        if (currentEncore > encoreNum) {
+          encoreNum = currentEncore;
+          setlistHtml += `<div class="setlist-encore-header">アンコール ${'👏'.repeat(encoreNum)}</div>`;
+        }
+      }
+      inMedley = true;
+      setlistHtml += `<div class="setlist-item setlist-medley-title${nextSongIsEncore ? ' setlist-encore' : ''}"><span class="setlist-item-number">${songNum++}.</span><span class="setlist-item-title">メドレー</span></div>`;
+      medleyNum = 1;
+      return;
+    }
+
+    const cleanSong = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
+    let currentEncore = s.includes('_アンコール') ? (s.includes('#3') ? 3 : s.includes('#2') ? 2 : 1) : 0;
+    if (currentEncore > encoreNum && !inMedley) {
+      encoreNum = currentEncore;
+      setlistHtml += `<div class="setlist-encore-header">アンコール ${'👏'.repeat(encoreNum)}</div>`;
+    }
+
+    // タイムラインバーの生成
+    const timeline = createTimelineHtml(cleanSong);
+
+    setlistHtml += `
+      <div class="setlist-item${inMedley ? ' setlist-medley' : ''}${currentEncore > 0 ? ' setlist-encore' : ''}">
+        <div class="setlist-left-content">
+          <span class="setlist-item-number">${inMedley ? `(${medleyNum++})` : `${songNum++}.`}</span>
+          <span class="setlist-item-title">${cleanSong}</span>
+        </div>
+        ${timeline}
+      </div>`;
+  });
+
+  const setlistSection = setlistHtml.trim()
+    ? `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3>
+       <div class="text-xs text-right text-gray-400 mb-1 pr-1">1998 ─── ● ─── ${maxYear}</div>
+       <div class="card-base shadow-none border border-gray-100">${setlistHtml}</div>`
+    : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
+
+  detailContainer.innerHTML = `
+    <div id="detail-header-area" class="pt-2 -mt-2 cursor-pointer">
+      <h2 class="font-extrabold mb-2 text-aiko-pink text-2xl leading-tight">${rec.tourName}</h2>
+    </div>
+    <div class="card-base mb-6 bg-white">
+      <p class="text-gray-500 text-xs font-semibold mb-1">開催日</p><p class="font-bold text-lg text-gray-800">${rec.date} (${rec.dayOfWeek})</p>
+      <div class="border-t my-3 border-gray-100"></div>
+      <p class="text-gray-500 text-xs font-semibold mb-1">会場</p><p class="font-bold text-lg text-gray-800">${rec.venue} (${rec.region})</p>
+    </div>
+    ${setlistSection}
+    <p class="text-center text-gray-400 mt-8 text-xs">※注:今まさにあなたが見ているセトリ 間違いじゃないとは言い切れない🌸</p>`;
+
+  document.getElementById('detail-header-area').onclick = hideDetailView;
+  document.getElementById('app').scrollTop = 0;
+}
+
+function hideDetailView() {
+  document.body.classList.remove('detail-view');
+  document.getElementById('live-detail').style.display = 'none';
+  document.getElementById('back-button-fixed').style.display = 'none';
+  document.getElementById('main-header').style.display = 'flex';
+  document.querySelector('nav').style.display = 'flex';
+  switchToTab(document.querySelector('.tab-item.active').dataset.tab);
+}
+
+function searchVenue(venue) {
+  ['tour-select', 'year-select', 'region-select', 'song-filter-input'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('search-input').value = venue;
+  switchToTab('search');
+  applyFilters();
+}
+
+function searchRegion(region) {
+  ['search-input', 'tour-select', 'year-select', 'song-filter-input'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('region-select').value = region;
+  switchToTab('search');
+  applyFilters();
+}
+
+function selectSong(songName) {
+  document.getElementById('song-search-input').value = songName;
+  renderSongRanking();
+  renderLiveCountChart();
+  document.getElementById('show-setlist-btn').style.display = 'inline-block';
+}
+
+function selectVenue(fullVenueName) {
+  selectedVenueInfo = { type: 'venue', name: fullVenueName };
+  document.getElementById('venue-search-input').value = fullVenueName;
+  renderVenueRanking();
+  renderVenueLiveCountChart();
+  document.getElementById('venue-show-setlist-btn').style.display = 'inline-block';
+}
+
+function selectRegion(regionName) {
+  selectedVenueInfo = { type: 'region', name: regionName };
+  document.getElementById('venue-search-input').value = regionName;
+  renderVenueRanking();
+  renderVenueLiveCountChart();
+  document.getElementById('venue-show-setlist-btn').style.display = 'inline-block';
+}
+
+function switchToTab(tabId) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab-item[data-tab="${tabId}"]`).classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.getElementById(`tab-${tabId}`).style.display = 'block';
+  document.getElementById('app').scrollTop = 0;
+  lucide.createIcons();
+
+  if (tabId === 'song' && chartInstances.liveCount) chartInstances.liveCount.resize();
+  if (tabId === 'pattern') {
+    renderAlbumChart();
+  }
+  if (tabId === 'venue' && chartInstances.venueLiveCount) {
+    chartInstances.venueLiveCount.resize();
+  }
+}
+
+function renderSongRanking() {
+  const container = document.getElementById('song-ranking-container');
+  if (!container) return;
+  const sortOrder = document.getElementById('song-sort').value;
+  const searchTerm = document.getElementById('song-search-input').value.toLowerCase();
+
+  const sortedSongs = Object.entries(songStats)
+    .filter(([song]) => song.toLowerCase().startsWith(searchTerm))
+    .map(([song, count]) => ({ song, count }))
+    .sort((a, b) => sortOrder === 'count-desc' ? b.count - a.count : a.count - b.count);
+
+  document.getElementById('total-songs').textContent = Object.keys(songStats).length;
+  const fullRanking = Object.entries(songStats).sort((a,b) => b[1]-a[1]);
+  container.innerHTML = sortedSongs.map(item => {
+    const globalRank = fullRanking.findIndex(([song]) => song === item.song) + 1;
+    const rankColor = globalRank <= 3 && searchTerm === '' ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][globalRank-1] : 'text-gray-300';
+    return `
+      <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectSong('${item.song.replace(/'/g, "\\'")}')">
+        <span class="rank-number ${rankColor}">${globalRank}</span>
+        <span class="song-title text-gray-700">${item.song}</span>
+        <span class="song-count">${item.count} <span>回</span></span>
+      </div>`}).join('');
+}
+
+function renderPatternStats() {
+  const types = ['opening', 'encore', 'last'];
+  types.forEach(type => {
+    const container = document.getElementById(type + '-songs');
+    if (!container) return;
+    const data = Object.entries(patternStats[type + 'Songs']).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    container.innerHTML = data.map(([song, count], i) => {
+      const rankColor = i < 3 ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][i] : 'text-gray-300';
+      const borderClass = i !== data.length -1 ? 'border-b border-gray-100' : '';
+      return `<div class="p-3 clickable-item flex items-center ${borderClass}" onclick="showModal('${song.replace(/'/g, "\\'")}', '${type}')">
+        <span class="rank-number ${rankColor}">${i + 1}</span>
+        <span class="song-title text-gray-700">${song}</span>
+        <span class="song-count">${count} <span>回</span></span>
+      </div>`
+    }).join('');
+  });
+}
+
+function renderVenueRanking() {
+  const venueContainer = document.getElementById('venue-ranking-container');
+  const regionContainer = document.getElementById('region-ranking-container');
+  if (!venueContainer || !regionContainer) return;
+
+  const vcs = {}, rcs = {};
+  allLiveRecords.forEach(rec => {
+    const venueKey = rec.region === 'オンライン' ? 'オンライン' : `${rec.venue} (${rec.region})`;
+    vcs[venueKey] = (vcs[venueKey] || 0) + 1;
+    if (rec.region) rcs[rec.region] = (rcs[rec.region] || 0) + 1;
+  });
+
+  const searchTerm = document.getElementById('venue-search-input').value.toLowerCase();
+  const rankColors = ['text-aiko-pink', 'text-aiko-yellow', 'text-aiko-blue'];
+
+  const filteredVenues = Object.entries(vcs)
+    .filter(([name]) => name.toLowerCase().includes(searchTerm))
+    .sort((a, b) => b[1] - a[1]);
+
+  venueContainer.innerHTML = filteredVenues.map(([name, count], i) => `
+    <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectVenue('${name.replace(/'/g, "\\'")}')">
+      <span class="rank-number ${i < 3 && searchTerm === '' ? rankColors[i] : 'text-gray-300'}">${filteredVenues.findIndex(v => v[0] === name) + 1}</span>
+      <span class="venue-name text-gray-700">${name}</span>
+      <span class="song-count">${count} <span>回</span></span>
+    </div>`).join('');
+
+  const filteredRegions = Object.entries(rcs)
+    .filter(([name]) => name.toLowerCase().includes(searchTerm))
+    .sort((a, b) => b[1] - a[1]);
+
+  let regionHtml = filteredRegions.map(([name, count], i) => `
+    <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectRegion('${name.replace(/'/g, "\\'")}')">
+      <span class="rank-number ${i < 3 && searchTerm === '' ? rankColors[i] : 'text-gray-300'}">${filteredRegions.findIndex(r => r[0] === name) + 1}</span>
+      <span class="venue-name text-gray-700">${name}</span>
+      <span class="song-count">${count} <span>回</span></span>
+    </div>`).join('');
+
+  if (searchTerm === '') {
+    const allRegions = ['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
+    const heldRegions = new Set(Object.keys(rcs));
+    const zeroRegions = allRegions.filter(r => !heldRegions.has(r));
+    if (zeroRegions.length > 0) {
+      regionHtml += '<div class="mt-6 mb-3 px-1"><h4 class="font-bold text-gray-500 text-sm">開催なし</h4></div>';
+      regionHtml += zeroRegions.sort().map(region =>
+        `<div class="card-base p-3 mb-2 flex items-center opacity-50 bg-gray-50 border border-gray-100">
+          <span class="rank-number text-gray-300 text-sm" style="min-width:30px;">-</span>
+          <span class="venue-name text-gray-500">${region}</span>
+          <span class="song-count text-gray-400">0 <span>回</span></span>
+        </div>`
+      ).join('');
+    }
+  }
+  regionContainer.innerHTML = regionHtml;
+}
+
+function setupEventListeners() {
+  ['search-input', 'tour-select', 'year-select', 'region-select', 'song-filter-input'].forEach(id => {
+    document.getElementById(id).addEventListener(id.includes('select') ? 'change' : 'input', applyFilters);
+  });
+
+  document.getElementById('clear-all-btn').addEventListener('click', () => {
+    ['search-input', 'tour-select', 'year-select', 'region-select'].forEach(id => document.getElementById(id).value = '');
+    const songInput = document.getElementById('song-filter-input');
+    songInput.value = '';
+    songInput.placeholder = '曲名で絞り込み（楽曲タブで選択）';
+    applyFilters();
+  });
+
+  document.getElementById('song-search-input').addEventListener('input', () => {
+    renderSongRanking();
+    document.getElementById('show-setlist-btn').style.display = 'none';
+  });
+  document.getElementById('song-sort').addEventListener('change', renderSongRanking);
+  document.getElementById('song-clear-btn').addEventListener('click', () => {
+    document.getElementById('song-search-input').value = '';
+    renderSongRanking();
+    renderLiveCountChart();
+    document.getElementById('show-setlist-btn').style.display = 'none';
+  });
+
+  document.getElementById('show-setlist-btn').addEventListener('click', () => {
+    const songName = document.getElementById('song-search-input').value;
+    if (songName) {
+      const songInput = document.getElementById('song-filter-input');
+      songInput.value = `${songName}（楽曲タブから選択）`;
+      switchToTab('search');
+      applyFilters();
+    }
+  });
+
+  document.getElementById('venue-search-input').addEventListener('input', renderVenueRanking);
+  document.getElementById('venue-clear-btn').addEventListener('click', () => {
+    document.getElementById('venue-search-input').value = '';
+    selectedVenueInfo = null;
+    document.getElementById('venue-show-setlist-btn').style.display = 'none';
+    renderVenueRanking();
+    renderVenueLiveCountChart();
+  });
+
+  document.getElementById('venue-show-setlist-btn').addEventListener('click', () => {
+    if (!selectedVenueInfo) return;
+    if (selectedVenueInfo.type === 'venue') {
+      const venueOnlyName = selectedVenueInfo.name.split(' (')[0];
+      searchVenue(venueOnlyName);
+    } else if (selectedVenueInfo.type === 'region') {
+      searchRegion(selectedVenueInfo.name);
+    }
+  });
+
+  document.querySelectorAll('.venue-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.venue-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const isVenue = tab.dataset.venueTab === 'venue';
+      document.getElementById('venue-ranking-container').style.display = isVenue ? 'block' : 'none';
+      document.getElementById('region-ranking-container').style.display = isVenue ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.tab-item').forEach(tab => {
+    tab.addEventListener('click', e => { e.preventDefault(); switchToTab(tab.dataset.tab); });
+  });
+
+  document.getElementById('info-btn').addEventListener('click', () => document.getElementById('info-modal').style.display = 'flex');
+  [document.getElementById('modal-overlay'), document.getElementById('info-modal')].forEach(modal => {
+    modal.addEventListener('click', e => { if (e.target === e.currentTarget) e.target.style.display = 'none'; });
+  });
+  document.getElementById('main-header').addEventListener('click', e => {
+    if (!e.target.closest('#info-btn')) document.getElementById('app').scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+function handleError(error) {
+  console.error("API Error:", error);
+  document.getElementById('live-list-container').innerHTML = `<p class="text-center text-red-500 py-8 text-sm">データ読み込み中にエラーが発生しました。<br>(${error.message})</p>`;
+}
+
+function showModal(song, type) {
+  const matchedRecords = [];
+  allLiveRecords.forEach(rec => {
+    const cleanSetlist = rec.setlist.filter(s => !s.startsWith('__MEDLEY_')).map(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim());
+    let isMatch = false;
+    if (type === 'opening' && cleanSetlist[0] === song) isMatch = true;
+    else if (type === 'last' && cleanSetlist[cleanSetlist.length - 1] === song) isMatch = true;
+    else if (type === 'encore' && rec.setlist.some(s => s.includes('_アンコール') && s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim() === song)) isMatch = true;
+    if (isMatch) matchedRecords.push(rec);
+  });
+
+  matchedRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const matches = new Set(matchedRecords.map(r => r.tourName));
+
+  const top5 = Array.from(matches).slice(0, 5);
+  let html = `<h2 class="font-bold mb-4 text-aiko-pink text-2xl">${song}</h2><div class="text-base text-gray-700">`;
+  html += top5.map(m => `<p class="mb-2">・${m}</p>`).join('');
+  if (matches.size > 5) html += `<p class="mt-4 text-gray-400 text-sm">など、計${matches.size}公演</p>`;
+  html += '</div>';
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+
+function closeInfoModal() {
+  document.getElementById('info-modal').style.display = 'none';
+}
+</script>
+</body>
+</html>
