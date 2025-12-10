@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base vol.2.0</title>
+<title>Love Like Data Base vol.2.3</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -19,7 +19,7 @@
   --aiko-yellow: #FFD700;
   --aiko-blue: #00BFFF;
   --aiko-bg: #F8F8F8;
-  --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.06);
+  --card-shadow: 0 2px 5px rgba(0,0,0,0.08);
 }
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
@@ -54,7 +54,7 @@ body.detail-view { padding-top: 0; }
   background-color: white; 
   border-radius: 12px; 
   box-shadow: var(--card-shadow); 
-  padding: 16px; /* 少しタイトに */
+  padding: 16px; 
   margin-bottom: 16px; 
 }
 
@@ -96,29 +96,29 @@ nav > div {
 .tab-item.active { color: white; background-color: #4B5563; }
 .tab-item.active i { color: white; }
 
-/* セットリストのスタイル */
+/* セットリストのスタイル（余白を詰めてv1風に） */
 .setlist-item { 
-  padding: 10px 14px; 
-  margin-bottom: 6px; 
-  border-radius: 8px; 
+  padding: 8px 10px; /* パディングを削減 */
+  margin-bottom: 4px; /* 間隔を削減 */
+  border-radius: 6px; 
   background-color: #f9fafb; 
-  font-size: 15px; 
-  line-height: 1.5;
+  font-size: 14px; 
+  line-height: 1.4;
   display: flex;
   align-items: baseline;
 }
-.setlist-item-number { display: inline-block; min-width: 28px; flex-shrink: 0; font-weight: bold; color: #9CA3AF; font-size: 13px; }
+.setlist-item-number { display: inline-block; min-width: 24px; flex-shrink: 0; font-weight: bold; color: #9CA3AF; font-size: 12px; }
 .setlist-item-title { flex: 1; font-weight: 500; }
-.setlist-medley { background-color: #fffbeb; border-left: 4px solid var(--aiko-yellow); padding-left: 14px; }
+.setlist-medley { background-color: #fffbeb; border-left: 4px solid var(--aiko-yellow); padding-left: 10px; }
 .setlist-encore { background-color: #fdf2f8; border-left: 4px solid var(--aiko-pink); }
-.setlist-medley-title { background-color: #fef3c7; border-left: 4px solid var(--aiko-yellow); font-weight: bold; font-size: 15px; }
-.setlist-encore-header { background-color: #fce7f3; border-left: 4px solid var(--aiko-pink); font-weight: bold; font-size: 15px; padding: 10px 14px; margin-bottom: 8px; border-radius: 8px; color: #db2777; }
+.setlist-medley-title { background-color: #fef3c7; border-left: 4px solid var(--aiko-yellow); font-weight: bold; font-size: 14px; }
+.setlist-encore-header { background-color: #fce7f3; border-left: 4px solid var(--aiko-pink); font-weight: bold; font-size: 14px; padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; color: #db2777; }
 
 header { background-color: var(--aiko-red) !important; color: white !important; height: 64px; display: flex; align-items: center; justify-content: center; padding: 0 16px; position: sticky; top: 0; z-index: 40; }
 main { padding: 16px; padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
 body.detail-view main { padding-top: 80px; padding-bottom: 40px; }
 
-/* フォーム要素の最適化 */
+/* フォーム要素 */
 input, select { font-size: 15px !important; padding: 10px 12px !important; border-radius: 8px !important; border: 1px solid #d1d5db !important; }
 button { font-size: 14px !important; }
 
@@ -126,9 +126,20 @@ button { font-size: 14px !important; }
 .clickable-item:hover { background-color: #f3f4f6; }
 
 .clear-btn { background-color: #ef4444; color: white; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; white-space: nowrap; }
-.setlist-btn { background-color: var(--aiko-blue); color: white; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+/* セトリボタン（改行禁止を追加） */
+.setlist-btn { 
+  background-color: var(--aiko-blue); 
+  color: white; 
+  padding: 10px 16px; 
+  border-radius: 8px; 
+  font-size: 14px; 
+  font-weight: bold; 
+  cursor: pointer; 
+  border: none; 
+  white-space: nowrap; /* これで1行に収まります */
+}
 
-/* 会場タブの調整 */
+/* 会場タブ */
 .venue-tabs { display: flex; border-bottom: 3px solid #e5e7eb; margin-bottom: 20px; gap: 0; position: sticky; top: 0px; background: white; z-index: 40; }
 .venue-tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 600; font-size: 15px; color: #6b7280; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: all 0.2s; background: white; }
 .venue-tab.active { color: var(--aiko-pink); border-bottom-color: var(--aiko-pink); }
@@ -146,13 +157,13 @@ button { font-size: 14px !important; }
 .modal-content { background: white; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
 .modal-close { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #6b7280; cursor: pointer; }
 
-/* ランキング表示の調整 */
+/* ランキング表示 */
 .rank-number { display: inline-block; min-width: 36px; text-align: right; margin-right: 14px; flex-shrink: 0; font-size: 20px; font-weight: 800; font-style: italic; }
 .song-title, .venue-name { flex: 1; word-break: break-word; font-size: 16px; font-weight: 600; line-height: 1.4; }
 .song-count { white-space: nowrap; flex-shrink: 0; font-size: 18px; font-weight: bold; color: #4B5563; }
 .song-count span { font-size: 13px; font-weight: normal; margin-left: 2px; }
 
-/* 公演カードのラベル（右上の斜め帯スタイル） */
+/* 公演カードのラベル */
 .live-card { position: relative; overflow: hidden; padding-bottom: 16px; }
 .live-card-label {
   position: absolute;
@@ -202,8 +213,8 @@ button { font-size: 14px !important; }
         
         <!-- フィルター行（Flex Wrapで最適化） -->
         <div class="flex flex-wrap gap-2 mb-2">
-          <!-- 幅を指定して、いい感じで折り返すように設定 -->
-          <select id="tour-select" class="flex-1 min-w-[140px] text-gray-700 bg-white"><option value="">すべてのライブイベント</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブイベント</option></select>
+          <!-- 文言修正：すべてのライブ、その他のライブ -->
+          <select id="tour-select" class="flex-1 min-w-[140px] text-gray-700 bg-white"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
           <select id="year-select" class="flex-1 min-w-[100px] text-gray-700 bg-white"><option value="">すべての年</option></select>
           <select id="region-select" class="flex-1 min-w-[120px] text-gray-700 bg-white"><option value="">すべての都道府県</option></select>
         </div>
@@ -986,13 +997,14 @@ function setupEventListeners() {
     document.getElementById('show-setlist-btn').style.display = 'none';
   });
   
+  // 「セトリ表示」ボタンクリック時の処理（機能追加）
   document.getElementById('show-setlist-btn').addEventListener('click', () => {
     const songName = document.getElementById('song-search-input').value;
     if (songName) {
       const songInput = document.getElementById('song-filter-input');
-      songInput.value = `${songName}（楽曲タブで選択）`;
-      switchToTab('search');
-      applyFilters();
+      songInput.value = `${songName}（楽曲タブから選択）`;
+      switchToTab('search'); // 公演タブへ切り替え
+      applyFilters(); // フィルタ適用
     }
   });
 
