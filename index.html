@@ -472,12 +472,13 @@ async function loadLiveList() {
 
 let loadingAnimationTimers = [];
 function startLoadingAnimation() {
+  // タイミングを1秒間隔に変更し、最後だけ0.5秒差で「いん...!!!」を表示
   const loadingTexts = [
-    { id: 'loading-text-1', delay: 500 },
-    { id: 'loading-text-2', delay: 1000 },
-    { id: 'loading-text-3', delay: 1500 },
-    { id: 'loading-text-4', delay: 2200 },
-    { id: 'loading-text-5', delay: 2700 }
+    { id: 'loading-text-1', delay: 100 },   // 男子ー!!
+    { id: 'loading-text-2', delay: 1100 },  // 女子ー!!
+    { id: 'loading-text-3', delay: 2100 },  // そうでない人ー!!
+    { id: 'loading-text-4', delay: 3100 },  // ぜー
+    { id: 'loading-text-5', delay: 3600 }   // いんっ...!!!
   ];
 
   loadingTexts.forEach(item => {
@@ -521,7 +522,7 @@ function initializeApp(records) {
   renderVenueRanking();
   renderVenueLiveCountChart();
 
-  // ローディング終了演出
+  // ローディング終了演出（トータル時間を4500msに調整）
   setTimeout(() => {
     // 1. 紙吹雪発射！
     startConfetti();
@@ -537,11 +538,11 @@ function initializeApp(records) {
     setTimeout(() => {
       loadingDiv.style.display = 'none';
     }, 500);
-  }, 3500);
+  }, 4500);
 }
 
 // -----------------------------------------------------------
-// 紙吹雪アニメーション (Simple Confetti)
+// 紙吹雪アニメーション (Simple Confetti) - さらに増量版 (400)
 // -----------------------------------------------------------
 function startConfetti() {
   const canvas = document.getElementById('confetti-canvas');
@@ -553,23 +554,21 @@ function startConfetti() {
   canvas.height = height;
 
   const particles = [];
-  const particleCount = 120;
-  const colors = ['#FFD700', '#C0C0C0', '#FF69B4', '#ef4444', '#FFA500']; // 金, 銀, ピンク, 赤, オレンジ
+  const particleCount = 400; // さらに増量
+  const colors = ['#FFD700', '#C0C0C0', '#FF69B4', '#ef4444', '#FFA500'];
 
   class Particle {
     constructor() {
       this.x = width / 2;
-      this.y = height / 2; // 画面中央から発射
+      this.y = height / 2; 
       this.color = colors[Math.floor(Math.random() * colors.length)];
-      // テープ形状（長細く）
       this.w = Math.random() * 10 + 5;
       this.h = Math.random() * 4 + 2;
-      // 爆発的な速度
       const angle = Math.random() * Math.PI * 2;
       const velocity = Math.random() * 15 + 8;
       this.vx = Math.cos(angle) * velocity;
-      this.vy = Math.sin(angle) * velocity - 5; // 上向きバイアス
-      this.gravity = 0.4;
+      this.vy = Math.sin(angle) * velocity - 5; 
+      this.gravity = 0.35; // 少しだけふわっとさせる
       this.friction = 0.95;
       this.rotation = Math.random() * 360;
       this.rotationSpeed = (Math.random() - 0.5) * 15;
@@ -599,7 +598,6 @@ function startConfetti() {
     }
   }
 
-  // パーティクル生成
   for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle());
   }
@@ -1055,11 +1053,14 @@ function switchToTab(tabId) {
 
   if (tabId === 'song' && chartInstances.liveCount) chartInstances.liveCount.resize();
   if (tabId === 'pattern') {
-    if (chartInstances.album) {
-       chartInstances.album.resize();
-    } else if (albumData.length > 0) {
-       renderAlbumChart();
-    }
+    // グラフが表示されない問題への対策：DOM更新後にリサイズを実行
+    setTimeout(() => {
+      if (chartInstances.album) {
+         chartInstances.album.resize();
+      } else if (albumData.length > 0) {
+         renderAlbumChart();
+      }
+    }, 0);
   }
   if (tabId === 'venue' && chartInstances.venueLiveCount) {
     chartInstances.venueLiveCount.resize();
