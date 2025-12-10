@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base vol.2.1.1</title>
+<title>Love Like Data Base vol.2.1</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -252,7 +252,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
   
   <header id="main-header" class="shadow-sm">
-    <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.2.1.1</h1>
+    <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.2.1</h1>
     <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
   </header>
 
@@ -260,7 +260,7 @@ button { font-size: 14px !important; }
     <div id="live-detail" style="display:none"></div>
 
     <div id="tab-search" class="tab-content" style="display:block">
-      <p class="text-gray-500 mb-4 text-sm text-center">※<span id="last-update-date">-</span>までの情報を掲載</p>
+      <p class="text-gray-500 mb-4 text-sm text-right">※<span id="last-update-date">-</span>までの情報を掲載</p>
       <div class="card-base bg-gray-50 border border-gray-200">
         <div class="flex gap-1 mb-2 items-center">
           <input type="text" id="search-input" placeholder="フリーワードで検索" class="flex-1 min-w-0">
@@ -352,7 +352,7 @@ button { font-size: 14px !important; }
   </main>
 
   <div id="loading-container" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; z-index:9000; display:flex; align-items:center; justify-content:center;">
-    <div class="text-center py-20 font-bold select-none overflow-hidden" style="color: #FF69B4; text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);">
+    <div class="text-center py-20 font-bold select-none overflow-hidden" style="color: white; text-shadow: 0 0 15px white;">
       <p class="m-0 transition-opacity duration-300" style="font-size:42px; line-height:1.2;">
         <span id="loading-text-1" class="opacity-0">男子ー!!</span> <span id="loading-text-2" class="opacity-0">女子ー!!</span>
       </p>
@@ -360,7 +360,7 @@ button { font-size: 14px !important; }
         <span id="loading-text-3" class="opacity-0">そうでない人ー!!</span>
       </p>
       <p class="m-0 transition-opacity duration-300" style="font-size:56px; line-height:1.2; margin-top:16px;">
-        <span id="loading-text-4" class="opacity-0" style="color:white; text-shadow: 0 0 15px white;">ぜー</span><span id="loading-text-5" class="opacity-0" style="color:white; text-shadow: 0 0 15px white;">いんっ...!!!</span>
+        <span id="loading-text-4" class="opacity-0">ぜー</span><span id="loading-text-5" class="opacity-0">いんっ...!!!</span>
       </p>
     </div>
   </div>
@@ -521,15 +521,15 @@ function startLoadingAnimation(mode) {
         { id: 'loading-text-4', delay: 1500 },  // ぜー
         { id: 'loading-text-5', delay: 2000 }   // いんっ...!!!
     ];
-    totalDuration = 2500; // 完了までの時間（余韻含む）
+    totalDuration = 2800; // 完了までの時間（余韻含む）
   } else {
     // キャッシュなし（初回）: 少し待たせつつ期待感を煽る
     loadingTexts = [
         { id: 'loading-text-1', delay: 100 },   // 男子ー!!
-        { id: 'loading-text-2', delay: 1000 },   // 女子ー!!
-        { id: 'loading-text-3', delay: 1900 },  // そうでない人ー!!
-        { id: 'loading-text-4', delay: 2800 },  // ぜー
-        { id: 'loading-text-5', delay: 3300 }   // いんっ...!!!
+        { id: 'loading-text-2', delay: 900 },   // 女子ー!!
+        { id: 'loading-text-3', delay: 1700 },  // そうでない人ー!!
+        { id: 'loading-text-4', delay: 2500 },  // ぜー
+        { id: 'loading-text-5', delay: 3000 }   // いんっ...!!!
     ];
     totalDuration = 3800;
   }
