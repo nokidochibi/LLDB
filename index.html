@@ -12,7 +12,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
-<!-- スタイル定義 (旧 Style.html) -->
 <style>
 :root {
   --aiko-pink: #FF69B4;
@@ -20,250 +19,223 @@
   --aiko-yellow: #FFD700;
   --aiko-blue: #00BFFF;
   --aiko-bg: #F8F8F8;
-  --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.06);
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
 body {
-  padding-top: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
   background-color: var(--aiko-bg);
+  color: #374151; /* text-gray-700 */
   display: flex;
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
   margin: 0;
-  font-size: 50px;
+  /* font-size: 50px; を削除し、標準に戻しました */
   touch-action: pan-y pinch-zoom;
-  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
 }
+
 body.detail-view header, body.detail-view nav { display: none !important; }
 body.detail-view { padding-top: 0; }
 
-/* スマホ・タブレットの横向きのみ下のタブを非表示 */
+/* スマホ・タブレットの横向き対応 */
 @media screen and (max-device-width: 1024px) and (orientation: landscape) {
-  body.landscape header, body.landscape nav {
-    display: none !important;
-  }
+  body.landscape header, body.landscape nav { display: none !important; }
   body.landscape { padding-top: 0; }
   body.landscape main { padding-bottom: 24px !important; }
 }
 
-.mobile-frame { width: 100%; max-width: 100vw; height: 100vh; background-color: white; position: relative; overflow-y: scroll; overflow-x: hidden; }
-.card-base { background-color: white; border-radius: 16px; box-shadow: var(--card-shadow); padding: 24px; margin-bottom: 24px; }
-.tab-item { display: flex; flex-direction: row; align-items: flex-start; justify-content: center; gap: 8px; color: #9CA3AF; background-color: white; padding: 20px 0; cursor: pointer; transition: all 0.2s; position: relative; flex: 1; }
-.tab-item.active { color: white; background-color: #4B5563; }
-.tab-item.active svg { stroke: white; }
-.tab-item:hover { opacity: 0.8; }
-.text-aiko-pink { color: var(--aiko-pink); }
-.loading-spinner { border-top-color: transparent; animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.mobile-frame { width: 100%; max-width: 100%; height: 100vh; background-color: white; position: relative; overflow-y: scroll; overflow-x: hidden; }
+.card-base { background-color: white; border-radius: 12px; box-shadow: var(--card-shadow); padding: 16px; margin-bottom: 16px; }
+
+/* タブナビゲーションの調整 */
+.tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #9CA3AF; background-color: white; padding: 8px 0; cursor: pointer; transition: all 0.2s; position: relative; flex: 1; height: 60px; }
+.tab-item.active { color: var(--aiko-red); background-color: #FFF5F5; } /* アクティブ時は薄い赤背景に */
+.tab-item.active i { color: var(--aiko-red); }
+
+/* セットリストのスタイル調整 */
 .setlist-item { 
-  padding: 12px 16px; 
-  margin-bottom: 6px; 
-  border-radius: 10px; 
+  padding: 8px 12px; 
+  margin-bottom: 4px; 
+  border-radius: 8px; 
   background-color: #f9fafb; 
-  font-size: 36px; 
+  font-size: 14px; 
   line-height: 1.5;
   display: flex;
   align-items: baseline;
 }
-.setlist-item-number {
-  display: inline-block;
-  min-width: 60px;
-  flex-shrink: 0;
-}
-.setlist-item-title {
-  flex: 1;
-}
-.setlist-medley { 
-  background-color: #f9fafb; 
-  border-left: 5px solid var(--aiko-yellow); 
-  padding-left: 32px; 
-}
-.setlist-medley .setlist-item-number {
-  min-width: 80px;
-}
-.setlist-encore { background-color: #f9fafb; border-left: 5px solid var(--aiko-pink); }
-.setlist-medley-title { background-color: #fef3c7; border-left: 5px solid var(--aiko-yellow); font-weight: bold; font-size: 40px; }
-.setlist-encore-header { background-color: #fce7f3; border-left: 5px solid var(--aiko-pink); font-weight: bold; font-size: 40px; padding: 14px 18px; margin-bottom: 8px; border-radius: 10px; }
-header { background-color: var(--aiko-red) !important; color: white !important; }
-header h1 { font-size: 50px; color: white !important; }
-h2 { font-size: 50px; }
-h3 { font-size: 44px; }
-input, select { font-size: 36px !important; padding: 20px !important; border-radius: 12px !important; }
-button { font-size: 36px !important; }
-nav { padding: 0; padding-bottom: env(safe-area-inset-bottom); position: fixed !important; display: flex !important; border-top: 2px solid #e5e7eb; }
-main { padding: 24px; padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
-body.detail-view main { padding-top: 140px; padding-bottom: 40px; }
+.setlist-item-number { display: inline-block; min-width: 24px; flex-shrink: 0; font-weight: bold; color: #9CA3AF; font-size: 12px; }
+.setlist-item-title { flex: 1; font-weight: 500; }
+.setlist-medley { background-color: #fffbeb; border-left: 3px solid var(--aiko-yellow); padding-left: 12px; }
+.setlist-encore { background-color: #fdf2f8; border-left: 3px solid var(--aiko-pink); }
+.setlist-medley-title { background-color: #fef3c7; border-left: 3px solid var(--aiko-yellow); font-weight: bold; font-size: 14px; }
+.setlist-encore-header { background-color: #fce7f3; border-left: 3px solid var(--aiko-pink); font-weight: bold; font-size: 14px; padding: 8px 12px; margin-bottom: 8px; border-radius: 8px; color: #db2777; }
+
+header { background-color: var(--aiko-red) !important; color: white !important; height: 60px; display: flex; align-items: center; justify-content: center; padding: 0 16px; }
+nav { padding-bottom: env(safe-area-inset-bottom); position: fixed !important; display: flex !important; border-top: 1px solid #e5e7eb; height: calc(60px + env(safe-area-inset-bottom)); z-index: 50; }
+main { padding: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+body.detail-view main { padding-top: 80px; padding-bottom: 40px; }
+
+/* フォーム要素の最適化 */
+input, select { font-size: 16px !important; padding: 10px 12px !important; border-radius: 8px !important; border: 1px solid #d1d5db !important; }
+button { font-size: 14px !important; }
+
 .clickable-item { cursor: pointer; transition: background-color 0.2s; }
 .clickable-item:hover { background-color: #f3f4f6; }
-.clear-btn { background-color: #ef4444; color: white; padding: 18px 22px; border-radius: 12px; font-size: 36px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; white-space: nowrap; border: none; }
-.clear-btn:hover { background-color: #dc2626; }
-.setlist-btn {
-  background-color: var(--aiko-blue);
-  color: white;
-  padding: 18px 22px;
-  border-radius: 12px;
-  font-size: 36px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  white-space: nowrap;
-  border: none;
-}
-.setlist-btn:hover {
-  background-color: #00A0D8;
-}
-.venue-tabs { display: flex; border-bottom: 3px solid #e5e7eb; margin-bottom: 24px; gap: 0; position: sticky; top: 132px; background: white; z-index: 100; }
-.venue-tab { flex: 1; padding: 20px; text-align: center; cursor: pointer; font-weight: 600; font-size: 36px; color: #6b7280; border-bottom: 4px solid transparent; margin-bottom: -3px; transition: all 0.2s; background: white; }
+
+.clear-btn { background-color: #ef4444; color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+.setlist-btn { background-color: var(--aiko-blue); color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+
+/* 会場タブの調整 */
+.venue-tabs { display: flex; border-bottom: 2px solid #e5e7eb; margin-bottom: 16px; gap: 0; position: sticky; top: 0px; background: white; z-index: 40; }
+.venue-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 14px; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; background: white; }
 .venue-tab.active { color: var(--aiko-pink); border-bottom-color: var(--aiko-pink); }
-.venue-tab:hover { color: var(--aiko-pink); background-color: #fef2f2; }
-/* 戻るボタンを上部に移動 */
+
+/* 戻るボタン */
 .back-button-circle {
-  width: 100px; height: 100px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.2s; position: fixed; top: 40px; left: 30px; z-index: 1001; backdrop-filter: blur(8px);
+  width: 44px; height: 44px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: fixed; top: 16px; left: 16px; z-index: 1001; backdrop-filter: blur(4px); border: 1px solid #f3f4f6;
 }
-.back-button-circle:hover { background-color: white; transform: scale(1.05); }
-.back-button-circle svg { width: 50px; height: 50px; stroke: var(--aiko-red); stroke-width: 4; }
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: white; border-radius: 16px; padding: 40px; max-width: 90%; max-height: 80%; overflow-y: auto; position: relative; }
-.modal-content ul { list-style-type: '・'; padding-left: 20px; margin: 20px 0; }
-.modal-content ul li { margin-bottom: 16px; line-height: 1.8; padding-left: 10px; }
-.modal-close { position: absolute; top: 15px; right: 15px; font-size: 50px; cursor: pointer; color: #6b7280; font-weight: bold; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
-.rank-number { display: inline-block; min-width: 80px; text-align: right; margin-right: 16px; flex-shrink: 0; }
-.song-title, .venue-name { flex: 1; word-break: break-word; padding-right: 16px; }
-.song-count { white-space: nowrap; flex-shrink: 0; }
+.back-button-circle svg { width: 24px; height: 24px; stroke: #374151; stroke-width: 2.5; }
+
+/* モーダル */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(2px); }
+.modal-content { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+.modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #6b7280; cursor: pointer; }
+
+/* ランキング表示の調整 */
+.rank-number { display: inline-block; min-width: 30px; text-align: right; margin-right: 12px; flex-shrink: 0; font-size: 18px; font-weight: 800; font-style: italic; }
+.song-title, .venue-name { flex: 1; word-break: break-word; font-size: 15px; font-weight: 600; line-height: 1.4; }
+.song-count { white-space: nowrap; flex-shrink: 0; font-size: 16px; font-weight: bold; color: #4B5563; }
+.song-count span { font-size: 12px; font-weight: normal; margin-left: 2px; }
+
 /* 公演カードのラベル */
-.live-card { position: relative; overflow: hidden; }
+.live-card { position: relative; overflow: hidden; padding-bottom: 32px; } /* ラベルのために下部余白確保 */
 .live-card-label {
-  position: absolute; top: 22px; right: -48px;
-  transform: rotate(45deg);
+  position: absolute; bottom: 0; right: 0;
+  border-top-left-radius: 12px;
   background-color: var(--aiko-pink);
   color: white;
-  padding: 5px 40px;
-  font-size: 24px;
+  padding: 4px 12px;
+  font-size: 12px;
   font-weight: bold;
-  text-align: center;
-  width: 180px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 .live-card-label.rock { background-color: var(--aiko-blue); }
 .live-card-label.aloha { background-color: var(--aiko-yellow); color: #333; }
 .live-card-label.other { background-color: #9CA3AF; }
+
+.text-aiko-pink { color: var(--aiko-pink); }
 </style>
 </head>
 <body>
 <div id="app" class="mobile-frame">
   
-  <!-- ヘッダー (旧 Header.html) -->
-  <header id="main-header" class="bg-white p-4 border-b border-gray-100 sticky top-0 z-10 shadow-sm" style="padding:36px 24px;background-color:#ef4444!important;cursor:pointer">
-    <div style="position:relative;display:flex;align-items:center;justify-content:center">
-      <h1 class="text-xl font-bold text-center" style="font-size:50px;color:white!important">Love Like Data Base</h1>
-      <button id="info-btn" style="position:absolute;right:0;background-color:white;color:#ef4444;padding:12px 20px;border-radius:8px;font-size:28px;font-weight:bold;white-space:nowrap;border:none;cursor:pointer">読んでね</button>
+  <!-- ヘッダー -->
+  <header id="main-header" class="shadow-sm">
+    <div style="position:relative; width:100%; display:flex; align-items:center; justify-content:center;">
+      <h1 class="font-bold text-center" style="font-size:18px; color:white;">Love Like Data Base</h1>
+      <button id="info-btn" style="position:absolute; right:0; background-color:rgba(255,255,255,0.2); color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold; border:none; cursor:pointer;">読んでね</button>
     </div>
   </header>
 
-  <!-- メインコンテンツ (旧 Main.html) -->
+  <!-- メインコンテンツ -->
   <main>
     <div id="live-detail" style="display:none"></div>
 
     <div id="tab-search" class="tab-content" style="display:block">
-      <p class="text-gray-500 mb-3" style="font-size:32px;text-align:center">※<span id="last-update-date">-</span>までの情報を掲載</p>
-      <div class="card-base p-3 bg-gray-50 border border-gray-200">
+      <p class="text-gray-400 mb-3 text-xs text-center">※<span id="last-update-date">-</span>までの情報を掲載</p>
+      <div class="card-base bg-gray-50 border border-gray-100">
         <div class="flex gap-2 mb-3">
-          <input type="text" id="search-input" placeholder="フリーワードで検索" class="flex-1 border border-gray-300 rounded-lg">
-          <button id="clear-all-btn" class="clear-btn">すべてクリア</button>
+          <input type="text" id="search-input" placeholder="フリーワード" class="flex-1">
+          <button id="clear-all-btn" class="clear-btn">クリア</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <select id="tour-select" class="w-full"><option value="">全イベント</option><option value="pop">LLP</option><option value="rock">LLR</option><option value="aloha">LLA</option><option value="other">その他</option></select>
+          <select id="year-select" class="w-full"><option value="">全期間</option></select>
         </div>
         <div class="mb-3">
-          <select id="tour-select" class="w-full border border-gray-300 rounded-lg">
-            <option value="">すべてのライブイベント</option>
-            <option value="pop">Love Like Pop</option>
-            <option value="rock">Love Like Rock</option>
-            <option value="aloha">Love Like Aloha</option>
-            <option value="other">その他のライブイベント</option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <select id="year-select" class="w-full border border-gray-300 rounded-lg"><option value="">すべての年</option></select>
-        </div>
-        <div class="mb-3">
-          <select id="region-select" class="w-full border border-gray-300 rounded-lg"><option value="">すべての都道府県</option></select>
+          <select id="region-select" class="w-full"><option value="">すべての都道府県</option></select>
         </div>
         <div>
-          <input type="text" id="song-filter-input" placeholder="演奏された曲名で検索（楽曲タブから選択）" class="w-full border border-gray-300 rounded-lg bg-gray-200" readonly>
+          <input type="text" id="song-filter-input" placeholder="曲名で絞り込み（楽曲タブで選択）" class="w-full bg-gray-100 text-gray-500" readonly>
         </div>
       </div>
-      <h3 class="font-bold my-5 text-gray-700">🎫 <span id="display-count-text">表示中の公演数</span>: <span id="display-count">0</span> / <span id="total-count">0</span></h3>
-      <div id="live-list-container"></div>
+      
+      <div class="flex items-center justify-between my-4 px-1">
+        <h3 class="font-bold text-gray-700 text-lg">🎫 公演リスト</h3>
+        <span class="text-xs bg-gray-200 px-2 py-1 rounded-full text-gray-600"><span id="display-count" class="font-bold">0</span> / <span id="total-count">0</span></span>
+      </div>
+      
+      <div id="live-list-container" class="space-y-3"></div>
     </div>
 
     <div id="tab-song" class="tab-content" style="display:none">
       <div class="mb-6">
-        <h3 class="font-bold mb-3 text-gray-700">📊 年別ライブ開催・楽曲演奏回数</h3>
-        <p class="text-gray-600 mb-2 text-center" style="font-size:28px; line-height:1.5;">※演奏回数ランキングから曲を選ぶと、グラフに反映されるよ</p>
-        <div class="card-base bg-white p-3">
-          <canvas id="live-count-chart" style="height:600px; max-height:600px"></canvas>
+        <h3 class="font-bold mb-2 text-gray-700 text-lg">📊 年別推移</h3>
+        <p class="text-gray-400 mb-2 text-center text-xs">※下のランキングから曲を選ぶとグラフが変わるよ</p>
+        <div class="card-base bg-white p-2">
+          <canvas id="live-count-chart" style="height:200px; max-height:200px"></canvas>
         </div>
       </div>
 
-      <div class="card-base p-3 bg-gray-50 border border-gray-200">
+      <div class="card-base bg-gray-50 border border-gray-100 mb-4">
         <div class="flex gap-2 mb-3">
-          <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="flex-1 border border-gray-300 rounded-lg">
+          <input type="text" id="song-search-input" placeholder="曲名検索" class="flex-1">
           <button id="song-clear-btn" class="clear-btn">クリア</button>
-          <button id="show-setlist-btn" class="setlist-btn" style="display: none;">セトリ表示</button>
+          <button id="show-setlist-btn" class="setlist-btn" style="display: none;">セトリ</button>
         </div>
-        <div class="flex justify-between font-semibold">
-          <span class="text-gray-600" style="font-size:36px">全楽曲: <span id="total-songs">-</span>曲</span>
-          <select id="song-sort" class="text-aiko-pink font-bold" style="font-size:36px">
-            <option value="count-desc">演奏回数 降順</option><option value="count-asc">演奏回数 昇順</option>
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-gray-600">全 <span id="total-songs" class="font-bold">-</span> 曲</span>
+          <select id="song-sort" class="text-aiko-pink font-bold border-none bg-transparent" style="padding:0!important">
+            <option value="count-desc">多い順</option><option value="count-asc">少ない順</option>
           </select>
         </div>
       </div>
-      <h3 class="font-bold mt-6 mb-3 text-gray-700">🎸 演奏回数ランキング</h3>
+      <h3 class="font-bold mt-6 mb-3 text-gray-700 text-lg">🎸 演奏回数ランキング</h3>
       <div id="song-ranking-container"></div>
     </div>
 
     <div id="tab-pattern" class="tab-content" style="display:none">
       <div class="mb-6">
-        <h3 class="font-bold mb-3 text-gray-700">📊 アルバム別演奏回数</h3>
-        <p class="text-gray-600 mb-2 text-center" style="font-size:28px; line-height:1.5;">※グラフが崩れている場合は、一度他のタブに切り替えて戻ってみて</p>
-        <div class="card-base bg-white p-3">
-          <canvas id="album-chart" style="max-height:600px"></canvas>
+        <h3 class="font-bold mb-2 text-gray-700 text-lg">📊 アルバム別</h3>
+        <div class="card-base bg-white p-2">
+          <canvas id="album-chart" style="height:300px; max-height:300px"></canvas>
         </div>
       </div>
 
-      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700">🎬 オープニング曲 TOP 10</h3>
-      <div id="opening-songs" class="card-base bg-white p-3"></div></div>
-      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700">👏 アンコール曲 TOP 10</h3>
-      <div id="encore-songs" class="card-base bg-white p-3"></div></div>
-      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700">🏁 大トリ曲 TOP 10</h3>
-      <div id="last-songs" class="card-base bg-white p-3"></div></div>
+      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700 text-lg">🎬 オープニング曲 TOP 10</h3>
+      <div id="opening-songs" class="card-base bg-white p-0 overflow-hidden"></div></div>
+      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700 text-lg">👏 アンコール曲 TOP 10</h3>
+      <div id="encore-songs" class="card-base bg-white p-0 overflow-hidden"></div></div>
+      <div class="mb-6"><h3 class="font-bold mb-2 text-gray-700 text-lg">🏁 大トリ曲 TOP 10</h3>
+      <div id="last-songs" class="card-base bg-white p-0 overflow-hidden"></div></div>
     </div>
 
     <div id="tab-venue" class="tab-content" style="display:none">
       <div class="mb-6">
-        <h3 class="font-bold mb-3 text-gray-700">📊 年別ライブ開催回数</h3>
-        <p class="text-gray-600 mb-2 text-center" style="font-size:28px; line-height:1.5;">※ランキングから会場/都道府県を選ぶと、グラフに反映されるよ</p>
-        <div class="card-base bg-white p-3">
-          <canvas id="venue-live-count-chart" style="height:600px; max-height:600px"></canvas>
+        <h3 class="font-bold mb-2 text-gray-700 text-lg">📊 開催頻度</h3>
+        <p class="text-gray-400 mb-2 text-center text-xs">※下のランキングから選ぶとグラフが変わるよ</p>
+        <div class="card-base bg-white p-2">
+          <canvas id="venue-live-count-chart" style="height:200px; max-height:200px"></canvas>
         </div>
       </div>
-      <div class="card-base p-3 bg-gray-50 border border-gray-200 mb-4">
+      <div class="card-base bg-gray-50 border border-gray-100 mb-0 rounded-b-none">
         <div class="flex gap-2">
-          <input type="text" id="venue-search-input" placeholder="会場 または 都道府県名で検索" class="flex-1 border border-gray-300 rounded-lg">
+          <input type="text" id="venue-search-input" placeholder="会場/都道府県" class="flex-1">
           <button id="venue-clear-btn" class="clear-btn">クリア</button>
-          <button id="venue-show-setlist-btn" class="setlist-btn" style="display: none;">セトリ表示</button>
+          <button id="venue-show-setlist-btn" class="setlist-btn" style="display: none;">セトリ</button>
         </div>
       </div>
       <div class="venue-tabs">
-        <div class="venue-tab active" data-venue-tab="venue">会場ランキング</div>
-        <div class="venue-tab" data-venue-tab="region">都道府県ランキング</div>
+        <div class="venue-tab active" data-venue-tab="venue">会場別</div>
+        <div class="venue-tab" data-venue-tab="region">都道府県別</div>
       </div>
-      <div id="venue-ranking-container"></div>
-      <div id="region-ranking-container" style="display:none"></div>
+      <div id="venue-ranking-container" class="mt-2"></div>
+      <div id="region-ranking-container" class="mt-2" style="display:none"></div>
     </div>
   </main>
 
@@ -277,61 +249,53 @@ body.detail-view main { padding-top: 140px; padding-bottom: 40px; }
   <div id="info-modal" class="modal-overlay" style="display:none">
     <div class="modal-content">
       <span class="modal-close" onclick="closeInfoModal()">&times;</span>
-      <div style="font-size:32px;line-height:1.8">
-        <h3 class="font-bold text-lg mb-4" style="font-size:40px;">▼情報源</h3>
-        <ul>
-          <li>このアプリの情報は開発者が独自の調査で集約したものだよ。</li>
-          <li>アカペラで歌った曲が入っているなど、一部セトリボードと異なる場合があるよ。
-          </li>
-          <li>まちがっている情報などがあれば、ぜひX（Twitter）の<a href="https://twitter.com/noki_dochibi" target="_blank" style="color:#1DA1F2;text-decoration:underline">@noki_dochibi</a>までお知らせください。</li>
-          <li>テレビ番組/音楽特番の情報はなく、ライブイベント（と思われる）情報のみ載せているよ。</li>
+      <div class="text-sm leading-relaxed text-gray-700">
+        <h3 class="font-bold text-base mb-2 text-aiko-red">▼情報源</h3>
+        <ul class="list-disc pl-4 mb-4 space-y-1">
+          <li>開発者の独自調査によるものです。</li>
+          <li>アカペラ等、公式情報と異なる場合があります。</li>
+          <li>誤りはX(<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-400 underline">@noki_dochibi</a>)まで。</li>
+          <li>テレビ/特番情報は含みません。</li>
         </ul>
-        <h3 class="font-bold text-lg mt-6 mb-4" style="font-size:40px;">▼集計方法</h3>
-        <ul>
-          <li>『より道』『相合傘』などバージョン違いがあるものも、１つの曲として統合しているよ。</li>
-          <li>「メドレー」は複数の曲をまとめて１曲として扱っているよ。</li>
-          <li>即興曲などは含んでいないよ。</li>
-          <li>会場は、同じ建物で名称が変わったものは「旧名称 / 新名称」としているよ。同じ場所でも建て替えた新しい建物の場合は、別の会場としているよ。</li>
+        <h3 class="font-bold text-base mb-2 text-aiko-red">▼集計ルール</h3>
+        <ul class="list-disc pl-4 mb-4 space-y-1">
+          <li>Ver違い（より道/相合傘など）は統合しています。</li>
+          <li>メドレーはまとめて1曲扱いです。</li>
+          <li>即興曲は除外しています。</li>
+          <li>会場名は「旧名称 / 新名称」で併記しています。</li>
         </ul>
-        <h3 class="font-bold text-lg mt-6 mb-4" style="font-size:40px;">▼操作</h3>
-        <ul>
-          <li>セトリのページの左上に「←（戻る）」ボタンがあるけど、ライブ名をタップしても前のページに戻るよ。右手でも押しやすいね。</li>
-        </ul>
-        <h3 class="font-bold text-lg mt-6 mb-4" style="font-size:40px;">▼その他</h3>
-        <ul>
-          <li>他にもいろいろおもちゃがあるよ<br>→<a href="https://lit.link/nokidochibi" target="_blank" style="color:#1DA1F2;text-decoration:underline">https://lit.link/nokidochibi</a></li>
-        </ul>
+        <h3 class="font-bold text-base mb-2 text-aiko-red">▼その他</h3>
+        <p>他にもいろいろ作ってます<br>→<a href="https://lit.link/nokidochibi" target="_blank" class="text-blue-400 underline">Lit.link</a></p>
       </div>
     </div>
   </div>
 
-  <!-- ナビゲーション (旧 Nav.html) -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-xl" style="max-width:100vw">
-    <div class="flex" style="width:100%">
-      <a href="#" class="tab-item active" data-tab="search" style="flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <i data-lucide="calendar-days" style="width:50px;height:50px"></i>
-        <span class="font-semibold" style="font-size:30px">公演</span>
+  <!-- ナビゲーション -->
+  <nav class="bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+    <div class="flex w-full">
+      <a href="#" class="tab-item active" data-tab="search">
+        <i data-lucide="calendar-days" style="width:24px;height:24px"></i>
+        <span class="text-[10px] font-bold">公演</span>
       </a>
-      <a href="#" class="tab-item" data-tab="song" style="flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <i data-lucide="music" style="width:50px;height:50px"></i>
-        <span class="font-semibold" style="font-size:30px">楽曲</span>
+      <a href="#" class="tab-item" data-tab="song">
+        <i data-lucide="music" style="width:24px;height:24px"></i>
+        <span class="text-[10px] font-bold">楽曲</span>
       </a>
-      <a href="#" class="tab-item" data-tab="pattern" style="flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <i data-lucide="shuffle" style="width:50px;height:50px"></i>
-        <span class="font-semibold" style="font-size:30px">傾向</span>
+      <a href="#" class="tab-item" data-tab="pattern">
+        <i data-lucide="shuffle" style="width:24px;height:24px"></i>
+        <span class="text-[10px] font-bold">傾向</span>
       </a>
-      <a href="#" class="tab-item" data-tab="venue" style="flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <i data-lucide="map-pin" style="width:50px;height:50px"></i>
-        <span class="font-semibold" style="font-size:30px">場所</span>
+      <a href="#" class="tab-item" data-tab="venue">
+        <i data-lucide="map-pin" style="width:24px;height:24px"></i>
+        <span class="text-[10px] font-bold">場所</span>
       </a>
     </div>
   </nav>
 
 </div>
 
-<!-- ロジック (旧 Script.html をAPI対応版に改修) -->
 <script>
-// GASのAPIエンドポイント（先ほど取得したもの）
+// GASのAPIエンドポイント
 const API_URL = "https://script.google.com/macros/s/AKfycbwwgVHJ2MfnbYawn97Ui1fTvO3YPPDStM14HnQtj07OoYsTKEEOVs_26gdtFGQxGvYq/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -342,16 +306,11 @@ document.addEventListener('DOMContentLoaded', () => {
 let allLiveRecords = [], songStats = {}, patternStats = {}, albumData = [], chartInstances = {};
 let selectedVenueInfo = null;
 
-/** データをロードしてアプリを初期化 */
 async function loadLiveList() {
   showLoading('live-list-container');
-  
   try {
-    // APIからライブ記録を取得
     const response = await fetch(`${API_URL}?action=getLiveRecords`);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     initializeApp(data);
   } catch (error) {
@@ -359,37 +318,27 @@ async function loadLiveList() {
   }
 }
 
-// ... 既存のコード ...
-
-let loadingAnimationTimers = []; // アニメーションのタイマーを管理する配列
-
-/**
- * ローディング表示をアニメーション付きで実行します。
- */
+let loadingAnimationTimers = [];
 function showLoading(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
-
-  // 以前のアニメーションタイマーをすべてクリア
   loadingAnimationTimers.forEach(clearTimeout);
   loadingAnimationTimers = [];
 
-  // HTML構造をpタグに戻し、Tailwind CSSで余白を精密に制御
+  // アニメーション文字サイズもスマホ最適化
   container.innerHTML = `
-<div class="text-center py-8 text-aiko-pink font-bold">
-  <p class="m-0" style="font-size:80px; line-height:1.3;">
+<div class="text-center py-12 text-aiko-pink font-bold select-none overflow-hidden">
+  <p class="m-0 transition-opacity duration-300" style="font-size:32px; line-height:1.2;">
     <span id="loading-text-1" class="opacity-0">男子ー!!</span> <span id="loading-text-2" class="opacity-0">女子ー!!</span>
   </p>
-  <p class="m-0" style="font-size:80px; line-height:1.3;">
+  <p class="m-0 transition-opacity duration-300" style="font-size:32px; line-height:1.2;">
     <span id="loading-text-3" class="opacity-0">そうでない人ー!!</span>
   </p>
-  <p class="m-0" style="font-size:100px; line-height:1.3;">
+  <p class="m-0 transition-opacity duration-300" style="font-size:40px; line-height:1.2; margin-top:8px;">
     <span id="loading-text-4" class="opacity-0">ぜー</span><span id="loading-text-5" class="opacity-0">いんっ...!!!</span>
   </p>
-</div>
-`;
+</div>`;
 
-  // 表示するテキストとタイミングのリストを更新
   const loadingTexts = [
     { id: 'loading-text-1', delay: 500 },
     { id: 'loading-text-2', delay: 1000 },
@@ -398,24 +347,18 @@ function showLoading(containerId) {
     { id: 'loading-text-5', delay: 2700 }
   ];
 
-  // 順番に表示する
   loadingTexts.forEach(item => {
     const timer = setTimeout(() => {
       const element = document.getElementById(item.id);
-      if (element) {
-        element.classList.remove('opacity-0');
-      }
+      if (element) element.classList.remove('opacity-0');
     }, item.delay);
     loadingAnimationTimers.push(timer);
   });
 }
 
-/** アプリの初期設定 */
 function initializeApp(records) {
   allLiveRecords = records;
-  
   if (records.length > 0) {
-    // 日付文字列をパースして最新日付を取得
     const latestDate = records.reduce((latest, rec) => {
         const d = new Date(rec.date);
         return d > latest ? d : latest;
@@ -431,7 +374,6 @@ function initializeApp(records) {
   checkOrientation();
   window.addEventListener('resize', checkOrientation);
 
-  // アルバムデータの取得もAPI経由に変更
   fetch(`${API_URL}?action=getAlbumData`)
     .then(res => res.json())
     .then(data => {
@@ -447,7 +389,6 @@ function initializeApp(records) {
   renderVenueLiveCountChart();
 }
 
-/** 画面の向きをチェックしてbodyにクラスを付与 */
 function checkOrientation() {
   if ('ontouchend' in document && window.innerWidth > window.innerHeight) {
     document.body.classList.add('landscape');
@@ -456,7 +397,17 @@ function checkOrientation() {
   }
 }
 
-/** アルバム別演奏回数グラフを描画 */
+// グラフ設定の共通フォントサイズ調整
+const chartCommonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { font: { size: 10 } } }, // 20px -> 10px
+    y: { ticks: { font: { size: 10 } } }  // 18px -> 10px
+  }
+};
+
 function renderAlbumChart() {
   const canvas = document.getElementById('album-chart');
   if (!canvas || !albumData.length) return;
@@ -472,23 +423,20 @@ function renderAlbumChart() {
         backgroundColor: 'rgba(255, 105, 180, 0.8)',
         borderColor: 'rgba(255, 105, 180, 1)',
         borderWidth: 1,
-        borderRadius: 8
+        borderRadius: 4
       }]
     },
     options: {
+      ...chartCommonOptions,
       indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
       scales: {
-        x: { beginAtZero: true, ticks: { font: { size: 20 } } },
-        y: { ticks: { font: { size: 18 }, autoSkip: false } }
+        x: { beginAtZero: true, ticks: { font: { size: 10 } } },
+        y: { ticks: { font: { size: 10 }, autoSkip: false } }
       }
     }
   });
 }
 
-/** 年別ライブ開催回数・楽曲演奏回数グラフを描画 */
 function renderLiveCountChart() {
   const canvas = document.getElementById('live-count-chart');
   if (!canvas) return;
@@ -514,7 +462,7 @@ function renderLiveCountChart() {
   const songPlayData = years.map(year => songPlaysByYear[year] || 0);
 
   const datasets = [{
-    label: '楽曲の演奏回数',
+    label: '楽曲演奏',
     data: songPlayData,
     backgroundColor: 'rgba(255, 105, 180, 0.8)',
     borderColor: 'rgba(255, 105, 180, 1)',
@@ -525,20 +473,18 @@ function renderLiveCountChart() {
       color: 'gray',
       anchor: 'end',
       align: 'end',
-      offset: 5,
-      font: { size: 24, weight: 'bold' },
+      offset: -2,
+      font: { size: 10, weight: 'bold' },
       formatter: val => val
     }
   }, {
-    label: 'ライブ開催回数（その他）',
+    label: 'その他',
     data: totalLiveData.map((total, i) => Math.max(0, total - songPlayData[i])),
-    backgroundColor: 'rgba(200, 200, 200, 0.6)',
-    borderColor: 'rgba(200, 200, 200, 1)',
+    backgroundColor: 'rgba(229, 231, 235, 0.8)', // gray-200
+    borderColor: 'rgba(229, 231, 235, 1)',
     borderWidth: 1,
     stack: 'stack1',
-    datalabels: {
-            display: false
-        }
+    datalabels: { display: false }
   }];
 
   chartInstances.liveCount = new Chart(canvas, {
@@ -546,33 +492,15 @@ function renderLiveCountChart() {
     data: { labels: years, datasets },
     plugins: [ChartDataLabels],
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false },
-      },
+      ...chartCommonOptions,
       scales: {
-        x: {
-          stacked: true,
-          ticks: {
-            font: { size: 20 },
-            maxRotation: 90,
-            minRotation: 90
-          }
-        },
-        y: {
-          stacked: true,
-          beginAtZero: true,
-          min: 0,
-          ticks: { font: { size: 20 }, stepSize: 5 }
-        }
+        x: { stacked: true, ticks: { font: { size: 10 }, maxRotation: 90, minRotation: 90 } },
+        y: { stacked: true, beginAtZero: true, min: 0, ticks: { font: { size: 10 }, stepSize: 5 } }
       }
     }
   });
 }
 
-/** 年別ライブ開催回数グラフ（場所タブ）を描画 */
 function renderVenueLiveCountChart() {
   const canvas = document.getElementById('venue-live-count-chart');
   if (!canvas) return;
@@ -590,17 +518,11 @@ function renderVenueLiveCountChart() {
       let isMatch = false;
       if (selectedVenueInfo.type === 'venue') {
         const venueKey = rec.region === 'オンライン' ? 'オンライン' : `${rec.venue} (${rec.region})`;
-        if (venueKey === selectedVenueInfo.name) {
-          isMatch = true;
-        }
+        if (venueKey === selectedVenueInfo.name) isMatch = true;
       } else if (selectedVenueInfo.type === 'region') {
-        if (rec.region === selectedVenueInfo.name) {
-          isMatch = true;
-        }
+        if (rec.region === selectedVenueInfo.name) isMatch = true;
       }
-      if (isMatch) {
-        selectedPlaysByYear[rec.year] = (selectedPlaysByYear[rec.year] || 0) + 1;
-      }
+      if (isMatch) selectedPlaysByYear[rec.year] = (selectedPlaysByYear[rec.year] || 0) + 1;
     });
   }
 
@@ -609,7 +531,7 @@ function renderVenueLiveCountChart() {
   const selectedPlayData = years.map(year => selectedPlaysByYear[year] || 0);
 
   const datasets = [{
-    label: '選択場所の開催回数',
+    label: '選択場所',
     data: selectedPlayData,
     backgroundColor: 'rgba(255, 105, 180, 0.8)',
     borderColor: 'rgba(255, 105, 180, 1)',
@@ -620,20 +542,18 @@ function renderVenueLiveCountChart() {
       color: 'gray',
       anchor: 'end',
       align: 'end',
-      offset: 5,
-      font: { size: 24, weight: 'bold' },
+      offset: -2,
+      font: { size: 10, weight: 'bold' },
       formatter: val => val
     }
   }, {
-    label: 'ライブ開催回数（その他）',
+    label: 'その他',
     data: totalLiveData.map((total, i) => Math.max(0, total - selectedPlayData[i])),
-    backgroundColor: 'rgba(200, 200, 200, 0.6)',
-    borderColor: 'rgba(200, 200, 200, 1)',
+    backgroundColor: 'rgba(229, 231, 235, 0.8)',
+    borderColor: 'rgba(229, 231, 235, 1)',
     borderWidth: 1,
     stack: 'stack1',
-    datalabels: {
-      display: false
-    }
+    datalabels: { display: false }
   }];
 
   chartInstances.venueLiveCount = new Chart(canvas, {
@@ -641,33 +561,15 @@ function renderVenueLiveCountChart() {
     data: { labels: years, datasets },
     plugins: [ChartDataLabels],
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false },
-      },
+      ...chartCommonOptions,
       scales: {
-        x: {
-          stacked: true,
-          ticks: {
-            font: { size: 20 },
-            maxRotation: 90,
-            minRotation: 90
-          }
-        },
-        y: {
-          stacked: true,
-          beginAtZero: true,
-          min: 0,
-          ticks: { font: { size: 20 }, stepSize: 5 }
-        }
+        x: { stacked: true, ticks: { font: { size: 10 }, maxRotation: 90, minRotation: 90 } },
+        y: { stacked: true, beginAtZero: true, min: 0, ticks: { font: { size: 10 }, stepSize: 5 } }
       }
     }
   });
 }
 
-/** 楽曲データの統計を分析 */
 function analyzeSongStats(records) {
   songStats = {};
   records.forEach(rec => {
@@ -680,7 +582,6 @@ function analyzeSongStats(records) {
   });
 }
 
-/** 楽曲パターンの統計を分析 */
 function analyzePatterns(records) {
   const o = {}, e = {}, l = {};
   records.forEach(rec => {
@@ -697,7 +598,6 @@ function analyzePatterns(records) {
   patternStats = { openingSongs: o, encoreSongs: e, lastSongs: l };
 }
 
-/** フィルタリングオプションを生成 */
 function populateFilters(records, skipApply = false) {
   const yearSelect = document.getElementById('year-select');
   const regionSelect = document.getElementById('region-select');
@@ -719,12 +619,11 @@ function populateFilters(records, skipApply = false) {
   if (!skipApply) applyFilters();
 }
 
-/** フィルタを適用してリストを再描画 */
 function applyFilters() {
   const songFilterInput = document.getElementById('song-filter-input');
   let songFilterValue = songFilterInput.value;
-  if (songFilterValue.includes('（楽曲タブから選択）')) {
-    songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '');
+  if (songFilterValue.includes('（楽曲タブで選択）')) {
+    songFilterValue = songFilterValue.replace('（楽曲タブで選択）', '');
   }
 
   const filters = {
@@ -756,12 +655,11 @@ function applyFilters() {
   renderLiveList(filteredRecords);
 }
 
-/** 公演リストを描画 */
 function renderLiveList(records) {
   const container = document.getElementById('live-list-container');
   container.innerHTML = '';
   if (!records.length) {
-    container.innerHTML = '<p class="text-center text-gray-500 py-8">該当する公演が見つかりませんでした。</p>';
+    container.innerHTML = '<p class="text-center text-gray-500 py-8 text-sm">該当する公演が見つかりませんでした。</p>';
     return;
   }
 
@@ -773,19 +671,18 @@ function renderLiveList(records) {
     else if (tourNameLower.includes('love like aloha')) { labelType = 'aloha'; labelText = 'ALOHA'; }
 
     const card = document.createElement('div');
-    card.className = 'card-base live-card p-3 cursor-pointer hover:shadow-lg transition';
+    card.className = 'card-base live-card cursor-pointer hover:shadow-md transition';
     card.innerHTML = `
       <div class="live-card-label ${labelType}">${labelText}</div>
-      <p class="text-gray-500 font-medium" style="font-size:32px">${rec.date} (${rec.dayOfWeek})</p>
-      <p class="font-bold mt-1 text-gray-800" style="font-size:44px">${rec.tourName}</p>
-      <p class="text-gray-600" style="font-size:36px">${rec.venue} (${rec.region})</p>
-      <p class="mt-2 font-semibold text-aiko-pink" style="font-size:32px">セットリスト: ${rec.songCount}曲</p>`;
+      <p class="text-gray-500 font-medium text-xs">${rec.date} (${rec.dayOfWeek})</p>
+      <p class="font-bold mt-1 text-gray-800 text-base leading-tight">${rec.tourName}</p>
+      <p class="text-gray-600 text-sm mt-1">${rec.venue} (${rec.region})</p>
+      <p class="mt-2 font-semibold text-aiko-pink text-sm">セットリスト: ${rec.songCount}曲</p>`;
     card.onclick = () => showLiveDetail(rec);
     container.appendChild(card);
   });
 }
 
-/** 公演詳細を表示 */
 function showLiveDetail(rec) {
   document.body.classList.add('detail-view');
   document.querySelectorAll('.tab-content, #main-header, nav').forEach(el => el.style.display = 'none');
@@ -835,35 +732,34 @@ function showLiveDetail(rec) {
   });
 
   const setlistSection = setlistHtml.trim()
-    ? `<h3 class="font-bold mb-3 text-gray-700">🎵 セットリスト</h3><div class="card-base">${setlistHtml}</div>`
-    : `<h3 class="font-bold mb-3 text-gray-700">🎵 セットリスト</h3><div class="card-base" style="font-size:32px;line-height:1.8;color:#6b7280">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" style="color:#1DA1F2;text-decoration:underline">@noki_dochibi</a>まで教えてください。</div>`;
+    ? `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base p-2 shadow-none border border-gray-100">${setlistHtml}</div>`
+    : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed p-4">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
 
   detailContainer.innerHTML = `
-    <div id="detail-header-area" class="pt-5 -mt-5 cursor-pointer">
-      <h2 class="font-extrabold mb-4 text-aiko-pink">${rec.tourName}</h2>
+    <div id="detail-header-area" class="pt-2 -mt-2 cursor-pointer">
+      <h2 class="font-extrabold mb-2 text-aiko-pink text-2xl leading-tight">${rec.tourName}</h2>
     </div>
-    <div class="card-base mb-4">
-      <p class="text-gray-500 font-semibold mb-1" style="font-size:32px">開催日</p><p class="font-bold" style="font-size:44px">${rec.date} (${rec.dayOfWeek})</p>
-      <p class="text-gray-500 font-semibold mb-1 mt-3" style="font-size:32px">会場</p><p class="font-bold" style="font-size:44px">${rec.venue} (${rec.region})</p>
+    <div class="card-base mb-6 bg-white">
+      <p class="text-gray-500 text-xs font-semibold mb-1">開催日</p><p class="font-bold text-lg text-gray-800">${rec.date} (${rec.dayOfWeek})</p>
+      <div class="border-t my-3 border-gray-100"></div>
+      <p class="text-gray-500 text-xs font-semibold mb-1">会場</p><p class="font-bold text-lg text-gray-800">${rec.venue} (${rec.region})</p>
     </div>
     ${setlistSection}
-    <p class="text-center text-gray-500 mt-6" style="font-size:28px;line-height:1.6">※注:今まさにあなたが見ているセトリ 間違いじゃないとは言い切れない🌸</p>`;
+    <p class="text-center text-gray-400 mt-8 text-xs">※注:今まさにあなたが見ているセトリ 間違いじゃないとは言い切れない🌸</p>`;
   
   document.getElementById('detail-header-area').onclick = hideDetailView;
   document.getElementById('app').scrollTop = 0;
 }
 
-/** 詳細ビューを非表示 */
 function hideDetailView() {
   document.body.classList.remove('detail-view');
   document.getElementById('live-detail').style.display = 'none';
   document.getElementById('back-button-fixed').style.display = 'none';
-  document.getElementById('main-header').style.display = 'block';
+  document.getElementById('main-header').style.display = 'flex';
   document.querySelector('nav').style.display = 'flex';
   switchToTab(document.querySelector('.tab-item.active').dataset.tab);
 }
 
-/** 場所タブの会場をクリックしたときの処理 */
 function searchVenue(venue) {
     ['tour-select', 'year-select', 'region-select', 'song-filter-input'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('search-input').value = venue;
@@ -871,7 +767,6 @@ function searchVenue(venue) {
     applyFilters();
 }
 
-/** 場所タブの都道府県をクリックしたときの処理 */
 function searchRegion(region) {
     ['search-input', 'tour-select', 'year-select', 'song-filter-input'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('region-select').value = region;
@@ -879,7 +774,6 @@ function searchRegion(region) {
     applyFilters();
 }
 
-/** 楽曲タブで曲を選択したときの処理 */
 function selectSong(songName) {
   document.getElementById('song-search-input').value = songName;
   renderSongRanking();
@@ -887,7 +781,6 @@ function selectSong(songName) {
   document.getElementById('show-setlist-btn').style.display = 'inline-block';
 }
 
-/** 場所タブで会場を選択したときの処理 */
 function selectVenue(fullVenueName) {
   selectedVenueInfo = { type: 'venue', name: fullVenueName };
   document.getElementById('venue-search-input').value = fullVenueName;
@@ -896,7 +789,6 @@ function selectVenue(fullVenueName) {
   document.getElementById('venue-show-setlist-btn').style.display = 'inline-block';
 }
 
-/** 場所タブで都道府県を選択したときの処理 */
 function selectRegion(regionName) {
   selectedVenueInfo = { type: 'region', name: regionName };
   document.getElementById('venue-search-input').value = regionName;
@@ -905,7 +797,6 @@ function selectRegion(regionName) {
   document.getElementById('venue-show-setlist-btn').style.display = 'inline-block';
 }
 
-/** タブ切り替え */
 function switchToTab(tabId) {
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   document.querySelector(`.tab-item[data-tab="${tabId}"]`).classList.add('active');
@@ -923,7 +814,6 @@ function switchToTab(tabId) {
   }
 }
 
-/** 楽曲ランキングを描画 */
 function renderSongRanking() {
   const container = document.getElementById('song-ranking-container');
   if (!container) return;
@@ -939,16 +829,15 @@ function renderSongRanking() {
   const fullRanking = Object.entries(songStats).sort((a,b) => b[1]-a[1]);
   container.innerHTML = sortedSongs.map(item => {
       const globalRank = fullRanking.findIndex(([song]) => song === item.song) + 1;
-      const rankColor = globalRank <= 3 && searchTerm === '' ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][globalRank-1] : 'text-gray-400';
+      const rankColor = globalRank <= 3 && searchTerm === '' ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][globalRank-1] : 'text-gray-300';
       return `
-    <div class="card-base p-3 mb-2 clickable-item flex items-center" onclick="selectSong('${item.song.replace(/'/g, "\\'")}')">
-      <span class="rank-number font-bold ${rankColor}" style="font-size:44px">${globalRank}</span>
-      <span class="song-title font-bold" style="font-size:36px">${item.song}</span>
-      <span class="song-count font-bold text-gray-800" style="font-size:44px">${item.count} <span class="text-gray-500" style="font-size:32px">回</span></span>
+    <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectSong('${item.song.replace(/'/g, "\\'")}')">
+      <span class="rank-number ${rankColor}">${globalRank}</span>
+      <span class="song-title text-gray-700">${item.song}</span>
+      <span class="song-count">${item.count} <span>回</span></span>
     </div>`}).join('');
 }
 
-/** パターン統計を描画 */
 function renderPatternStats() {
   const types = ['opening', 'encore', 'last'];
   types.forEach(type => {
@@ -956,17 +845,17 @@ function renderPatternStats() {
     if (!container) return;
     const data = Object.entries(patternStats[type + 'Songs']).sort((a, b) => b[1] - a[1]).slice(0, 10);
     container.innerHTML = data.map(([song, count], i) => {
-      const rankColor = i < 3 ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][i] : 'text-gray-400';
-      return `<div class="card-base p-3 mb-2 clickable-item flex items-center" onclick="showModal('${song.replace(/'/g, "\\'")}', '${type}')">
-        <span class="rank-number font-bold ${rankColor}" style="font-size:44px">${i + 1}</span>
-        <span class="song-title font-bold" style="font-size:36px">${song}</span>
-        <span class="song-count font-bold text-gray-800" style="font-size:44px">${count} <span class="text-gray-500" style="font-size:32px">回</span></span>
+      const rankColor = i < 3 ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][i] : 'text-gray-300';
+      const borderClass = i !== data.length -1 ? 'border-b border-gray-100' : '';
+      return `<div class="p-3 clickable-item flex items-center ${borderClass}" onclick="showModal('${song.replace(/'/g, "\\'")}', '${type}')">
+        <span class="rank-number ${rankColor}">${i + 1}</span>
+        <span class="song-title text-gray-700">${song}</span>
+        <span class="song-count">${count} <span>回</span></span>
       </div>`
     }).join('');
   });
 }
 
-/** 場所ランキングを描画 */
 function renderVenueRanking() {
     const venueContainer = document.getElementById('venue-ranking-container');
     const regionContainer = document.getElementById('region-ranking-container');
@@ -987,10 +876,10 @@ function renderVenueRanking() {
         .sort((a, b) => b[1] - a[1]);
     
     venueContainer.innerHTML = filteredVenues.map(([name, count], i) => `
-        <div class="card-base p-3 mb-2 clickable-item flex items-center" onclick="selectVenue('${name.replace(/'/g, "\\'")}')">
-            <span class="rank-number font-bold ${i < 3 && searchTerm === '' ? rankColors[i] : 'text-gray-400'}" style="font-size:44px">${filteredVenues.findIndex(v => v[0] === name) + 1}</span>
-            <span class="venue-name" style="font-size:34px">${name}</span>
-            <span class="song-count font-bold text-gray-800" style="font-size:44px">${count} <span class="text-gray-500" style="font-size:32px">回</span></span>
+        <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectVenue('${name.replace(/'/g, "\\'")}')">
+            <span class="rank-number ${i < 3 && searchTerm === '' ? rankColors[i] : 'text-gray-300'}">${filteredVenues.findIndex(v => v[0] === name) + 1}</span>
+            <span class="venue-name text-gray-700">${name}</span>
+            <span class="song-count">${count} <span>回</span></span>
         </div>`).join('');
 
     const filteredRegions = Object.entries(rcs)
@@ -998,10 +887,10 @@ function renderVenueRanking() {
         .sort((a, b) => b[1] - a[1]);
 
     let regionHtml = filteredRegions.map(([name, count], i) => `
-      <div class="card-base p-3 mb-2 clickable-item flex items-center" onclick="selectRegion('${name.replace(/'/g, "\\'")}')">
-        <span class="rank-number font-bold ${i < 3 && searchTerm === '' ? rankColors[i] : 'text-gray-400'}" style="font-size:44px">${filteredRegions.findIndex(r => r[0] === name) + 1}</span>
-        <span class="venue-name" style="font-size:34px">${name}</span>
-        <span class="song-count font-bold text-gray-800" style="font-size:44px">${count} <span class="text-gray-500" style="font-size:32px">回</span></span>
+      <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectRegion('${name.replace(/'/g, "\\'")}')">
+        <span class="rank-number ${i < 3 && searchTerm === '' ? rankColors[i] : 'text-gray-300'}">${filteredRegions.findIndex(r => r[0] === name) + 1}</span>
+        <span class="venue-name text-gray-700">${name}</span>
+        <span class="song-count">${count} <span>回</span></span>
       </div>`).join('');
     
     if (searchTerm === '') {
@@ -1009,12 +898,12 @@ function renderVenueRanking() {
       const heldRegions = new Set(Object.keys(rcs));
       const zeroRegions = allRegions.filter(r => !heldRegions.has(r));
       if (zeroRegions.length > 0) {
-        regionHtml += '<div class="mt-6 mb-3"><h4 class="font-bold text-gray-600" style="font-size:36px">開催なし</h4></div>';
+        regionHtml += '<div class="mt-6 mb-3 px-1"><h4 class="font-bold text-gray-500 text-sm">開催なし</h4></div>';
         regionHtml += zeroRegions.sort().map(region =>
-          `<div class="card-base p-3 mb-2 flex items-center opacity-50">
-            <span class="rank-number font-bold text-gray-400" style="font-size:44px">-</span>
-            <span class="venue-name" style="font-size:34px">${region}</span>
-            <span class="song-count font-bold text-gray-500" style="font-size:44px">0 <span style="font-size:32px">回</span></span>
+          `<div class="card-base p-3 mb-2 flex items-center opacity-50 bg-gray-50 border border-gray-100">
+            <span class="rank-number text-gray-300 text-sm" style="min-width:30px;">-</span>
+            <span class="venue-name text-gray-500">${region}</span>
+            <span class="song-count text-gray-400">0 <span>回</span></span>
           </div>`
         ).join('');
       }
@@ -1022,7 +911,6 @@ function renderVenueRanking() {
     regionContainer.innerHTML = regionHtml;
 }
 
-/** イベントリスナーを設定 */
 function setupEventListeners() {
   ['search-input', 'tour-select', 'year-select', 'region-select', 'song-filter-input'].forEach(id => {
     document.getElementById(id).addEventListener(id.includes('select') ? 'change' : 'input', applyFilters);
@@ -1032,7 +920,7 @@ function setupEventListeners() {
     ['search-input', 'tour-select', 'year-select', 'region-select'].forEach(id => document.getElementById(id).value = '');
     const songInput = document.getElementById('song-filter-input');
     songInput.value = '';
-    songInput.placeholder = '演奏された曲名で検索（楽曲タブから選択）';
+    songInput.placeholder = '曲名で絞り込み（楽曲タブで選択）';
     applyFilters();
   });
 
@@ -1052,7 +940,7 @@ function setupEventListeners() {
     const songName = document.getElementById('song-search-input').value;
     if (songName) {
       const songInput = document.getElementById('song-filter-input');
-      songInput.value = `${songName}（楽曲タブから選択）`;
+      songInput.value = `${songName}（楽曲タブで選択）`;
       switchToTab('search');
       applyFilters();
     }
@@ -1102,7 +990,7 @@ function setupEventListeners() {
 
 function handleError(error) {
   console.error("API Error:", error);
-  document.getElementById('live-list-container').innerHTML = `<p class="text-center text-red-500 py-8">データ読み込み中にエラーが発生しました。<br>(${error.message})</p>`;
+  document.getElementById('live-list-container').innerHTML = `<p class="text-center text-red-500 py-8 text-sm">データ読み込み中にエラーが発生しました。<br>(${error.message})</p>`;
 }
 
 function showModal(song, type) {
@@ -1116,9 +1004,9 @@ function showModal(song, type) {
     if (isMatch) matches.add(rec.tourName);
   });
   const top5 = Array.from(matches).slice(0, 5);
-  let html = `<h2 class="font-bold mb-4 text-aiko-pink" style="font-size:44px">${song}</h2><div style="font-size:36px">`;
+  let html = `<h2 class="font-bold mb-4 text-aiko-pink text-2xl">${song}</h2><div class="text-base text-gray-700">`;
   html += top5.map(m => `<p class="mb-2">・${m}</p>`).join('');
-  if (matches.size > 5) html += `<p class="mt-4 text-gray-500">など、計${matches.size}公演</p>`;
+  if (matches.size > 5) html += `<p class="mt-4 text-gray-400 text-sm">など、計${matches.size}公演</p>`;
   html += '</div>';
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('modal-overlay').style.display = 'flex';
