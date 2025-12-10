@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base vol.2.3</title>
+<title>Love Like Data Base vol.2.0</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -96,10 +96,10 @@ nav > div {
 .tab-item.active { color: white; background-color: #4B5563; }
 .tab-item.active i { color: white; }
 
-/* セットリストのスタイル（余白を詰めてv1風に） */
+/* セットリストのスタイル（v1風に余白を詰める） */
 .setlist-item { 
-  padding: 8px 10px; /* パディングを削減 */
-  margin-bottom: 4px; /* 間隔を削減 */
+  padding: 8px 10px;
+  margin-bottom: 4px;
   border-radius: 6px; 
   background-color: #f9fafb; 
   font-size: 14px; 
@@ -114,7 +114,20 @@ nav > div {
 .setlist-medley-title { background-color: #fef3c7; border-left: 4px solid var(--aiko-yellow); font-weight: bold; font-size: 14px; }
 .setlist-encore-header { background-color: #fce7f3; border-left: 4px solid var(--aiko-pink); font-weight: bold; font-size: 14px; padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; color: #db2777; }
 
-header { background-color: var(--aiko-red) !important; color: white !important; height: 64px; display: flex; align-items: center; justify-content: center; padding: 0 16px; position: sticky; top: 0; z-index: 40; }
+/* ヘッダー（タイトル左寄せ） */
+header { 
+  background-color: var(--aiko-red) !important; 
+  color: white !important; 
+  height: 64px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; /* 両端揃え */
+  padding: 0 16px; 
+  position: sticky; 
+  top: 0; 
+  z-index: 40; 
+}
+
 main { padding: 16px; padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
 body.detail-view main { padding-top: 80px; padding-bottom: 40px; }
 
@@ -125,19 +138,20 @@ button { font-size: 14px !important; }
 .clickable-item { cursor: pointer; transition: background-color 0.2s; }
 .clickable-item:hover { background-color: #f3f4f6; }
 
-.clear-btn { background-color: #ef4444; color: white; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; white-space: nowrap; }
-/* セトリボタン（改行禁止を追加） */
-.setlist-btn { 
-  background-color: var(--aiko-blue); 
-  color: white; 
-  padding: 10px 16px; 
-  border-radius: 8px; 
-  font-size: 14px; 
-  font-weight: bold; 
-  cursor: pointer; 
-  border: none; 
-  white-space: nowrap; /* これで1行に収まります */
+/* ボタン共通スタイル（改行禁止、縮小禁止、パディング調整） */
+.action-btn {
+  padding: 10px 10px; /* 横パディングを詰めて収まりよく */
+  border-radius: 8px;
+  font-size: 13px; /* 少し小さくして1行に収める */
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap; /* 改行禁止 */
+  flex-shrink: 0; /* 縮小禁止 */
 }
+
+.clear-btn { background-color: #ef4444; color: white; }
+.setlist-btn { background-color: var(--aiko-blue); color: white; }
 
 /* 会場タブ */
 .venue-tabs { display: flex; border-bottom: 3px solid #e5e7eb; margin-bottom: 20px; gap: 0; position: sticky; top: 0px; background: white; z-index: 40; }
@@ -190,12 +204,10 @@ button { font-size: 14px !important; }
 <body>
 <div id="app" class="mobile-frame">
   
-  <!-- ヘッダー -->
+  <!-- ヘッダー（左寄せタイトル + 右寄せボタン） -->
   <header id="main-header" class="shadow-sm">
-    <div style="position:relative; width:100%; display:flex; align-items:center; justify-content:center;">
-      <h1 class="font-bold text-center" style="font-size:20px; color:white;">Love Like Data Base vol.2.0</h1>
-      <button id="info-btn" style="position:absolute; right:0; background-color:white; color:#ef4444; padding:8px 16px; border-radius:8px; font-size:14px; font-weight:bold; border:none; cursor:pointer;">読んでね</button>
-    </div>
+    <h1 class="font-bold text-left" style="font-size:18px; color:white; flex:1;">Love Like Data Base vol.2.0</h1>
+    <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
   </header>
 
   <!-- メインコンテンツ -->
@@ -206,17 +218,18 @@ button { font-size: 14px !important; }
       <p class="text-gray-500 mb-4 text-sm text-center">※<span id="last-update-date">-</span>までの情報を掲載</p>
       <div class="card-base bg-gray-50 border border-gray-200">
         <!-- 検索フォーム行 -->
-        <div class="flex gap-2 mb-2">
+        <div class="flex gap-1 mb-2 items-center">
           <input type="text" id="search-input" placeholder="フリーワードで検索" class="flex-1 min-w-0">
-          <button id="clear-all-btn" class="clear-btn flex-shrink-0">すべてクリア</button>
+          <!-- ボタン -->
+          <button id="clear-all-btn" class="action-btn clear-btn">すべてクリア</button>
         </div>
         
-        <!-- フィルター行（Flex Wrapで最適化） -->
+        <!-- フィルター行 -->
         <div class="flex flex-wrap gap-2 mb-2">
-          <!-- 文言修正：すべてのライブ、その他のライブ -->
-          <select id="tour-select" class="flex-1 min-w-[140px] text-gray-700 bg-white"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
-          <select id="year-select" class="flex-1 min-w-[100px] text-gray-700 bg-white"><option value="">すべての年</option></select>
-          <select id="region-select" class="flex-1 min-w-[120px] text-gray-700 bg-white"><option value="">すべての都道府県</option></select>
+          <!-- 文言修正反映 -->
+          <select id="tour-select" class="flex-1 min-w-[130px] text-gray-700 bg-white"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
+          <select id="year-select" class="flex-1 min-w-[90px] text-gray-700 bg-white"><option value="">すべての年</option></select>
+          <select id="region-select" class="flex-1 min-w-[110px] text-gray-700 bg-white"><option value="">すべての都道府県</option></select>
         </div>
         
         <!-- 楽曲フィルター行 -->
@@ -240,10 +253,14 @@ button { font-size: 14px !important; }
       </div>
 
       <div class="card-base bg-gray-50 border border-gray-200 mb-6">
-        <div class="flex gap-2 mb-4">
-          <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="flex-1">
-          <button id="song-clear-btn" class="clear-btn">クリア</button>
-          <button id="show-setlist-btn" class="setlist-btn" style="display: none;">セトリ表示</button>
+        <!-- 入力欄とボタンを横並びにするためのフレックスコンテナ (gap-1 で詰める) -->
+        <div class="flex gap-1 mb-4 items-center">
+          <!-- 入力欄の幅を自動調整 (flex-1) -->
+          <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="flex-1 min-w-0">
+          <!-- ボタン -->
+          <button id="song-clear-btn" class="action-btn clear-btn">クリア</button>
+          <!-- 文言修正：公演表示 -->
+          <button id="show-setlist-btn" class="action-btn setlist-btn" style="display: none;">公演表示</button>
         </div>
         <div class="flex justify-between items-center text-base font-semibold">
           <span class="text-gray-600">全楽曲: <span id="total-songs" class="font-bold">-</span> 曲</span>
@@ -281,10 +298,14 @@ button { font-size: 14px !important; }
         </div>
       </div>
       <div class="card-base bg-gray-50 border border-gray-200 mb-0 rounded-b-none">
-        <div class="flex gap-2">
-          <input type="text" id="venue-search-input" placeholder="会場 または 都道府県名で検索" class="flex-1">
-          <button id="venue-clear-btn" class="clear-btn">クリア</button>
-          <button id="venue-show-setlist-btn" class="setlist-btn" style="display: none;">セトリ表示</button>
+        <!-- 入力欄とボタンを横並びにするためのフレックスコンテナ (gap-1) -->
+        <div class="flex gap-1 items-center">
+          <!-- 入力欄 -->
+          <input type="text" id="venue-search-input" placeholder="会場 または 都道府県名で検索" class="flex-1 min-w-0">
+          <!-- ボタン -->
+          <button id="venue-clear-btn" class="action-btn clear-btn">クリア</button>
+          <!-- 文言修正：公演表示 -->
+          <button id="venue-show-setlist-btn" class="action-btn setlist-btn" style="display: none;">公演表示</button>
         </div>
       </div>
       <div class="venue-tabs">
@@ -997,7 +1018,7 @@ function setupEventListeners() {
     document.getElementById('show-setlist-btn').style.display = 'none';
   });
   
-  // 「セトリ表示」ボタンクリック時の処理（機能追加）
+  // 「公演表示」ボタンクリック時の処理（機能追加）
   document.getElementById('show-setlist-btn').addEventListener('click', () => {
     const songName = document.getElementById('song-search-input').value;
     if (songName) {
@@ -1017,6 +1038,7 @@ function setupEventListeners() {
     renderVenueLiveCountChart();
   });
 
+  // 「公演表示」ボタンクリック時の処理（機能追加・場所タブ）
   document.getElementById('venue-show-setlist-btn').addEventListener('click', () => {
     if (!selectedVenueInfo) return;
     if (selectedVenueInfo.type === 'venue') {
