@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base</title>
+<title>Love Like Data Base vol.2.0</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -32,7 +32,6 @@ body {
   align-items: flex-start;
   min-height: 100vh;
   margin: 0;
-  /* font-size: 50px; を削除し、標準に戻しました */
   touch-action: pan-y pinch-zoom;
   user-select: none;
   -webkit-user-select: none;
@@ -51,9 +50,39 @@ body.detail-view { padding-top: 0; }
 .mobile-frame { width: 100%; max-width: 100%; height: 100vh; background-color: white; position: relative; overflow-y: scroll; overflow-x: hidden; }
 .card-base { background-color: white; border-radius: 12px; box-shadow: var(--card-shadow); padding: 16px; margin-bottom: 16px; }
 
-/* タブナビゲーションの調整 */
-.tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #9CA3AF; background-color: white; padding: 8px 0; cursor: pointer; transition: all 0.2s; position: relative; flex: 1; height: 60px; }
-.tab-item.active { color: var(--aiko-red); background-color: #FFF5F5; } /* アクティブ時は薄い赤背景に */
+/* タブナビゲーションの調整（均等配置を強制） */
+nav {
+  padding-bottom: env(safe-area-inset-bottom);
+  position: fixed !important;
+  display: flex !important;
+  border-top: 1px solid #e5e7eb;
+  height: calc(60px + env(safe-area-inset-bottom));
+  z-index: 50;
+  width: 100%; /* 幅を確実に100%に */
+  background-color: white;
+}
+nav > div {
+  display: flex;
+  width: 100%;
+  justify-content: space-between; /* 子要素を均等に配置 */
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #9CA3AF;
+  background-color: white;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  flex: 1 1 0px; /* 幅を均等に伸縮させる */
+  width: 0; /* flexアイテムの幅計算用 */
+  height: 60px;
+}
+.tab-item.active { color: var(--aiko-red); background-color: #FFF5F5; }
 .tab-item.active i { color: var(--aiko-red); }
 
 /* セットリストのスタイル調整 */
@@ -75,7 +104,6 @@ body.detail-view { padding-top: 0; }
 .setlist-encore-header { background-color: #fce7f3; border-left: 3px solid var(--aiko-pink); font-weight: bold; font-size: 14px; padding: 8px 12px; margin-bottom: 8px; border-radius: 8px; color: #db2777; }
 
 header { background-color: var(--aiko-red) !important; color: white !important; height: 60px; display: flex; align-items: center; justify-content: center; padding: 0 16px; }
-nav { padding-bottom: env(safe-area-inset-bottom); position: fixed !important; display: flex !important; border-top: 1px solid #e5e7eb; height: calc(60px + env(safe-area-inset-bottom)); z-index: 50; }
 main { padding: 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 body.detail-view main { padding-top: 80px; padding-bottom: 40px; }
 
@@ -113,16 +141,22 @@ button { font-size: 14px !important; }
 .song-count { white-space: nowrap; flex-shrink: 0; font-size: 16px; font-weight: bold; color: #4B5563; }
 .song-count span { font-size: 12px; font-weight: normal; margin-left: 2px; }
 
-/* 公演カードのラベル */
-.live-card { position: relative; overflow: hidden; padding-bottom: 32px; } /* ラベルのために下部余白確保 */
+/* 公演カードのラベル（右上の斜め帯スタイル） */
+.live-card { position: relative; overflow: hidden; }
 .live-card-label {
-  position: absolute; bottom: 0; right: 0;
-  border-top-left-radius: 12px;
+  position: absolute;
+  top: 15px;
+  right: -35px;
+  transform: rotate(45deg);
   background-color: var(--aiko-pink);
   color: white;
-  padding: 4px 12px;
+  padding: 4px 0;
+  width: 120px;
+  text-align: center;
   font-size: 12px;
   font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  z-index: 1;
 }
 .live-card-label.rock { background-color: var(--aiko-blue); }
 .live-card-label.aloha { background-color: var(--aiko-yellow); color: #333; }
@@ -137,7 +171,7 @@ button { font-size: 14px !important; }
   <!-- ヘッダー -->
   <header id="main-header" class="shadow-sm">
     <div style="position:relative; width:100%; display:flex; align-items:center; justify-content:center;">
-      <h1 class="font-bold text-center" style="font-size:18px; color:white;">Love Like Data Base</h1>
+      <h1 class="font-bold text-center" style="font-size:18px; color:white;">Love Like Data Base vol.2.0</h1>
       <button id="info-btn" style="position:absolute; right:0; background-color:rgba(255,255,255,0.2); color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold; border:none; cursor:pointer;">読んでね</button>
     </div>
   </header>
