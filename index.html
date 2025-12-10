@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base vol.2.5</title>
+<title>Love Like Data Base vol.2.0</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -96,18 +96,17 @@ nav > div {
 .tab-item.active { color: white; background-color: #4B5563; }
 .tab-item.active i { color: white; }
 
-/* セットリストのスタイル（v1風調整：背景なし、文字大きく、幅狭く） */
+/* セットリストのスタイル */
 .setlist-item { 
-  padding: 4px 0; /* 上下の余白を詰める（幅狭く） */
-  margin-bottom: 0; /* 間隔をなくす */
-  background-color: transparent; /* 背景なし */
-  border-bottom: 1px solid #f3f4f6; /* 薄い区切り線 */
-  font-size: 17px; /* 文字大きく */
+  padding: 4px 0;
+  margin-bottom: 0;
+  background-color: transparent;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 17px;
   line-height: 1.4;
   display: flex;
   align-items: baseline;
 }
-/* 最後の要素だけボーダーを消す */
 .setlist-item:last-child { border-bottom: none; }
 
 .setlist-item-number { 
@@ -116,19 +115,19 @@ nav > div {
   flex-shrink: 0; 
   font-weight: normal; 
   color: #9CA3AF; 
-  font-size: 14px; /* 番号は少し控えめに */
+  font-size: 14px;
 }
 .setlist-item-title { flex: 1; font-weight: 500; color: #1f2937; }
 
-/* メドレー・アンコール（帯のみ残す） */
+/* メドレー・アンコール */
 .setlist-medley { 
-  background-color: transparent; /* 背景削除 */
-  border-left: 5px solid var(--aiko-yellow); /* 帯を残す */
+  background-color: transparent; 
+  border-left: 5px solid var(--aiko-yellow); 
   padding-left: 12px; 
 }
 .setlist-encore { 
-  background-color: transparent; /* 背景削除 */
-  border-left: 5px solid var(--aiko-pink); /* 帯を残す */
+  background-color: transparent; 
+  border-left: 5px solid var(--aiko-pink); 
   padding-left: 12px;
 }
 
@@ -247,9 +246,9 @@ button { font-size: 14px !important; }
 <body>
 <div id="app" class="mobile-frame">
   
-  <!-- ヘッダー -->
+  <!-- ヘッダー（フォントサイズを22pxに拡大） -->
   <header id="main-header" class="shadow-sm">
-    <h1 class="font-bold text-left" style="font-size:18px; color:white; flex:1;">Love Like Data Base vol.2.0</h1>
+    <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.2.0</h1>
     <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
   </header>
 
@@ -266,11 +265,15 @@ button { font-size: 14px !important; }
           <button id="clear-all-btn" class="action-btn clear-btn">すべてクリア</button>
         </div>
         
-        <!-- フィルター行 -->
-        <div class="flex flex-wrap gap-2 mb-2">
-          <select id="tour-select" class="flex-1 min-w-[130px] text-gray-700 bg-white"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
-          <select id="year-select" class="flex-1 min-w-[90px] text-gray-700 bg-white"><option value="">すべての年</option></select>
-          <select id="region-select" class="flex-1 min-w-[110px] text-gray-700 bg-white"><option value="">すべての都道府県</option></select>
+        <!-- フィルター行（修正：2段構成に変更） -->
+        <div class="flex flex-col gap-2 mb-2">
+          <!-- 1段目：ツアー選択 -->
+          <select id="tour-select" class="w-full text-gray-700 bg-white"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
+          <!-- 2段目：年と都道府県を横並び -->
+          <div class="flex gap-2">
+            <select id="year-select" class="flex-1 text-gray-700 bg-white"><option value="">すべての年</option></select>
+            <select id="region-select" class="flex-1 text-gray-700 bg-white"><option value="">すべての都道府県</option></select>
+          </div>
         </div>
         
         <!-- 楽曲フィルター行 -->
@@ -737,7 +740,7 @@ function populateFilters(records, skipApply = false) {
 function applyFilters() {
   const songFilterInput = document.getElementById('song-filter-input');
   let songFilterValue = songFilterInput.value;
-  if (songFilterValue.includes('（楽曲タブから選択）')) {
+  if (songFilterInput.value.includes('（楽曲タブから選択）')) {
     songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '');
   }
 
@@ -922,7 +925,11 @@ function switchToTab(tabId) {
 
   if (tabId === 'song' && chartInstances.liveCount) chartInstances.liveCount.resize();
   if (tabId === 'pattern') {
-    if (chartInstances.album) chartInstances.album.resize();
+    if (chartInstances.album) {
+       chartInstances.album.resize();
+    } else if (albumData.length > 0) {
+       renderAlbumChart();
+    }
   }
   if (tabId === 'venue' && chartInstances.venueLiveCount) {
     chartInstances.venueLiveCount.resize();
@@ -1111,15 +1118,19 @@ function handleError(error) {
 }
 
 function showModal(song, type) {
-  const matches = new Set();
+  const matchedRecords = [];
   allLiveRecords.forEach(rec => {
     const cleanSetlist = rec.setlist.filter(s => !s.startsWith('__MEDLEY_')).map(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim());
     let isMatch = false;
     if (type === 'opening' && cleanSetlist[0] === song) isMatch = true;
     else if (type === 'last' && cleanSetlist[cleanSetlist.length - 1] === song) isMatch = true;
     else if (type === 'encore' && rec.setlist.some(s => s.includes('_アンコール') && s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim() === song)) isMatch = true;
-    if (isMatch) matches.add(rec.tourName);
+    if (isMatch) matchedRecords.push(rec);
   });
+
+  matchedRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const matches = new Set(matchedRecords.map(r => r.tourName));
+
   const top5 = Array.from(matches).slice(0, 5);
   let html = `<h2 class="font-bold mb-4 text-aiko-pink text-2xl">${song}</h2><div class="text-base text-gray-700">`;
   html += top5.map(m => `<p class="mb-2">・${m}</p>`).join('');
