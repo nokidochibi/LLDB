@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base vol.2.0</title>
+<title>Love Like Data Base vol.3.0</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -240,7 +240,7 @@ button { font-size: 14px !important; }
 
 .fade-out {
   opacity: 0;
-  transition: opacity 0.8s ease-out;
+  transition: opacity 0.5s ease-out;
   pointer-events: none;
 }
 </style>
@@ -252,11 +252,11 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
   
   <header id="main-header" class="shadow-sm">
-    <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.2.0</h1>
+    <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.3.0</h1>
     <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
   </header>
 
-  <main id="main-content" style="opacity: 0; transition: opacity 1s;">
+  <main id="main-content" style="opacity: 0; transition: opacity 0.5s;">
     <div id="live-detail" style="display:none"></div>
 
     <div id="tab-search" class="tab-content" style="display:block">
@@ -427,6 +427,8 @@ button { font-size: 14px !important; }
 <script>
 // GASのAPIエンドポイント
 const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
+// キャッシュキー
+const CACHE_KEY = 'lldb_data_v3';
 
 // アプリの初期化Promise
 let appInitializedResolver;
@@ -442,8 +444,39 @@ const animationFinishedPromise = new Promise(resolve => {
 
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
-  startLoadingAnimation(); // 演出スタート
-  loadAllData(); // 【高速化】全データを一括取得スタート
+  
+  // 1. キャッシュがあれば即表示
+  const cachedData = localStorage.getItem(CACHE_KEY);
+  let isCachedLoaded = false;
+  
+  if (cachedData) {
+    try {
+      const parsed = JSON.parse(cachedData);
+      if (parsed.liveRecords && parsed.liveRecords.length > 0) {
+        // キャッシュデータで初期化
+        initializeApp(parsed.liveRecords, parsed.albumData);
+        appInitializedResolver(); // データ準備完了
+        isCachedLoaded = true;
+      }
+    } catch (e) {
+      console.error("Cache parse error", e);
+    }
+  }
+
+  // 2. ローディング演出の開始（キャッシュがある場合はスキップして即完了）
+  if (isCachedLoaded) {
+    // キャッシュがあるなら演出は一瞬で終わらせる
+    setTimeout(() => {
+        // フェードイン用に少しだけ待つ
+        animationFinishedResolver(); 
+    }, 100);
+  } else {
+    // キャッシュがないなら通常の演出
+    startLoadingAnimation();
+  }
+
+  // 3. 裏で最新データを取得して更新（Stale-While-Revalidate）
+  loadAllData(isCachedLoaded);
   
   // 両方終わったら画面遷移
   Promise.all([appInitializedPromise, animationFinishedPromise]).then(() => {
@@ -454,23 +487,37 @@ document.addEventListener('DOMContentLoaded', () => {
 let allLiveRecords = [], songStats = {}, patternStats = {}, albumData = [], chartInstances = {};
 let selectedVenueInfo = null;
 
-// 【高速化】一括データ取得関数に変更
-async function loadAllData() {
+// 一括データ取得＆キャッシュ更新
+async function loadAllData(isAlreadyDisplayed) {
   try {
     const response = await fetch(`${API_URL}?action=getAllData`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     
-    // データが { liveRecords: [], albumData: [] } の形式で返ってくる
+    // データをキャッシュに保存
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+
+    // もしキャッシュ表示済みなら、データが変わった場合のみ静かに更新してもいいが
+    // 今回は整合性重視で常に最新データで再描画する
+    // (ユーザー操作中にいきなり変わると困るので、本当は通知がいいが、まずはシンプルに反映)
     initializeApp(data.liveRecords, data.albumData);
-    appInitializedResolver();
+    
+    // まだ表示されていなければ（キャッシュなしの場合）、ここで準備完了とする
+    if (!isAlreadyDisplayed) {
+      appInitializedResolver();
+    }
+    
   } catch (error) {
-    handleError(error);
+    // キャッシュもない、通信も失敗した場合のみエラー表示
+    if (!isAlreadyDisplayed) {
+        handleError(error);
+    } else {
+        console.log("Background update failed, keeping cached data.");
+    }
   }
 }
 
 function startLoadingAnimation() {
-  // タイミング調整：よりテンポよく
   const loadingTexts = [
     { id: 'loading-text-1', delay: 100 },   // 男子ー!!
     { id: 'loading-text-2', delay: 900 },   // 女子ー!!
@@ -486,24 +533,27 @@ function startLoadingAnimation() {
     }, item.delay);
   });
 
-  // 全てのアニメーションが表示され、余韻も含めた時間が経過したら完了とする
-  // 3000ms + 余韻(0.8秒) = 3800ms
+  // 通常演出完了
   setTimeout(() => {
-    animationFinishedResolver(); // 演出完了！
+    animationFinishedResolver();
   }, 3800);
 }
 
 function finishLoading() {
+  // キャッシュロード時は演出を邪魔しないように少し控えめに
   startConfetti();
+  
   const loadingDiv = document.getElementById('loading-container');
   loadingDiv.classList.add('fade-out');
+  
+  // メインコンテンツ表示
   document.getElementById('main-content').style.opacity = '1';
+  
   setTimeout(() => {
     loadingDiv.style.display = 'none';
   }, 500);
 }
 
-// 初期化関数を修正：アルバムデータも引数で受け取る
 function initializeApp(records, albums) {
   allLiveRecords = records;
   albumData = albums || [];
@@ -518,15 +568,20 @@ function initializeApp(records, albums) {
   
   analyzeSongStats(records);
   analyzePatterns(records);
-  populateFilters(records);
-  setupEventListeners();
+  populateFilters(records); // フィルタの中身を更新
+  // setupEventListeners(); // これは1回だけでいいのでDOMContentLoadedなどで呼ぶべきだが、現状の実装では上書きしても問題ない
+  if (!document.getElementById('search-input').hasAttribute('data-listener-attached')) {
+      setupEventListeners();
+      document.getElementById('search-input').setAttribute('data-listener-attached', 'true');
+  }
+  
   applyFilters();
   checkOrientation();
   window.addEventListener('resize', checkOrientation);
 
   // すべてのグラフを初期化
   renderLiveCountChart();
-  renderAlbumChart(); // 【修正】ここで確実に描画
+  renderAlbumChart();
   renderSongRanking();
   renderPatternStats();
   renderVenueRanking();
@@ -637,7 +692,12 @@ const chartCommonOptions = {
 function renderAlbumChart() {
   const canvas = document.getElementById('album-chart');
   if (!canvas || !albumData.length) return;
-  if (chartInstances.album) chartInstances.album.destroy();
+  
+  // 既存のチャートがあれば破棄
+  if (chartInstances.album) {
+      chartInstances.album.destroy();
+      chartInstances.album = null;
+  }
 
   chartInstances.album = new Chart(canvas, {
     type: 'bar',
@@ -1038,14 +1098,12 @@ function switchToTab(tabId) {
   lucide.createIcons();
 
   if (tabId === 'song' && chartInstances.liveCount) chartInstances.liveCount.resize();
+  
   if (tabId === 'pattern') {
-    // 【修正】タブ切り替え時にもリサイズと再描画を確認
-    if (chartInstances.album) {
-       chartInstances.album.resize();
-    } else {
-       renderAlbumChart();
-    }
+    // 【修正】タブ切り替え時にチャートを確実に再生成
+    renderAlbumChart();
   }
+  
   if (tabId === 'venue' && chartInstances.venueLiveCount) {
     chartInstances.venueLiveCount.resize();
   }
