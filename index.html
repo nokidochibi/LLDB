@@ -107,7 +107,7 @@ nav > div {
 .tab-item.active { color: white; background-color: #4B5563; }
 .tab-item.active i { color: white; }
 
-/* セットリストのスタイル（v1風調整：背景なし、文字大きく、幅狭く） */
+/* セットリストのスタイル */
 .setlist-item { 
   padding: 4px 0;
   margin-bottom: 0;
@@ -450,10 +450,27 @@ button { font-size: 14px !important; }
 // GASのAPIエンドポイント
 const API_URL = "https://script.google.com/macros/s/AKfycbwwgVHJ2MfnbYawn97Ui1fTvO3YPPDStM14HnQtj07OoYsTKEEOVs_26gdtFGQxGvYq/exec";
 
+// アプリの初期化Promise
+let appInitializedResolver;
+const appInitializedPromise = new Promise(resolve => {
+  appInitializedResolver = resolve;
+});
+
+// アニメーション完了Promise
+let animationFinishedResolver;
+const animationFinishedPromise = new Promise(resolve => {
+  animationFinishedResolver = resolve;
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
-  startLoadingAnimation();
-  loadLiveList();
+  startLoadingAnimation(); // 演出スタート
+  loadLiveList(); // データ取得スタート（並行）
+  
+  // 両方終わったら画面遷移
+  Promise.all([appInitializedPromise, animationFinishedPromise]).then(() => {
+    finishLoading();
+  });
 });
 
 let allLiveRecords = [], songStats = {}, patternStats = {}, albumData = [], chartInstances = {};
@@ -465,29 +482,51 @@ async function loadLiveList() {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     initializeApp(data);
+    appInitializedResolver(); // データ準備完了！
   } catch (error) {
     handleError(error);
   }
 }
 
-let loadingAnimationTimers = [];
 function startLoadingAnimation() {
-  // タイミングを1秒間隔に変更し、最後だけ0.5秒差で「いん...!!!」を表示
+  // タイミング調整：1秒間隔＋最後のタメ
   const loadingTexts = [
     { id: 'loading-text-1', delay: 100 },   // 男子ー!!
     { id: 'loading-text-2', delay: 1100 },  // 女子ー!!
     { id: 'loading-text-3', delay: 2100 },  // そうでない人ー!!
     { id: 'loading-text-4', delay: 3100 },  // ぜー
-    { id: 'loading-text-5', delay: 4100 }   // いんっ...!!!
+    { id: 'loading-text-5', delay: 3600 }   // いんっ...!!! (0.5秒後)
   ];
 
   loadingTexts.forEach(item => {
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       const element = document.getElementById(item.id);
       if (element) element.classList.remove('opacity-0');
     }, item.delay);
-    loadingAnimationTimers.push(timer);
   });
+
+  // 全てのアニメーションが表示され、余韻も含めた時間が経過したら完了とする
+  // 3600ms + 余韻(約1秒) = 4500ms
+  setTimeout(() => {
+    animationFinishedResolver(); // 演出完了！
+  }, 4500);
+}
+
+function finishLoading() {
+  // 1. 紙吹雪発射！
+  startConfetti();
+  
+  // 2. ローディング画面をフェードアウト
+  const loadingDiv = document.getElementById('loading-container');
+  loadingDiv.classList.add('fade-out');
+  
+  // 3. メインコンテンツをフェードイン
+  document.getElementById('main-content').style.opacity = '1';
+  
+  // 4. 少し待ってローディング画面を完全削除
+  setTimeout(() => {
+    loadingDiv.style.display = 'none';
+  }, 500);
 }
 
 function initializeApp(records) {
@@ -521,24 +560,6 @@ function initializeApp(records) {
   renderPatternStats();
   renderVenueRanking();
   renderVenueLiveCountChart();
-
-  // ローディング終了演出（トータル時間を4500msに調整）
-  setTimeout(() => {
-    // 1. 紙吹雪発射！
-    startConfetti();
-    
-    // 2. ローディング画面をフェードアウト
-    const loadingDiv = document.getElementById('loading-container');
-    loadingDiv.classList.add('fade-out');
-    
-    // 3. メインコンテンツをフェードイン
-    document.getElementById('main-content').style.opacity = '1';
-    
-    // 4. 少し待ってローディング画面を完全削除
-    setTimeout(() => {
-      loadingDiv.style.display = 'none';
-    }, 500);
-  }, 4500);
 }
 
 // -----------------------------------------------------------
@@ -1281,3 +1302,5 @@ function closeInfoModal() {
 </script>
 </body>
 </html>
+
+
