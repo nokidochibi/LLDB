@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like Data Base vol.3.0</title>
+<title>Love Like Data Base vol.2.1.1</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Scripts and Styles -->
@@ -252,7 +252,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
   
   <header id="main-header" class="shadow-sm">
-    <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.3.0</h1>
+    <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like Data Base vol.2.1.1</h1>
     <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
   </header>
 
@@ -463,17 +463,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. ローディング演出の開始（キャッシュがある場合はスキップして即完了）
-  if (isCachedLoaded) {
-    // キャッシュがあるなら演出は一瞬で終わらせる
-    setTimeout(() => {
-        // フェードイン用に少しだけ待つ
-        animationFinishedResolver(); 
-    }, 100);
-  } else {
-    // キャッシュがないなら通常の演出
-    startLoadingAnimation();
-  }
+  // 2. ローディング演出の開始（キャッシュ有無でモード分岐）
+  startLoadingAnimation(isCachedLoaded ? 'fast' : 'normal');
 
   // 3. 裏で最新データを取得して更新（Stale-While-Revalidate）
   loadAllData(isCachedLoaded);
@@ -517,14 +508,31 @@ async function loadAllData(isAlreadyDisplayed) {
   }
 }
 
-function startLoadingAnimation() {
-  const loadingTexts = [
-    { id: 'loading-text-1', delay: 100 },   // 男子ー!!
-    { id: 'loading-text-2', delay: 900 },   // 女子ー!!
-    { id: 'loading-text-3', delay: 1700 },  // そうでない人ー!!
-    { id: 'loading-text-4', delay: 2500 },  // ぜー
-    { id: 'loading-text-5', delay: 3000 }   // いんっ...!!!
-  ];
+function startLoadingAnimation(mode) {
+  let loadingTexts;
+  let totalDuration;
+
+  if (mode === 'fast') {
+    // キャッシュあり（2回目以降）: 0.5秒間隔でテンポよく
+    loadingTexts = [
+        { id: 'loading-text-1', delay: 0 },     // 男子ー!!
+        { id: 'loading-text-2', delay: 500 },   // 女子ー!!
+        { id: 'loading-text-3', delay: 1000 },  // そうでない人ー!!
+        { id: 'loading-text-4', delay: 1500 },  // ぜー
+        { id: 'loading-text-5', delay: 2000 }   // いんっ...!!!
+    ];
+    totalDuration = 2800; // 完了までの時間（余韻含む）
+  } else {
+    // キャッシュなし（初回）: 少し待たせつつ期待感を煽る
+    loadingTexts = [
+        { id: 'loading-text-1', delay: 100 },   // 男子ー!!
+        { id: 'loading-text-2', delay: 900 },   // 女子ー!!
+        { id: 'loading-text-3', delay: 1700 },  // そうでない人ー!!
+        { id: 'loading-text-4', delay: 2500 },  // ぜー
+        { id: 'loading-text-5', delay: 3000 }   // いんっ...!!!
+    ];
+    totalDuration = 3800;
+  }
 
   loadingTexts.forEach(item => {
     setTimeout(() => {
@@ -533,22 +541,16 @@ function startLoadingAnimation() {
     }, item.delay);
   });
 
-  // 通常演出完了
   setTimeout(() => {
     animationFinishedResolver();
-  }, 3800);
+  }, totalDuration);
 }
 
 function finishLoading() {
-  // キャッシュロード時は演出を邪魔しないように少し控えめに
   startConfetti();
-  
   const loadingDiv = document.getElementById('loading-container');
   loadingDiv.classList.add('fade-out');
-  
-  // メインコンテンツ表示
   document.getElementById('main-content').style.opacity = '1';
-  
   setTimeout(() => {
     loadingDiv.style.display = 'none';
   }, 500);
