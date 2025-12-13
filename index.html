@@ -3,8 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.2.0</title>
+<title>Love Like DataBase vol.2.1</title>
 <meta name="theme-color" content="#ef4444">
+
+<!-- ホーム画面に追加したときの設定 -->
+<meta name="apple-mobile-web-app-title" content="LLDB">
+<meta name="application-name" content="LLDB">
+
+<!-- アプリアイコン (GitHub上の icon.png を使用) -->
+<link rel="icon" type="image/png" href="./icon.png">
+<link rel="apple-touch-icon" href="./icon.png">
+
+<!-- Web App Manifest (Data URI) -->
+<link rel="manifest" href='data:application/manifest+json,{"name":"Love Like DataBase","short_name":"LLDB","start_url":".","display":"standalone","background_color":"#F8F8F8","theme_color":"#ef4444","icons":[{"src":"./icon.png","sizes":"192x192 512x512","type":"image/png"}]}'>
 
 <!-- Scripts and Styles -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -103,8 +114,9 @@ nav > div {
 .tab-item.active { color: white; background-color: #4B5563; }
 .tab-item.active i { color: white; }
 
+/* セトリリストのスタイル修正: 余白を狭くして一覧性を向上 */
 .setlist-item {
-  padding: 8px 0;
+  padding: 3px 0;
   margin-bottom: 0;
   background-color: transparent;
   border-bottom: 1px solid #f3f4f6;
@@ -113,6 +125,7 @@ nav > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 36px;
 }
 .setlist-item:last-child { border-bottom: none; }
 
@@ -142,7 +155,7 @@ nav > div {
 /* タイムラインバー用スタイル */
 .timeline-container {
   flex: 1;
-  height: 30px; /* タップしやすいように少し高く */
+  height: 30px;
   display: flex;
   align-items: center;
   position: relative;
@@ -165,14 +178,14 @@ nav > div {
   transform: translate(-50%, -50%);
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  background-color: var(--aiko-pink); /* デフォルト色 */
+  background-color: var(--aiko-pink);
   z-index: 10;
   transition: transform 0.1s;
 }
 /* タップ時の年表示吹き出し */
 .year-tooltip {
   position: absolute;
-  bottom: 18px; /* ドットの上に表示 */
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
   background-color: #374151;
@@ -345,7 +358,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.2.0</h1>
+  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.2.1</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -416,6 +429,10 @@ button { font-size: 14px !important; }
         <canvas id="album-chart" style="height:350px; max-height:350px"></canvas>
       </div>
     </div>
+
+    <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700 text-xl">🕰️ 最近演奏されていない曲 TOP 10</h3>
+    <p class="text-gray-500 mb-3 text-center text-sm">※過去に1度でも演奏された曲が対象だよ</p>
+    <div id="not-played-recently-songs" class="card-base bg-white p-2"></div></div>
 
     <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700 text-xl">🎬 オープニング曲 TOP 10</h3>
     <div id="opening-songs" class="card-base bg-white p-2"></div></div>
@@ -492,7 +509,15 @@ button { font-size: 14px !important; }
       <ul class="list-disc pl-5 mb-6 space-y-2">
         <li>セトリのページの左上に「←（戻る）」ボタンがあるけど、ライブ名をタップしても前のページに戻るよ。右手でも押しやすいね。</li>
         <li>「表示中の公演数」の前の「🎫」を3回タップすると...？</li>
+        <li>セトリ画面の「🎵 セットリスト」をタップすると、テキストとしてコピーできるよ。</li>
       </ul>
+      
+      <!-- 最新のお知らせエリア（ここだけ表示する運用） -->
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (vol.2.1)</h3>
+      <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-6 text-sm text-gray-600">
+        <p>セトリ画面の余白調整、セトリのコピー機能追加、アイコン変更、グラフへの数値表示などを行いました。</p>
+      </div>
+
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
       <p>他にもいろいろおもちゃがあるよ<br>→<a href="https://lit.link/nokidochibi" target="_blank" class="text-blue-500 underline">https://lit.link/nokidochibi</a></p>
     </div>
@@ -510,13 +535,14 @@ button { font-size: 14px !important; }
       <i data-lucide="music" style="width:26px;height:26px"></i>
       <span class="text-[11px] font-bold">楽曲</span>
     </a>
-    <a href="#" class="tab-item" data-tab="pattern">
-      <i data-lucide="shuffle" style="width:26px;height:26px"></i>
-      <span class="text-[11px] font-bold">傾向</span>
-    </a>
+    <!-- 場所タブを傾向タブの前に移動 -->
     <a href="#" class="tab-item" data-tab="venue">
       <i data-lucide="map-pin" style="width:26px;height:26px"></i>
       <span class="text-[11px] font-bold">場所</span>
+    </a>
+    <a href="#" class="tab-item" data-tab="pattern">
+      <i data-lucide="shuffle" style="width:26px;height:26px"></i>
+      <span class="text-[11px] font-bold">傾向</span>
     </a>
   </div>
 </nav>
@@ -524,10 +550,10 @@ button { font-size: 14px !important; }
 </div>
 
 <script>
-// GASのAPIエンドポイント (前回と同じならそのままでOK)
+// GASのAPIエンドポイント
 const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
 // キャッシュキー (ここを変更して強制更新させる)
-const CACHE_KEY = 'lldb_data_v3_3';
+const CACHE_KEY = 'lldb_data_v3_6';
 
 // アプリの初期化Promise
 let appInitializedResolver;
@@ -577,8 +603,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-let allLiveRecords = [], songStats = {}, patternStats = {}, albumData = [], songData = {}, chartInstances = {};
+let allLiveRecords = [], songStats = {}, patternStats = {}, lastPlayedStats = {}, albumData = [], songData = {}, chartInstances = {};
 let selectedVenueInfo = null;
+let currentDisplayingRecord = null; // 現在表示中のセトリデータを保持
 
 // 一括データ取得＆キャッシュ更新
 async function loadAllData(isAlreadyDisplayed) {
@@ -621,7 +648,7 @@ function startLoadingAnimation(mode) {
         { id: 'loading-text-4', delay: 1500 },  // ぜー
         { id: 'loading-text-5', delay: 2000 }   // いんっ...!!!
     ];
-    totalDuration = 2800; // 完了までの時間（余韻含む）
+    totalDuration = 2500; // 完了までの時間（余韻含む）
   } else {
     // キャッシュなし（初回）: 少し待たせつつ期待感を煽る
     loadingTexts = [
@@ -671,6 +698,7 @@ function initializeApp(records, albums, songs) {
 
   analyzeSongStats(records);
   analyzePatterns(records);
+  analyzeLastPlayed(records); // 最終演奏日の分析
   populateFilters(records);
   
   if (!document.getElementById('search-input').hasAttribute('data-listener-attached')) {
@@ -687,6 +715,7 @@ function initializeApp(records, albums, songs) {
   renderAlbumChart();
   renderSongRanking();
   renderPatternStats();
+  renderLastPlayedRanking(); // ご無沙汰ランキング描画
   renderVenueRanking();
   renderVenueLiveCountChart();
 }
@@ -880,11 +909,24 @@ function renderAlbumChart() {
     options: {
       ...chartCommonOptions,
       indexAxis: 'y',
+      // ChartDataLabelsプラグインの設定を追加
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: 'white',
+          anchor: 'end',
+          align: 'start', // 棒の内側の右端に表示
+          offset: 4,
+          font: { weight: 'bold', size: 11 },
+          formatter: (value) => value > 0 ? value : ''
+        }
+      },
       scales: {
         x: { beginAtZero: true, ticks: { font: { size: 10 } } },
         y: { ticks: { font: { size: 10 }, autoSkip: false } }
       }
-    }
+    },
+    plugins: [ChartDataLabels] // プラグインを有効化
   });
 }
 
@@ -1029,6 +1071,14 @@ function renderVenueLiveCountChart() {
 
 function analyzeSongStats(records) {
   songStats = {};
+
+  // 楽曲データにある全曲を0回で初期化
+  if (songData) {
+    Object.keys(songData).forEach(songName => {
+      songStats[songName] = 0;
+    });
+  }
+
   records.forEach(rec => {
     rec.setlist.forEach(s => {
       const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
@@ -1053,6 +1103,58 @@ function analyzePatterns(records) {
     });
   });
   patternStats = { openingSongs: o, encoreSongs: e, lastSongs: l };
+}
+
+function analyzeLastPlayed(records) {
+  lastPlayedStats = {};
+  records.forEach(rec => {
+    // 日付オブジェクト作成（rec.dateは "YYYY/MM/DD" 文字列または Dateオブジェクト）
+    const recDate = new Date(rec.date);
+    
+    rec.setlist.forEach(s => {
+      // 除外チェック
+      if (s.startsWith('__MEDLEY_') || s === 'メドレー') return;
+      
+      const cleanName = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
+      if (!cleanName) return;
+
+      // 【修正】aikoの曲（楽曲データにある曲）のみ対象
+      if (!songData[cleanName]) return;
+
+      // 既存データがない、または今回のライブの方が新しい場合更新
+      if (!lastPlayedStats[cleanName] || recDate > lastPlayedStats[cleanName].dateObj) {
+        lastPlayedStats[cleanName] = {
+          dateObj: recDate,
+          tourName: rec.tourName,
+          year: rec.year
+        };
+      }
+    });
+  });
+}
+
+function renderLastPlayedRanking() {
+  const container = document.getElementById('not-played-recently-songs');
+  if (!container) return;
+
+  // 日付昇順（古い順）にソート
+  const sorted = Object.entries(lastPlayedStats)
+    .sort((a, b) => a[1].dateObj - b[1].dateObj)
+    .slice(0, 10);
+
+  container.innerHTML = sorted.map(([song, data], i) => {
+    const rankColor = i < 3 ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][i] : 'text-gray-300';
+    const borderClass = i !== sorted.length - 1 ? 'border-b border-gray-100' : '';
+    
+    // 【修正】フォーマット変更: 曲名 <br> (西暦) ライブ名
+    return `<div class="p-3 clickable-item flex items-center ${borderClass}" onclick="selectSong('${song.replace(/'/g, "\\'")}'); switchToTab('song');">
+      <span class="rank-number ${rankColor}">${i + 1}</span>
+      <div class="flex-1 min-w-0">
+        <div class="song-title text-gray-700 truncate">${song}</div>
+        <div class="text-xs text-gray-400 mt-0.5 truncate">(${data.year}) ${data.tourName}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function populateFilters(records, skipApply = false) {
@@ -1142,6 +1244,8 @@ function renderLiveList(records) {
 
 function showLiveDetail(rec) {
   document.body.classList.add('detail-view');
+  currentDisplayingRecord = rec; // コピー用に保持
+
   document.querySelectorAll('.tab-content, #main-header, nav').forEach(el => el.style.display = 'none');
 
   let backBtn = document.getElementById('back-button-fixed');
@@ -1163,8 +1267,6 @@ function showLiveDetail(rec) {
   const minYear = 1998;
   const maxYear = new Date().getFullYear();
 
-  // 📝 修正箇所: 楽曲タイプ正規化関数
-  // スプレッドシートの表記ゆれ（「カップリング」「C/W」など）を統一的なタイプ名に変換する
   function normalizeType(rawType) {
     if (!rawType) return 'その他';
     if (rawType.includes('表題') || rawType.includes('シングル')) return '表題曲';
@@ -1173,7 +1275,6 @@ function showLiveDetail(rec) {
     return 'その他';
   }
 
-  // タイムラインバーHTML生成関数
   function createTimelineHtml(songName) {
     const songInfo = songData[songName];
     if (!songInfo || !songInfo.year) return ''; 
@@ -1182,12 +1283,12 @@ function showLiveDetail(rec) {
     let percent = ((songYear - minYear) / (maxYear - minYear)) * 100;
     percent = Math.max(0, Math.min(100, percent)); 
     
-    const type = normalizeType(songInfo.type); // 正規化
+    const type = normalizeType(songInfo.type);
     
-    let dotColor = '#D1D5DB'; // デフォルトはグレー
-    if (type === '表題曲') dotColor = '#FF69B4'; // ピンク
-    else if (type === 'カップリング曲') dotColor = '#3B82F6'; // 青
-    else if (type === 'アルバム曲') dotColor = '#EAB308'; // 黄色
+    let dotColor = '#D1D5DB'; 
+    if (type === '表題曲') dotColor = '#FF69B4'; 
+    else if (type === 'カップリング曲') dotColor = '#3B82F6'; 
+    else if (type === 'アルバム曲') dotColor = '#EAB308'; 
     
     return `
       <div class="timeline-container" onclick="this.querySelector('.timeline-dot').classList.toggle('active'); event.stopPropagation();">
@@ -1199,7 +1300,6 @@ function showLiveDetail(rec) {
       </div>
     `;
   }
-  // ----------------------
 
   let setlistHtml = '', songNum = 1, inMedley = false, medleyNum = 1, encoreNum = 0;
   let typeCounts = { '表題曲': 0, 'カップリング曲': 0, 'アルバム曲': 0, 'その他': 0 };
@@ -1217,14 +1317,19 @@ function showLiveDetail(rec) {
         }
       }
       inMedley = true;
-      setlistHtml += `<div class="setlist-item setlist-medley-title${nextSongIsEncore ? ' setlist-encore' : ''}"><span class="setlist-item-number">${songNum++}.</span><span class="setlist-item-title">メドレー</span></div>`;
+      // 修正: メドレーの行も通常の曲と同じ構造で囲み、かつ強力に左寄せを強制
+      setlistHtml += `<div class="setlist-item setlist-medley-title${nextSongIsEncore ? ' setlist-encore' : ''}" style="justify-content: flex-start;">
+        <div class="setlist-left-content">
+          <span class="setlist-item-number">${songNum++}.</span>
+          <span class="setlist-item-title">メドレー</span>
+        </div>
+      </div>`;
       medleyNum = 1;
       return;
     }
 
     const cleanSong = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
     
-    // 集計処理 (修正: 正規化してからカウント)
     const songInfo = songData[cleanSong];
     if (songInfo) {
       const normalizedType = normalizeType(songInfo.type);
@@ -1241,7 +1346,6 @@ function showLiveDetail(rec) {
       setlistHtml += `<div class="setlist-encore-header">アンコール ${'👏'.repeat(encoreNum)}</div>`;
     }
 
-    // タイムラインバーの生成
     const timeline = createTimelineHtml(cleanSong);
 
     setlistHtml += `
@@ -1254,20 +1358,18 @@ function showLiveDetail(rec) {
       </div>`;
   });
 
-  // 凡例エリアの生成
   const legendHtml = `
-    <div class="flex items-center mb-2 px-0">
-      <div class="w-1/2 text-right pr-2 text-xs text-gray-400 font-medium">リリース年</div>
-      <div class="flex-1 flex items-center text-xs text-gray-400 pl-1">
+    <div class="flex flex-col items-end justify-end pb-1">
+      <div class="text-[10px] text-gray-400 leading-none mb-1 text-center w-full">リリース年</div>
+      <div class="flex items-center text-[10px] text-gray-400 leading-none">
         <span class="mr-1">1998</span>
-        <div class="flex-1 h-[1px] bg-gray-300 mx-1 relative flex items-center justify-center">
-            <div class="w-3 h-3 rounded-full border border-white shadow-sm" style="background-color: var(--aiko-pink);"></div>
+        <div class="w-20 h-[1px] bg-gray-300 mx-1 relative flex items-center justify-center">
+            <div class="w-2 h-2 rounded-full shadow-sm" style="background-color: var(--aiko-pink);"></div>
         </div>
         <span class="ml-1">${maxYear}</span>
       </div>
     </div>`;
 
-  // 集計エリアの生成
   const summaryHtml = `
     <div class="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600 font-bold text-center border border-gray-100">
       <div class="mb-1">📊 このライブの成分表</div>
@@ -1277,11 +1379,18 @@ function showLiveDetail(rec) {
     </div>
   `;
 
+  // 見出しと凡例を横並びにするヘッダー
+  const setlistHeaderHtml = `
+    <div class="flex justify-between items-end mt-8 mb-2">
+       <h3 class="font-bold text-gray-700 text-lg cursor-pointer flex items-center gap-2" onclick="copySetlist()">🎵 セットリスト</h3>
+       ${legendHtml}
+    </div>
+  `;
+
   const setlistSection = setlistHtml.trim()
     ? `
        ${summaryHtml}
-       <h3 class="font-bold mb-3 mt-8 text-gray-700 text-lg">🎵 セットリスト</h3>
-       ${legendHtml}
+       ${setlistHeaderHtml}
        <div class="card-base shadow-none border border-gray-100 pb-2">
          ${setlistHtml}
        </div>`
@@ -1310,6 +1419,28 @@ function hideDetailView() {
   document.getElementById('main-header').style.display = 'flex';
   document.querySelector('nav').style.display = 'flex';
   switchToTab(document.querySelector('.tab-item.active').dataset.tab);
+  currentDisplayingRecord = null;
+}
+
+// セトリコピー機能
+function copySetlist() {
+  if (!currentDisplayingRecord) return;
+  if (!confirm('セットリストをコピーしますか？')) return;
+
+  const text = currentDisplayingRecord.setlist
+    .filter(s => s !== '__MEDLEY_START__' && s !== '__MEDLEY_END__')
+    .map((s, i) => {
+        const cleanName = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
+        return `${i + 1}. ${cleanName}`;
+    })
+    .join('\n');
+    
+  navigator.clipboard.writeText(text).then(() => {
+      alert('コピーしました！');
+  }).catch(err => {
+      console.error(err);
+      alert('コピーに失敗しました');
+  });
 }
 
 function searchVenue(venue) {
@@ -1372,19 +1503,41 @@ function renderSongRanking() {
   const sortOrder = document.getElementById('song-sort').value;
   const searchTerm = document.getElementById('song-search-input').value.toLowerCase();
 
+  // フィルタリングとソート
   const sortedSongs = Object.entries(songStats)
     .filter(([song]) => song.toLowerCase().startsWith(searchTerm))
     .map(([song, count]) => ({ song, count }))
     .sort((a, b) => sortOrder === 'count-desc' ? b.count - a.count : a.count - b.count);
 
   document.getElementById('total-songs').textContent = Object.keys(songStats).length;
-  const fullRanking = Object.entries(songStats).sort((a,b) => b[1]-a[1]);
-  container.innerHTML = sortedSongs.map(item => {
-    const globalRank = fullRanking.findIndex(([song]) => song === item.song) + 1;
-    const rankColor = globalRank <= 3 && searchTerm === '' ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][globalRank-1] : 'text-gray-300';
+  
+  // 順位付けロジック（同率順位対応）
+  let currentRank = 0;
+  let lastCount = -1;
+  let skip = 1;
+
+  container.innerHTML = sortedSongs.map((item, index) => {
+    // 最初のアイテム、またはカウントが変わった場合にランクを更新
+    if (item.count !== lastCount) {
+        if (lastCount !== -1) {
+            // 前回のカウントと違う場合、スキップしていた分を加算してランクを進める（Standard Competition Ranking）
+            // 例: 1位, 1位, 3位... とする場合
+            currentRank += skip;
+            skip = 1;
+        } else {
+            // 初回
+            currentRank = 1;
+        }
+        lastCount = item.count;
+    } else {
+        // カウントが同じならランクは据え置きでスキップ数を増やす
+        skip++;
+    }
+
+    const rankColor = currentRank <= 3 && searchTerm === '' ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][currentRank-1] : 'text-gray-300';
     return `
       <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectSong('${item.song.replace(/'/g, "\\'")}')">
-        <span class="rank-number ${rankColor}">${globalRank}</span>
+        <span class="rank-number ${rankColor}">${currentRank}</span>
         <span class="song-title text-gray-700">${item.song}</span>
         <span class="song-count">${item.count} <span>回</span></span>
       </div>`}).join('');
@@ -1576,5 +1729,3 @@ function closeInfoModal() {
   document.getElementById('info-modal').style.display = 'none';
 }
 </script>
-</body>
-</html>
