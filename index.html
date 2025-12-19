@@ -36,7 +36,7 @@
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background: white; display: none; flex-direction: column; 
         overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
-        padding-top: 60px; padding-bottom: calc(70px + env(safe-area-inset-bottom));
+        padding-top: 60px; padding-bottom: calc(140px + env(safe-area-inset-bottom));
     }
     .app-screen.active { display: flex; animation: fadeIn 0.2s ease-out; }
     
@@ -70,7 +70,7 @@
     /* 共通UIパーツ */
     .card-base { background: white; border-radius: 12px; box-shadow: var(--card-shadow); padding: 16px; margin-bottom: 12px; }
     
-    /* 吹き出しデザイン (完コピ) */
+    /* 吹き出しデザイン */
     .bubble { position: relative; border-radius: 1.2rem; transition: background-color 0.3s, color 0.3s; padding: 12px 16px; font-size: 14px; line-height: 1.6; max-width: 85%; margin-bottom: 12px; }
     .bubble-left { background: white; border: 1px solid #e5e7eb; margin-left: 44px; }
     .bubble-left::before {
@@ -93,7 +93,7 @@
     /* 暗黒モード (しりとり用) */
     body.dark-mode { background-color: #0f172a; color: #e2e8f0; }
     body.dark-mode .app-screen { background-color: #0f172a; }
-    body.dark-mode header, body.dark-mode .bottom-nav, body.dark-mode #phrase-tabs, body.dark-mode #phrase-form-area { background-color: #1e293b; border-color: #334155; }
+    body.dark-mode header, body.dark-mode .bottom-nav, body.dark-mode #phrase-footer-content { background-color: #1e293b; border-color: #334155; }
     body.dark-mode .bubble-left { background-color: #334155; border-color: #475569; color: #f1f5f9; }
     body.dark-mode .bubble-left::before { border-right-color: #334155; }
     body.dark-mode .phrase-tab-btn.active { background-color: #334155; }
@@ -105,6 +105,7 @@
     .pulse-text { animation: pulse 1.5s infinite; }
     @keyframes pulse { 50% { opacity: .5; } }
     .highlight-text { color: #ea580c; font-weight: bold; background-color: #fff7ed; padding: 0 2px; border-radius: 2px; }
+    .message-row { scroll-margin-top: 80px; }
 
     /* モーダル */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
@@ -164,7 +165,6 @@
      1. LLDB phrase (Music App)
      ============================================ -->
 <div id="app-music" class="app-screen">
-    <!-- 各チャットコンテナ -->
     <div id="chat-container-lyrics" class="flex-1 p-4 overflow-y-auto bg-orange-50/30 space-y-4 no-scrollbar">
         <div class="flex items-start relative mb-4">
             <img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi">
@@ -185,11 +185,7 @@
     </div>
 
     <!-- phrase用フッターエリア -->
-    <div class="fixed bottom-0 left-0 w-full z-40 bg-white border-t border-gray-100 safe-pb shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <!-- ランダム歌詞表示エリア -->
-        <div id="random-lyric-container" class="bg-orange-50/50 border-b border-orange-100 py-1 px-4 overflow-hidden h-0 opacity-0 transition-all duration-300">
-             <div id="random-lyric-area" class="text-[10px] text-orange-400 text-center truncate h-4 leading-4"></div>
-        </div>
+    <div id="phrase-footer-content" class="fixed bottom-0 left-0 w-full z-40 bg-white border-t border-gray-100 safe-pb shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <!-- 入力フォーム -->
         <form id="music-form" class="flex items-center gap-2 px-3 py-3 border-b border-gray-50">
             <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2.5 transition-colors focus-within:bg-white border border-transparent focus-within:border-gray-200">
@@ -283,10 +279,17 @@
 <script>
     // --- ★定数・状態管理★ ---
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
-    const VERSION = "v5.1.2";
+    const VERSION = "v5.1.3";
+    const LOADING_MESSAGES = {
+        lyrics: ["aikoからのtelepathyを受信中...", "そんなことよりパーティ抜け出さない？"],
+        title: ["おっ！その曲なら確かね...", "俺もそれ好きだよ！待ってて..."],
+        shiritori: ["俺に勝負を仕掛けるとはいい度胸だ。", "なるほど、そう来たか..."]
+    };
+
     let allData = { liveRecords: [], songData: {}, historyData: [] };
     let currentApp = 'live';
     let phraseMode = 'lyrics';
+    let lastPhraseMode = 'lyrics';
     let isDarkMode = false;
 
     // --- 初期化 ---
@@ -316,7 +319,8 @@
     function switchApp(appName) {
         currentApp = appName;
         document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(`app-${appName}`).classList.add('active');
+        const target = document.getElementById(`app-${appName}`);
+        if (target) target.classList.add('active');
         
         const header = document.getElementById('main-header');
         const title = document.getElementById('header-title');
@@ -334,7 +338,7 @@
             header.className = "bg-orange-500 text-white";
             title.textContent = "LLDB phrase";
             document.documentElement.style.setProperty('--active-color', '#f97316');
-            switchPhraseTab(phraseMode); // 現在のタブ状態を反映
+            switchPhraseTab(phraseMode);
         } else if (appName === 'history') {
             header.className = "bg-pink-500 text-white"; title.textContent = "LLDB history";
         } else if (appName === 'stats') {
@@ -343,7 +347,7 @@
         toggleNoren(false);
     }
 
-    // --- LLDB phrase ロジック (完コピ移植) ---
+    // --- LLDB phrase ロジック ---
     function switchPhraseTab(mode) {
         phraseMode = mode;
         const containers = {
@@ -359,23 +363,17 @@
         const activeBtn = document.getElementById(`phrase-tab-${mode}`);
         if (activeBtn) activeBtn.classList.add('active');
 
-        // デザイン調整
         const submitBtn = document.getElementById('music-submit-btn');
         const input = document.getElementById('music-input');
-        const randomContainer = document.getElementById('random-lyric-container');
 
         if (mode === 'lyrics') {
             document.documentElement.style.setProperty('--bubble-color', '#f97316');
             submitBtn.className = "bg-orange-500 text-white p-2.5 rounded-full shadow-sm active:scale-95 transition";
             input.placeholder = "例：甘い匂いに";
-            if (document.getElementById('random-lyric-area').textContent) {
-                randomContainer.classList.remove('h-0', 'opacity-0');
-            }
         } else if (mode === 'title') {
             document.documentElement.style.setProperty('--bubble-color', '#0ea5e9');
             submitBtn.className = "bg-sky-500 text-white p-2.5 rounded-full shadow-sm active:scale-95 transition";
             input.placeholder = "例：ポニーテール";
-            randomContainer.classList.add('h-0', 'opacity-0');
         } else if (mode === 'shiritori') {
             document.documentElement.style.setProperty('--bubble-color', '#ec4899');
             submitBtn.className = "bg-pink-500 text-white p-2.5 rounded-full shadow-sm active:scale-95 transition";
@@ -396,7 +394,7 @@
 
         try {
             const endpoint = (phraseMode === 'lyrics') ? 'searchLyrics' : (phraseMode === 'title' ? 'searchTitleData' : 'shiritori');
-            const response = await fetch(`${GAS_API_URL}?action=${endpoint}&q=${encodeURIComponent(query)}`);
+            const response = await fetch(`${GAS_API_URL}?action=${endpoint}&q=${encodeURIComponent(query)}&mode=${phraseMode}`);
             const data = await response.json();
             removeMusicLoading(loadingId);
 
@@ -416,7 +414,7 @@
     function addMusicMessage(content, type) {
         const container = document.getElementById(`chat-container-${phraseMode}`);
         const div = document.createElement('div');
-        div.className = `flex flex-col ${type === 'user' ? 'items-end' : 'items-start'} relative mb-4 animate-fade-in`;
+        div.className = `flex items-start message-row relative mb-4 animate-fade-in ${type === 'user' ? 'justify-end' : ''}`;
         
         if (type === 'user') {
             div.innerHTML = `<div class="bubble bubble-right shadow-sm">${content}</div>`;
@@ -424,7 +422,7 @@
             div.innerHTML = `<img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm">${content}</div>`;
         }
         container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
+        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
 
     function addMusicLoading() {
@@ -433,19 +431,17 @@
         const div = document.createElement('div');
         div.id = id;
         div.className = "flex items-start relative mb-4";
-        div.innerHTML = `<img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm pulse-text">受信中...</div>`;
+        const msgs = LOADING_MESSAGES[phraseMode] || ["テレパシー受信中..."];
+        const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+        div.innerHTML = `<img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm"><p class="text-sm pulse-text">${randomMsg}</p></div>`;
         container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
+        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
         return id;
     }
 
     function removeMusicLoading(id) { document.getElementById(id)?.remove(); }
 
     function renderLyricsResults(data) {
-        if (data.random_message) {
-            document.getElementById('random-lyric-area').textContent = 'aiko: ' + data.random_message;
-            document.getElementById('random-lyric-container').classList.remove('h-0', 'opacity-0');
-        }
         if (!data.results || data.results.length === 0) {
             addMusicMessage(`「${data.query}」は見つからなかったよ。歌詞カードと同じ表記にしてみて！`, 'bot');
             return;
@@ -465,9 +461,18 @@
         });
         
         const uniqueCount = new Set(data.results.map(r => r.title)).size;
-        html += `<div class="mt-2 flex justify-between items-center"><span class="text-[10px] text-gray-400">${uniqueCount}曲中、計${data.results.length}箇所</span></div>`;
+        const allText = data.results.map(item => `${item.phrase}（${item.title}）`).join('\n').replace(/'/g, "\\'");
+
+        html += `<div class="mt-3 pt-2 border-t border-dashed border-orange-100">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="text-[10px] text-gray-400 font-bold">${uniqueCount}曲中、計${data.results.length}箇所見つかったよ♪</p>
+                        <button onclick="copyToClipboard('${allText}')" class="text-[10px] text-orange-500 bg-orange-50 px-2 py-1 rounded-full border border-orange-200 flex items-center gap-1 shadow-sm"><i data-lucide="copy" class="w-3 h-3"></i> まとめてコピー</button>
+                    </div>
+                 </div>`;
+        html += `<div class="flex justify-center mt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-[10px] text-orange-300 hover:text-orange-500 transition">この回答のトップへ移動</button></div>`;
         html += '</div>';
         addMusicMessage(html, 'bot');
+        lucide.createIcons();
     }
 
     function renderTitleResults(data) {
@@ -486,6 +491,7 @@
                         </div>
                      </div>`;
         });
+        html += `<div class="flex justify-center mt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-[10px] text-sky-300 hover:text-sky-500 transition">この回答のトップへ移動</button></div>`;
         html += '</div>';
         addMusicMessage(html, 'bot');
     }
@@ -493,18 +499,22 @@
     function renderShiritoriResults(data) {
         if (data.result === 'unknown_song') { addMusicMessage(data.message, 'bot'); return; }
         if (data.result === 'user_lose' || data.result === 'user_win') {
-            addMusicMessage(`${data.message}<br><button onclick="restartShiritori()" class="mt-2 bg-pink-500 text-white px-4 py-2 rounded-full text-xs font-bold">もう一度あそぶ</button>`, 'bot');
+            addMusicMessage(`${data.message}<br><div class="flex gap-2 mt-3"><button onclick="restartShiritori()" class="flex-1 bg-pink-500 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm">もう一度遊ぶ</button><button onclick="activateSecretMode()" class="flex-1 bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm">おしまいにする</button></div>`, 'bot');
             return;
         }
         let html = `<p>${data.message}</p>`;
         if (data.hints && data.hints.length > 0) {
-            html += `<div class="mt-2 flex flex-wrap gap-2">`;
+            const hintId = 'hint-' + Date.now();
+            html += `<div class="mt-2">
+                        <button onclick="document.getElementById('${hintId}').classList.toggle('hidden')" class="text-[10px] font-bold text-pink-500 flex items-center gap-1"><i data-lucide="lightbulb" class="w-3 h-3"></i> ヒントを見る</button>
+                        <div id="${hintId}" class="hidden mt-2 flex flex-wrap gap-2 animate-fade-in">`;
             data.hints.forEach(h => {
                 html += `<button onclick="sendShiritoriAnswer('${h.title}')" class="bg-white border border-pink-200 text-pink-500 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">${h.title}</button>`;
             });
-            html += `</div>`;
+            html += `</div></div>`;
         }
         addMusicMessage(html, 'bot');
+        lucide.createIcons();
     }
 
     function sendShiritoriAnswer(text) {
@@ -512,27 +522,30 @@
         document.getElementById('music-form').dispatchEvent(new Event('submit'));
     }
     function restartShiritori() {
-        document.getElementById('chat-container-shiritori').innerHTML = `<div class="flex items-start relative mb-4"><img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm">しりとりリセット！<br>最初の曲名を入力してね。</div></div>`;
+        document.getElementById('chat-container-shiritori').innerHTML = `<div class="flex items-start relative mb-4 animate-fade-in"><img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm">しりとりリセット！<br>最初の曲名を入力してね。</div></div>`;
     }
 
     function activateSecretMode() {
         if (currentApp !== 'music') return;
         isDarkMode = !isDarkMode;
         document.body.classList.toggle('dark-mode', isDarkMode);
+        const footerArea = document.getElementById('phrase-tabs');
         if (isDarkMode) {
+            lastPhraseMode = phraseMode;
             addMusicMessage("裏モード「しりとり」起動。曲名を入力してね。", "bot");
             switchPhraseTab('shiritori');
-            document.getElementById('phrase-tabs').classList.add('hidden');
+            footerArea.classList.add('hidden');
         } else {
-            switchPhraseTab('lyrics');
-            document.getElementById('phrase-tabs').classList.remove('hidden');
+            switchPhraseTab(lastPhraseMode);
+            footerArea.classList.remove('hidden');
         }
     }
 
     // --- LLDB live ロジック ---
     function switchLiveTab(tabName) {
         document.querySelectorAll('.live-sub-content').forEach(c => c.classList.add('hidden'));
-        document.getElementById(`live-tab-${tabName}`).classList.remove('hidden');
+        const target = document.getElementById(`live-tab-${tabName}`);
+        if (target) target.classList.remove('hidden');
         document.querySelectorAll('#live-nav .nav-item').forEach(i => i.classList.remove('active'));
         if (event && event.currentTarget) event.currentTarget.classList.add('active');
     }
