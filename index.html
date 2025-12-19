@@ -29,6 +29,7 @@
         background-color: var(--bg-color); color: #374151; 
         min-height: 100vh; overflow: hidden; touch-action: pan-y pinch-zoom; -webkit-tap-highlight-color: transparent;
         transition: background-color 0.3s, color 0.3s;
+        font-size: 15px; /* 全体的なフォントサイズ復旧 */
     }
 
     /* アプリ画面基本設定 */
@@ -36,7 +37,7 @@
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background: white; display: none; flex-direction: column; 
         overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
-        padding-top: 60px; padding-bottom: calc(140px + env(safe-area-inset-bottom));
+        padding-top: 60px; padding-bottom: calc(145px + env(safe-area-inset-bottom));
     }
     .app-screen.active { display: flex; animation: fadeIn 0.2s ease-out; }
     
@@ -60,7 +61,7 @@
         padding-bottom: env(safe-area-inset-bottom); z-index: 50;
     }
     .bottom-nav.active { display: flex; }
-    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #9CA3AF; font-size: 10px; font-weight: bold; cursor: pointer; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #9CA3AF; font-size: 11px; font-weight: bold; cursor: pointer; }
     .nav-item.active { color: var(--active-color, #ef4444); }
 
     /* 詳細ビュー */
@@ -70,20 +71,32 @@
     /* 共通UIパーツ */
     .card-base { background: white; border-radius: 12px; box-shadow: var(--card-shadow); padding: 16px; margin-bottom: 12px; }
     
-    /* 吹き出しデザイン */
-    .bubble { position: relative; border-radius: 1.2rem; transition: background-color 0.3s, color 0.3s; padding: 12px 16px; font-size: 14px; line-height: 1.6; max-width: 85%; margin-bottom: 12px; }
+    /* 吹き出しデザイン (完コピ + 矢印枠線対応) */
+    .bubble { position: relative; border-radius: 1.2rem; transition: background-color 0.3s, color 0.3s; padding: 12px 16px; font-size: 15px; line-height: 1.6; max-width: 85%; margin-bottom: 12px; }
+    
+    /* 左側吹き出し（Bot）: 枠線付き矢印 */
     .bubble-left { background: white; border: 1px solid #e5e7eb; margin-left: 44px; }
     .bubble-left::before {
         content: ""; position: absolute; top: 10px; left: -8px; width: 0; height: 0;
         border-style: solid; border-width: 6px 10px 6px 0;
-        border-color: transparent #ffffff transparent transparent;
+        border-color: transparent #e5e7eb transparent transparent;
+        z-index: 1;
     }
+    .bubble-left::after {
+        content: ""; position: absolute; top: 10px; left: -7px; width: 0; height: 0;
+        border-style: solid; border-width: 6px 10px 6px 0;
+        border-color: transparent white transparent transparent;
+        z-index: 2;
+    }
+
+    /* 右側吹き出し（User）: 矢印 */
     .bubble-right { background: var(--bubble-color, #f97316); color: white; margin-left: auto; }
     .bubble-right::before {
         content: ""; position: absolute; top: 10px; right: -8px; width: 0; height: 0;
         border-style: solid; border-width: 6px 0 6px 10px;
         border-color: transparent transparent transparent var(--bubble-color, #f97316);
     }
+    
     .bot-icon { width: 36px; height: 36px; border-radius: 50%; position: absolute; left: 0; top: 0; border: 1px solid #eee; background: white; }
 
     /* phraseタブデザイン */
@@ -95,7 +108,8 @@
     body.dark-mode .app-screen { background-color: #0f172a; }
     body.dark-mode header, body.dark-mode .bottom-nav, body.dark-mode #phrase-footer-content { background-color: #1e293b; border-color: #334155; }
     body.dark-mode .bubble-left { background-color: #334155; border-color: #475569; color: #f1f5f9; }
-    body.dark-mode .bubble-left::before { border-right-color: #334155; }
+    body.dark-mode .bubble-left::before { border-right-color: #475569; }
+    body.dark-mode .bubble-left::after { border-right-color: #334155; }
     body.dark-mode .phrase-tab-btn.active { background-color: #334155; }
     body.dark-mode input { color: white; }
 
@@ -198,11 +212,11 @@
         <!-- フッタータブ -->
         <div id="phrase-tabs" class="flex w-full">
             <button onclick="switchPhraseTab('lyrics')" id="phrase-tab-lyrics" class="phrase-tab-btn active flex-1 py-3 text-center flex flex-col items-center gap-1">
-                <i data-lucide="music" class="w-5 h-5"></i><span class="text-[10px]">歌詞</span>
+                <i data-lucide="music" class="w-5 h-5"></i><span class="text-[11px]">歌詞</span>
             </button>
             <div class="w-[1px] bg-gray-100 my-2"></div>
             <button onclick="switchPhraseTab('title')" id="phrase-tab-title" class="phrase-tab-btn flex-1 py-3 text-center flex flex-col items-center gap-1">
-                <i data-lucide="disc" class="w-5 h-5"></i><span class="text-[10px]">楽曲</span>
+                <i data-lucide="disc" class="w-5 h-5"></i><span class="text-[11px]">楽曲</span>
             </button>
         </div>
     </div>
@@ -279,7 +293,7 @@
 <script>
     // --- ★定数・状態管理★ ---
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
-    const VERSION = "v5.1.3";
+    const VERSION = "v5.1.4";
     const LOADING_MESSAGES = {
         lyrics: ["aikoからのtelepathyを受信中...", "そんなことよりパーティ抜け出さない？"],
         title: ["おっ！その曲なら確かね...", "俺もそれ好きだよ！待ってて..."],
@@ -319,8 +333,7 @@
     function switchApp(appName) {
         currentApp = appName;
         document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
-        const target = document.getElementById(`app-${appName}`);
-        if (target) target.classList.add('active');
+        document.getElementById(`app-${appName}`).classList.add('active');
         
         const header = document.getElementById('main-header');
         const title = document.getElementById('header-title');
@@ -422,7 +435,11 @@
             div.innerHTML = `<img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm">${content}</div>`;
         }
         container.appendChild(div);
-        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        
+        // スクロール制御: メッセージが隠れないように
+        setTimeout(() => {
+            div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 50);
     }
 
     function addMusicLoading() {
@@ -433,7 +450,7 @@
         div.className = "flex items-start relative mb-4";
         const msgs = LOADING_MESSAGES[phraseMode] || ["テレパシー受信中..."];
         const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
-        div.innerHTML = `<img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm"><p class="text-sm pulse-text">${randomMsg}</p></div>`;
+        div.innerHTML = `<img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm"><p class="pulse-text">${randomMsg}</p></div>`;
         container.appendChild(div);
         div.scrollIntoView({ behavior: 'smooth', block: 'end' });
         return id;
@@ -449,67 +466,109 @@
 
         let html = '<div class="flex flex-col gap-2">';
         if (data.fuzzy_type) {
-            html += `<div class="bg-orange-100/50 border border-orange-200 rounded-lg p-2 text-[10px] text-orange-700">「${data.query}」のかわりに「${data.actual_query}」で見つけたよ！</div>`;
+            html += `<div class="bg-orange-100/50 border border-orange-200 rounded-lg p-2 text-xs text-orange-700">「${data.query}」のかわりに「${data.actual_query}」で見つけたよ！</div>`;
         }
 
         const highlightWord = data.fuzzy_type ? data.actual_query : data.query;
         data.results.forEach(item => {
             const highlighted = item.phrase.replace(new RegExp(`(${highlightWord})`, 'gi'), '<span class="highlight-text">$1</span>');
-            html += `<div class="py-2 border-b border-orange-50 cursor-pointer" onclick="copyToClipboard('${item.phrase.replace(/'/g, "\\'")}（${item.title}）')">
-                        <p class="text-sm text-gray-700">${highlighted} <span class="text-[10px] text-gray-400">（${item.title}）</span></p>
+            const safeText = `${item.phrase}（${item.title}）`.replace(/'/g, "\\'").replace(/\n/g, " ");
+            html += `<div class="py-2 border-b border-orange-50 cursor-pointer" onclick="copyToClipboard('${safeText}')">
+                        <p class="text-gray-700">${highlighted} <span class="text-xs text-gray-400 ml-1">（${item.title}）</span></p>
                      </div>`;
         });
         
         const uniqueCount = new Set(data.results.map(r => r.title)).size;
-        const allText = data.results.map(item => `${item.phrase}（${item.title}）`).join('\n').replace(/'/g, "\\'");
+        const allText = data.results.map(item => `${item.phrase}（${item.title}）`).join('\n');
 
-        html += `<div class="mt-3 pt-2 border-t border-dashed border-orange-100">
+        // まとめてコピー用のデータ属性を付与
+        const allTextId = `copy-data-${Date.now()}`;
+        html += `<div style="display:none;" id="${allTextId}">${allText}</div>`;
+
+        html += `<div class="mt-3 pt-2">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <p class="text-[10px] text-gray-400 font-bold">${uniqueCount}曲中、計${data.results.length}箇所見つかったよ♪</p>
-                        <button onclick="copyToClipboard('${allText}')" class="text-[10px] text-orange-500 bg-orange-50 px-2 py-1 rounded-full border border-orange-200 flex items-center gap-1 shadow-sm"><i data-lucide="copy" class="w-3 h-3"></i> まとめてコピー</button>
+                        <p class="text-xs text-gray-400 font-bold">${uniqueCount}曲中、計${data.results.length}箇所見つかったよ♪</p>
+                        <button onclick="copyElementText('${allTextId}')" class="text-xs text-orange-500 bg-orange-50 px-2 py-1.5 rounded-full border border-orange-200 flex items-center gap-1 shadow-sm font-bold"><i data-lucide="copy" class="w-3 h-3"></i> まとめてコピー</button>
                     </div>
                  </div>`;
-        html += `<div class="flex justify-center mt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-[10px] text-orange-300 hover:text-orange-500 transition">この回答のトップへ移動</button></div>`;
+        html += `<div class="flex justify-center mt-3 pt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-xs text-orange-300 hover:text-orange-500 transition">この回答のトップへ移動</button></div>`;
         html += '</div>';
         addMusicMessage(html, 'bot');
         lucide.createIcons();
     }
 
     function renderTitleResults(data) {
-        if (!data.songs || data.songs.length === 0) {
-            addMusicMessage("その曲は見つからなかったよ。正式名称で探してみて！", 'bot');
+        if ((!data.songs || data.songs.length === 0) && (!data.albums || data.albums.length === 0)) {
+            addMusicMessage(`「${data.query}」は見つからなかったよ。正式名称（またはその一部）を教えてね！`, 'bot');
             return;
         }
-        let html = '<div class="flex flex-col gap-4">';
-        data.songs.forEach(song => {
-            html += `<div class="bg-sky-50/50 rounded-lg p-3 border border-sky-100">
-                        <div class="font-bold text-sky-700">${song.title} <span class="text-[10px] font-normal text-gray-400">(${song.reading})</span></div>
-                        <div class="text-[11px] text-gray-600 mt-2 space-y-1">
-                            ${song.album_info ? `<p>💿 ${song.album_info}</p>` : '<p class="text-gray-400">💿 アルバム未収録</p>'}
-                            <p>🎼 編曲: ${song.arranger || '不明'}</p>
-                            ${song.age_at_release ? `<p class="text-sky-600 font-bold">リリース当時のaikoは${song.age_at_release}歳！</p>` : ''}
+        
+        let html = '<div class="flex flex-col gap-6 animate-fade-in">';
+        
+        // 楽曲マッチング
+        if (data.songs && data.songs.length > 0) {
+            let songSection = '<div class="flex flex-col gap-4">';
+            if (data.albums && data.albums.length > 0) songSection += '<div class="text-xs font-bold text-sky-500 border-b border-sky-100 pb-1">🎵 曲の検索結果</div>';
+            
+            data.songs.forEach((song, idx) => {
+                const hasDivider = idx > 0 ? 'border-t border-sky-100 pt-4' : '';
+                const ageText = song.age_at_release ? `リリース時のaikoは<span class="font-bold text-sky-600">${song.age_at_release}歳</span>だよ。` : '';
+                
+                songSection += `<div class="${hasDivider}">
+                    <div class="mb-2 font-bold text-base text-gray-800">${song.title} <span class="text-xs font-normal text-gray-400">(${song.reading || ''})</span></div>
+                    <div class="text-sm text-gray-700 space-y-2 leading-relaxed bg-sky-50/50 p-3 rounded-lg border border-sky-100">
+                        ${song.single_info ? `<p>💿 ${song.single_info}</p>` : ''}
+                        ${song.album_info ? `<p>💿 ${song.album_info}</p>` : '<p class="text-gray-400 italic">💿 アルバムには未収録だよ。</p>'}
+                        <div class="pt-2 border-t border-sky-100 text-xs text-gray-600">
+                            <p>🎼 編曲：${song.arranger || '不明'}</p>
+                            <p>⏱ 再生時間：${song.duration || '不明'}</p>
                         </div>
-                     </div>`;
-        });
-        html += `<div class="flex justify-center mt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-[10px] text-sky-300 hover:text-sky-500 transition">この回答のトップへ移動</button></div>`;
+                        ${ageText ? `<p class="pt-1 text-xs text-sky-700 font-medium">${ageText}</p>` : ''}
+                    </div>
+                </div>`;
+            });
+            songSection += '</div>';
+            html += songSection;
+        }
+        
+        // ディスク(アルバム/シングル)マッチング
+        if (data.albums && data.albums.length > 0) {
+            let albumSection = '<div class="flex flex-col gap-4">';
+            if (data.songs && data.songs.length > 0) albumSection += '<div class="text-xs font-bold text-sky-500 border-b border-sky-100 pb-1 mt-2">💿 収録ディスク情報</div>';
+            
+            data.albums.forEach((disk) => {
+                const songList = disk.songs.map(s => `<li class="py-1 border-b border-sky-50 last:border-0 flex gap-2"><span class="text-sky-400 w-6 text-right font-mono text-xs pt-0.5">${s.order}.</span><span class="text-sm">${s.title}</span></li>`).join('');
+                albumSection += `<div class="bg-sky-50/50 rounded-xl p-4 border border-sky-100">
+                    <h3 class="font-bold text-sky-700 mb-1">💿 ${disk.disk_name}</h3>
+                    <p class="text-[10px] text-gray-500 mb-3">${disk.release_date} 発売</p>
+                    <ul class="list-none">${songList}</ul>
+                </div>`;
+            });
+            albumSection += '</div>';
+            html += albumSection;
+        }
+        
+        html += `<div class="flex justify-center mt-3 pt-2 border-t border-dashed border-sky-100"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-xs text-sky-300 hover:text-sky-500 transition">この回答のトップへ移動</button></div>`;
         html += '</div>';
+        
         addMusicMessage(html, 'bot');
+        lucide.createIcons();
     }
 
     function renderShiritoriResults(data) {
         if (data.result === 'unknown_song') { addMusicMessage(data.message, 'bot'); return; }
         if (data.result === 'user_lose' || data.result === 'user_win') {
-            addMusicMessage(`${data.message}<br><div class="flex gap-2 mt-3"><button onclick="restartShiritori()" class="flex-1 bg-pink-500 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm">もう一度遊ぶ</button><button onclick="activateSecretMode()" class="flex-1 bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm">おしまいにする</button></div>`, 'bot');
+            addMusicMessage(`${data.message}<br><div class="flex gap-2 mt-3"><button onclick="restartShiritori()" class="flex-1 bg-pink-500 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm active:scale-95 transition">もう一度遊ぶ</button><button onclick="activateSecretMode()" class="flex-1 bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm active:scale-95 transition">おしまいにする</button></div>`, 'bot');
             return;
         }
         let html = `<p>${data.message}</p>`;
         if (data.hints && data.hints.length > 0) {
             const hintId = 'hint-' + Date.now();
             html += `<div class="mt-2">
-                        <button onclick="document.getElementById('${hintId}').classList.toggle('hidden')" class="text-[10px] font-bold text-pink-500 flex items-center gap-1"><i data-lucide="lightbulb" class="w-3 h-3"></i> ヒントを見る</button>
+                        <button onclick="document.getElementById('${hintId}').classList.toggle('hidden')" class="text-xs font-bold text-pink-500 flex items-center gap-1"><i data-lucide="lightbulb" class="w-3 h-3"></i> ヒントを見る</button>
                         <div id="${hintId}" class="hidden mt-2 flex flex-wrap gap-2 animate-fade-in">`;
             data.hints.forEach(h => {
-                html += `<button onclick="sendShiritoriAnswer('${h.title}')" class="bg-white border border-pink-200 text-pink-500 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">${h.title}</button>`;
+                html += `<button onclick="sendShiritoriAnswer('${h.title}')" class="bg-white border border-pink-200 text-pink-500 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm active:scale-95 transition">${h.title}</button>`;
             });
             html += `</div></div>`;
         }
@@ -521,6 +580,7 @@
         document.getElementById('music-input').value = text;
         document.getElementById('music-form').dispatchEvent(new Event('submit'));
     }
+    
     function restartShiritori() {
         document.getElementById('chat-container-shiritori').innerHTML = `<div class="flex items-start relative mb-4 animate-fade-in"><img class="bot-icon shadow-sm" src="https://unavatar.io/twitter/noki_dochibi"><div class="bubble bubble-left shadow-sm">しりとりリセット！<br>最初の曲名を入力してね。</div></div>`;
     }
@@ -573,7 +633,7 @@
         rec.setlist.forEach(s => {
             if (s === '__MEDLEY_START__') { html += `<div class="font-bold text-yellow-600 mt-2 text-sm">メドレー</div>`; return; }
             if (s === '__MEDLEY_END__') return;
-            html += `<div class="py-1 border-b border-gray-50 text-xs flex gap-2"><span class="text-gray-300 w-6">${num++}.</span>${s.replace(/_アンコール/g, '')}</div>`;
+            html += `<div class="py-1 border-b border-gray-50 text-sm flex gap-2"><span class="text-gray-300 w-6">${num++}.</span>${s.replace(/_アンコール/g, '')}</div>`;
         });
         document.getElementById('detail-setlist').innerHTML = html;
         document.getElementById('live-detail-view').style.display = 'block';
@@ -612,13 +672,42 @@
         menu.classList.toggle('open', isOpen);
         overlay.style.display = isOpen ? 'block' : 'none';
     }
+    
     function showAboutModal() { toggleNoren(false); document.getElementById('about-modal').style.display = 'flex'; }
     function closeAboutModal() { document.getElementById('about-modal').style.display = 'none'; }
-    function showToast() { const t = document.getElementById('toast'); t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 2000); }
-    function copyToClipboard(text) {
-        if (navigator.clipboard) { navigator.clipboard.writeText(text).then(showToast); }
-        else { const a = document.createElement('textarea'); a.value = text; document.body.appendChild(a); a.select(); document.execCommand('copy'); document.body.removeChild(a); showToast(); }
+    
+    function showToast() {
+        const t = document.getElementById('toast');
+        t.classList.remove('opacity-0');
+        setTimeout(() => t.classList.add('opacity-0'), 2000);
     }
+    
+    // エスケープ不要なコピー関数
+    function copyElementText(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        copyToClipboard(el.innerText || el.textContent);
+    }
+
+    function copyToClipboard(text) {
+        const cleanText = text.trim();
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(cleanText).then(showToast).catch(() => fallbackCopy(cleanText));
+        } else {
+            fallbackCopy(cleanText);
+        }
+    }
+    
+    function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px'; ta.style.top = '0';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        try { document.execCommand('copy'); showToast(); } catch (err) {}
+        document.body.removeChild(ta);
+    }
+
     function getLabelClass(n) { if (n.includes('Pop')) return 'pop'; if (n.includes('Rock')) return 'rock'; if (n.includes('Aloha')) return 'aloha'; return 'other'; }
     function getLabelText(n) { if (n.includes('Pop')) return 'POP'; if (n.includes('Rock')) return 'ROCK'; if (n.includes('Aloha')) return 'ALOHA'; return 'OTHER'; }
 
@@ -634,7 +723,11 @@
     function populateFilters() {
         const years = [...new Set(allData.liveRecords.map(r => r.year))].sort((a,b) => b-a);
         const select = document.getElementById('year-select');
-        if (select) years.forEach(y => select.innerHTML += `<option value="${y}">${y}年</option>`);
+        if (select) years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y; opt.textContent = `${y}年`;
+            select.appendChild(opt);
+        });
     }
 </script>
 </body>
