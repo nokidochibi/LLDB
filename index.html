@@ -1,815 +1,210 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase Unified</title>
-<meta name="theme-color" content="#ef4444">
-
-<!-- アイコン・マニフェスト -->
-<link id="app-icon" rel="icon" type="image/png" href="icon_live.png">
-<link id="apple-touch-icon" rel="apple-touch-icon" href="icon_live.png">
-<link id="manifest-link" rel="manifest" href='data:application/manifest+json,{"name":"Love Like DataBase","short_name":"LLDB","start_url":".","display":"standalone","background_color":"#F8F8F8","theme_color":"#ef4444","icons":[{"src":"icon_live.png","sizes":"192x192 512x512","type":"image/png"}]}'>
-
-<!-- ライブラリ -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-
-<style>
-    :root { 
-        --app-music: #f97316; --app-live: #ef4444; --app-history: #ec4899; --app-stats: #0f172a;
-        --bg-color: #F8F8F8; --card-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        --aiko-pink: #FF69B4; --aiko-red: #ef4444; --aiko-yellow: #FFD700; --aiko-blue: #00BFFF;
-        --bubble-color: #f97316;
-    }
-    body { 
-        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-        background-color: var(--bg-color); color: #374151; 
-        min-height: 100vh; overflow: hidden; touch-action: pan-y pinch-zoom; -webkit-tap-highlight-color: transparent;
-        transition: background-color 0.3s, color 0.3s;
-        font-size: 15px;
-    }
-
-    /* アプリ画面基本設定 */
-    .app-screen { 
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-        background: white; display: none; flex-direction: column; 
-        overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
-        padding-top: 60px; padding-bottom: calc(145px + env(safe-area-inset-bottom));
-    }
-    .app-screen.active { display: flex; animation: fadeIn 0.2s ease-out; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Love Like DataBase</title>
+    <meta name="theme-color" content="#ef4444">
     
-    /* ヘッダー */
-    header { height: 60px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: fixed; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: background-color 0.3s; }
-    #noren-menu { position: fixed; top: 60px; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); z-index: 95; transform: translateY(-120%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; }
-    #noren-menu.open { transform: translateY(0); }
-    #noren-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 90; display: none; }
-    .sakura-icon { display: inline-block; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); font-size: 24px; line-height: 1; vertical-align: middle; }
-    .sakura-rotate { transform: rotate(360deg); }
+    <!-- アイコン -->
+    <link rel="icon" type="image/png" href="./icon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
 
-    /* 下部ナビゲーション */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: none; height: calc(64px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); z-index: 50; }
-    .bottom-nav.active { display: flex; }
-    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #9CA3AF; font-size: 11px; font-weight: bold; cursor: pointer; }
-    .nav-item.active { color: var(--active-color, #ef4444); }
+    <!-- 共通ライブラリ -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
-    /* 共通UIパーツ */
-    .card-base { background: white; border-radius: 12px; box-shadow: var(--card-shadow); padding: 16px; margin-bottom: 12px; }
-    .clickable-item { cursor: pointer; transition: background-color 0.2s; }
-    .clickable-item:active { background-color: #f3f4f6; }
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0; padding: 0;
+            overflow: hidden; /* スクロールはiframe内で */
+            background-color: #F8F8F8;
+        }
 
-    /* 吹き出し (phrase用) */
-    .bubble { position: relative; border-radius: 1.2rem; transition: background-color 0.3s, color 0.3s; padding: 12px 16px; font-size: 15px; line-height: 1.6; max-width: 85%; margin-bottom: 12px; }
-    .bubble-left { background: white; border: 1px solid #e5e7eb; margin-left: 44px; }
-    .bubble-left::before { content: ""; position: absolute; top: 10px; left: -8px; width: 0; height: 0; border-style: solid; border-width: 6px 10px 6px 0; border-color: transparent #e5e7eb transparent transparent; z-index: 1; }
-    .bubble-left::after { content: ""; position: absolute; top: 10px; left: -7px; width: 0; height: 0; border-style: solid; border-width: 6px 10px 6px 0; border-color: transparent white transparent transparent; z-index: 2; }
-    .bubble-right { background: var(--bubble-color, #f97316); color: white; margin-left: auto; }
-    .bubble-right::before { content: ""; position: absolute; top: 10px; right: -8px; width: 0; height: 0; border-style: solid; border-width: 6px 0 6px 10px; border-color: transparent transparent transparent var(--bubble-color, #f97316); }
-    .bot-icon { width: 36px; height: 36px; border-radius: 50%; position: absolute; left: 0; top: 0; border: 1px solid #eee; background: white; }
+        /* アプリ表示エリア (iframe) */
+        .app-frame {
+            position: fixed;
+            top: 60px; /* ヘッダーの高さ */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 60px);
+            border: none;
+            display: none; /* デフォルト非表示 */
+            background-color: #fff;
+        }
+        .app-frame.active {
+            display: block;
+        }
 
-    /* Live固有スタイル */
-    .live-card { position: relative; overflow: hidden; }
-    .live-card-label { position: absolute; top: 18px; right: -40px; transform: rotate(45deg); background-color: var(--aiko-pink); color: white; padding: 4px 0; width: 140px; text-align: center; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.15); z-index: 1; }
-    .live-card-label.rock { background-color: var(--aiko-blue); }
-    .live-card-label.aloha { background-color: var(--aiko-yellow); color: #333; }
-    .live-card-label.other { background-color: #9CA3AF; }
+        /* 準備中画面 */
+        .coming-soon {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 60px; left: 0;
+            width: 100%; height: calc(100% - 60px);
+            background-color: #fce7f3;
+            color: #db2777;
+        }
+        .coming-soon.active { display: flex; }
 
-    .setlist-item { padding: 4px 0; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; min-height: 40px; border-left: 4px solid transparent; padding-left: 12px; }
-    .setlist-medley-title { border-left-color: var(--aiko-yellow) !important; background-color: #fffbeb !important; }
-    .setlist-medley { border-left-color: var(--aiko-yellow) !important; }
-    .setlist-encore-header { margin-top: 16px; margin-bottom: 4px; font-weight: 800; color: var(--aiko-red); font-size: 17px; padding: 6px 12px; background-color: #fef2f2; border-left: 4px solid var(--aiko-red); border-radius: 0 4px 4px 0; }
-    .setlist-encore { border-left-color: var(--aiko-red) !important; }
-    .setlist-num { min-width: 32px; color: #9CA3AF; font-size: 12px; }
-    .setlist-title { font-weight: 600; color: #1f2937; }
-
-    .timeline-container { flex: 1; height: 30px; display: flex; align-items: center; position: relative; padding-left: 10px; cursor: pointer; }
-    .timeline-bar { width: 100%; height: 2px; background-color: #e5e7eb; border-radius: 2px; position: relative; }
-    .timeline-dot { width: 12px; height: 12px; border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.15); background-color: var(--aiko-pink); z-index: 10; }
-    .year-tooltip { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); background: #374151; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20; }
-    .timeline-dot.active .year-tooltip { opacity: 1; }
-
-    .history-grid-container { display: flex; flex-direction: column; width: 100%; border-top: 1px solid #e5e7eb; }
-    .history-row { display: grid; grid-template-columns: 48px 1fr 1fr 1fr; min-height: 44px; border-bottom: 1px dashed #f3f4f6; }
-    .history-row.year-start { border-top: 2px solid #d1d5db; }
-    .col-date { font-size: 10px; font-weight: bold; color: #9CA3AF; display: flex; flex-direction: column; align-items: center; padding-top: 6px; background-color: #f9fafb; border-right: 1px solid #e5e7eb; }
-    .col-live, .col-single, .col-album { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; border-left: 1px dashed #eee; overflow: hidden; }
-    .event-chip { font-size: 9px; font-weight: bold; padding: 2px 4px; border-radius: 4px; width: 90%; text-align: center; line-height: 1.1; margin-bottom: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .event-chip.live { background: white; color: #ef4444; border: 1px solid #ef4444; }
-    .event-chip.single { background: #e0f2fe; color: #0284c7; }
-    .event-chip.album { background: #fef9c3; color: #854d0e; }
-
-    .venue-tabs { display: flex; border-bottom: 3px solid #e5e7eb; margin-bottom: 20px; position: sticky; top: 0; background: white; z-index: 40; }
-    .venue-tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: all 0.2s; }
-    .venue-tab.active { color: var(--aiko-pink); border-bottom-color: var(--aiko-pink); }
-
-    .rank-number { display: inline-block; min-width: 32px; text-align: right; margin-right: 12px; font-size: 20px; font-weight: 800; font-style: italic; }
-    .song-title, .venue-name { flex: 1; font-weight: 600; line-height: 1.4; color: #374151; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .song-count { white-space: nowrap; font-size: 18px; font-weight: bold; color: #4B5563; }
-    .song-count span { font-size: 12px; font-weight: normal; margin-left: 2px; }
-
-    /* トグルスイッチ用 */
-    .toggle-checkbox { position: absolute; opacity: 0; width: 0; height: 0; }
-    .toggle-label { width: 44px; height: 22px; background-color: #e5e7eb; border-radius: 99px; position: relative; cursor: pointer; transition: background-color 0.3s; display: block; }
-    .toggle-label:before { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-    .toggle-checkbox:checked + .toggle-label { background-color: var(--aiko-pink); }
-    .toggle-checkbox:checked + .toggle-label:before { transform: translateX(22px); }
-
-    /* ローディングオーバーレイ */
-    #loading-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9000; display: flex; align-items: center; justify-content: center; }
-    .loading-content { text-align: center; color: white; font-weight: bold; text-shadow: 0 0 15px white; overflow: hidden; }
-    .loading-text { transition: opacity 0.3s; opacity: 0; }
-    .loading-text.visible { opacity: 1; }
-
-    /* 演出用 */
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
-    .message-row { scroll-margin-top: 80px; }
-    .highlight-text { color: #ea580c; font-weight: bold; background-color: #fff7ed; padding: 0 2px; border-radius: 2px; }
-    
-    /* 詳細ビュー */
-    #live-detail-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 110; overflow-y: auto; padding-top: 60px; display: none; animation: slideIn 0.2s ease-out; }
-</style>
+        /* --------------------------------------------------
+           暖簾メニュー & ヘッダー (共通UI)
+           -------------------------------------------------- */
+        #main-app-header {
+            height: 60px; width: 100%;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px;
+            position: fixed; top: 0; z-index: 50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
+        }
+        
+        #noren-menu {
+            position: fixed; top: 60px; left: 0; width: 100%;
+            background-color: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); z-index: 40;
+            transform: translateY(-120%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; border-bottom: 1px solid #f3f4f6;
+            display: none;
+        }
+        #noren-menu.open { transform: translateY(0); }
+        
+        .noren-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background-color 0.2s; }
+        .noren-item:active { background-color: #f9fafb; }
+        .noren-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        #noren-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 30; display: none; opacity: 0; transition: opacity 0.3s; }
+        #noren-overlay.open { display: block; opacity: 1; }
+    </style>
 </head>
-<body class="theme-live">
+<body>
 
-<canvas id="confetti-canvas"></canvas>
-
-<!-- ローディング: 復旧 -->
-<div id="loading-container">
-    <div class="loading-content">
-        <p class="m-0" style="font-size:42px; line-height:1.2;">
-          <span id="lt-1" class="loading-text">男子ー!!</span> <span id="lt-2" class="loading-text">女子ー!!</span>
-        </p>
-        <p class="m-0 loading-text" id="lt-3" style="font-size:42px; line-height:1.2;">そうでない人ー!!</p>
-        <p class="m-0" style="margin-top:16px;">
-            <span class="loading-text" id="lt-4" style="font-size:56px;">ぜー</span>
-            <span class="loading-text" id="lt-5" style="font-size:56px;">いんっ...!!!</span>
-        </p>
-    </div>
-</div>
-
-<!-- 暖簾メニュー -->
-<div id="noren-overlay" onclick="toggleNoren()"></div>
-<div id="noren-menu">
-    <div class="flex flex-col p-2">
-        <div class="flex items-center gap-4 p-4 border-b border-gray-100 clickable-item" onclick="switchApp('live')">
-            <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center text-white"><i data-lucide="mic-2"></i></div>
-            <div class="flex-1"><div class="font-bold">LLDB live</div><div class="text-xs text-gray-400">ライブ / セトリ検索</div></div>
-            <i data-lucide="chevron-right" class="text-gray-300"></i>
-        </div>
-        <div class="flex items-center gap-4 p-4 border-b border-gray-100 clickable-item" onclick="switchApp('music')">
-            <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white"><i data-lucide="music"></i></div>
-            <div class="flex-1"><div class="font-bold">LLDB phrase</div><div class="text-xs text-gray-400">歌詞 / 楽曲検索</div></div>
-            <i data-lucide="chevron-right" class="text-gray-300"></i>
-        </div>
-        <div class="flex items-center gap-4 p-4 border-b border-gray-100 clickable-item" onclick="switchApp('stats')">
-            <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white"><i data-lucide="bar-chart-2"></i></div>
-            <div class="flex-1"><div class="font-bold">LLDB stats</div><div class="text-xs text-gray-400">人気のaiko / 統計</div></div>
-            <i data-lucide="chevron-right" class="text-gray-300"></i>
-        </div>
-        <div class="flex items-center gap-4 p-4 border-b border-gray-100 clickable-item" onclick="switchApp('history')">
-            <div class="w-10 h-10 bg-pink-500 rounded-xl flex items-center justify-center text-white"><i data-lucide="heart-handshake"></i></div>
-            <div class="flex-1"><div class="font-bold">LLDB history</div><div class="text-xs text-gray-400">aikoと自分 / 年表</div></div>
-            <i data-lucide="chevron-right" class="text-gray-300"></i>
-        </div>
-        <div class="flex items-center gap-4 p-4 clickable-item" onclick="showAboutModal()">
-            <div class="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center text-gray-500"><i data-lucide="info"></i></div>
-            <div class="flex-1"><div class="font-bold">About</div><div class="text-xs text-gray-400">アプリについて</div></div>
-        </div>
-    </div>
-    <div class="py-2 flex justify-center cursor-pointer" onclick="toggleNoren()">
-        <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
-    </div>
-</div>
-
-<!-- ヘッダー -->
-<header id="main-header" class="bg-red-500 text-white transition-colors duration-300">
-    <div class="flex items-center gap-1">
-        <button id="header-back-btn" class="hidden" onclick="closeLiveDetail()"><i data-lucide="arrow-left"></i></button>
-        <h1 class="font-bold text-lg cursor-pointer select-none active:scale-95 transition-transform" id="header-title" ondblclick="activateSecretMode()">LLDB live</h1>
-    </div>
-    <div class="flex items-center gap-1">
-        <span id="header-version-display" class="text-[10px] font-mono opacity-60 bg-white/20 px-1.5 py-0.5 rounded"></span>
-        <button onclick="toggleNoren()" class="p-2 active:scale-90 transition-transform">
-            <span id="menu-sakura" class="sakura-icon">🌸</span>
+    <!-- 共通ヘッダー -->
+    <header id="main-app-header" class="bg-red-500 text-white">
+        <h1 class="font-bold text-lg tracking-wide flex-1 cursor-pointer" id="header-title" onclick="toggleNoren()">LLDB live</h1>
+        <button onclick="toggleNoren()" class="p-2 rounded-full hover:bg-white/20 transition active:scale-95">
+            <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
-    </div>
-</header>
+    </header>
 
-<!-- ============================================
-     1. LLDB phrase
-     ============================================ -->
-<div id="app-music" class="app-screen">
-    <div id="chat-container-lyrics" class="flex-1 p-4 overflow-y-auto bg-orange-50/30 space-y-4 no-scrollbar"></div>
-    <div id="chat-container-title" class="flex-1 p-4 overflow-y-auto bg-sky-50/30 space-y-4 no-scrollbar hidden"></div>
-    <div id="chat-container-shiritori" class="flex-1 p-4 overflow-y-auto bg-pink-50/30 space-y-4 no-scrollbar hidden"></div>
-
-    <div id="phrase-footer-content" class="fixed bottom-0 left-0 w-full z-40 bg-white border-t border-gray-100 safe-pb shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <form id="music-form" class="flex items-center gap-2 px-3 py-3 border-b border-gray-50">
-            <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2.5 focus-within:bg-white border border-transparent focus-within:border-gray-200">
-                <input type="text" id="music-input" class="flex-1 bg-transparent border-none focus:outline-none text-sm placeholder-gray-400" placeholder="例：甘い匂いに" autocomplete="off">
-            </div>
-            <button type="submit" class="bg-orange-500 text-white p-2.5 rounded-full shadow-sm active:scale-95 transition" id="music-submit-btn">
-                <i data-lucide="send" class="w-5 h-5 fill-current"></i>
-            </button>
-        </form>
-        <div id="phrase-tabs" class="flex w-full">
-            <button onclick="switchPhraseTab('lyrics')" id="phrase-tab-lyrics" class="phrase-tab-btn active flex-1 py-3 text-center flex flex-col items-center gap-1"><i data-lucide="music" class="w-5 h-5"></i><span class="text-[11px]">歌詞</span></button>
-            <div class="w-[1px] bg-gray-100 my-2"></div>
-            <button onclick="switchPhraseTab('title')" id="phrase-tab-title" class="phrase-tab-btn flex-1 py-3 text-center flex flex-col items-center gap-1"><i data-lucide="disc" class="w-5 h-5"></i><span class="text-[11px]">楽曲</span></button>
-        </div>
-    </div>
-</div>
-
-<!-- ============================================
-     2. LLDB live (復旧項目反映)
-     ============================================ -->
-<div id="app-live" class="app-screen">
-    <!-- 公演タブ -->
-    <div id="live-tab-search" class="live-sub-content p-4">
-        <div class="card-base bg-gray-50 border border-gray-200 mb-4">
-            <div class="flex gap-1 mb-2 items-center">
-                <input type="text" id="live-search-input" placeholder="フリーワードで検索" class="flex-1 min-w-0 bg-white border border-gray-300 rounded p-2 text-sm focus:border-red-400 focus:outline-none">
-                <button onclick="clearFilters()" class="bg-red-500 text-white px-3 py-2 rounded text-xs font-bold whitespace-nowrap">クリア</button>
-            </div>
-            <div class="flex flex-col gap-2">
-                <select id="tour-select" class="w-full text-sm bg-white border border-gray-300 rounded p-2"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
-                <div class="flex gap-2">
-                    <select id="year-select" class="flex-1 text-sm bg-white border border-gray-300 rounded p-2"><option value="">すべての年</option></select>
-                    <select id="region-select" class="flex-1 text-sm bg-white border border-gray-300 rounded p-2"><option value="">すべての地域</option></select>
+    <!-- 暖簾メニュー -->
+    <div id="noren-overlay" onclick="toggleNoren()"></div>
+    <div id="noren-menu">
+        <div class="flex flex-col">
+            <div class="noren-item" onclick="switchApp('live')">
+                <div class="noren-icon bg-red-500"><i data-lucide="mic-2" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800">LLDB live</div>
+                    <div class="text-xs text-gray-400">ライブ / セトリ / ツアー</div>
                 </div>
-                <input type="text" id="song-filter-input" placeholder="演奏された曲名で検索（楽曲タブから選択）" class="w-full bg-gray-100 text-gray-500 text-[10px] p-2 rounded" readonly>
+                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
-        </div>
-        <div id="omikuji-area" class="mb-4 flex items-center justify-between px-1 cursor-pointer select-none" ondblclick="playOmikuji()">
-            <h3 class="font-bold text-gray-700 flex items-center gap-2"><span id="omikuji-icon" class="text-xl">🎫</span> 表示中の公演: <span id="display-count" class="text-red-500">0</span> / <span id="total-count">0</span></h3>
-            <span class="text-[10px] text-gray-400">ダブルタップでおみくじ 🎰</span>
-        </div>
-        <div id="live-list" class="space-y-4"></div>
-    </div>
-
-    <!-- 楽曲タブ -->
-    <div id="live-tab-song" class="live-sub-content hidden p-4">
-        <div class="mb-6">
-            <h3 class="font-bold mb-3 text-gray-700">📊 楽曲別演奏回数 / 開催数</h3>
-            <div class="card-base p-3"><canvas id="live-count-chart" style="height:250px;"></canvas></div>
-        </div>
-        <div class="card-base bg-gray-50 mb-4">
-            <div class="flex gap-1 mb-4 items-center">
-                <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="flex-1 min-w-0 bg-white border border-gray-300 rounded p-2 text-sm focus:outline-none">
-                <button onclick="clearSongSearch()" class="bg-red-500 text-white px-3 py-2 rounded text-xs font-bold">クリア</button>
-                <button id="show-setlist-btn" onclick="applySongFilterToSearch()" class="hidden bg-sky-500 text-white px-3 py-2 rounded text-xs font-bold">公演表示</button>
-            </div>
-            <div class="flex justify-between items-center text-xs font-bold text-gray-500">
-                <span>全 <span id="total-songs">0</span> 曲</span>
-                <select id="song-sort" class="bg-transparent text-red-500 font-bold"><option value="count-desc">演奏回数 降順</option><option value="count-asc">演奏回数 昇順</option></select>
-            </div>
-        </div>
-        <div class="flex justify-between items-center mb-4 px-1">
-            <h3 id="song-ranking-header" class="font-bold text-gray-700 text-lg cursor-pointer select-none" ondblclick="selectRandomSong()">🎸 演奏回数ランキング</h3>
-            <div class="flex items-center gap-2">
-                <span class="text-[10px] font-bold text-gray-400 leading-tight">メドレー<br>込み</span>
-                <div class="relative inline-block align-middle select-none">
-                    <input type="checkbox" id="medley-toggle" class="toggle-checkbox" checked onchange="renderSongRanking()"/>
-                    <label for="medley-toggle" class="toggle-label"></label>
+            <div class="noren-item" onclick="switchApp('phrase')">
+                <div class="noren-icon bg-orange-500"><i data-lucide="music" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800">LLDB phrase</div>
+                    <div class="text-xs text-gray-400">楽曲 / 歌詞フレーズ検索</div>
                 </div>
+                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+            </div>
+            <div class="noren-item" onclick="switchApp('history')">
+                <div class="noren-icon bg-pink-500"><i data-lucide="heart-handshake" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800">LLDB history</div>
+                    <div class="text-xs text-gray-400">aikoとわたし / 人生年表</div>
+                </div>
+                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+            </div>
+            <div class="noren-item" onclick="switchApp('stats')">
+                <div class="noren-icon bg-slate-700"><i data-lucide="bar-chart-2" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800">LLDB stats</div>
+                    <div class="text-xs text-gray-400">人気のaiko / 統計</div>
+                </div>
+                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
         </div>
-        <div id="song-ranking-container" class="space-y-2 pb-10"></div>
+        <div class="py-3 flex justify-center cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition" onclick="toggleNoren()">
+            <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+        </div>
     </div>
 
-    <!-- 場所タブ -->
-    <div id="live-tab-venue" class="live-sub-content hidden p-4">
-        <div class="mb-6">
-            <h3 class="font-bold mb-3 text-gray-700">📊 年別ライブ開催回数</h3>
-            <div class="card-base p-3"><canvas id="venue-chart" style="height:250px;"></canvas></div>
+    <!-- アプリコンテナ (iFrame) -->
+    <!-- 1. LLDB live -->
+    <iframe id="frame-live" class="app-frame active" src="index_LLDB_live.html"></iframe>
+    
+    <!-- 2. LLDB phrase -->
+    <iframe id="frame-phrase" class="app-frame" src="index_LLDB_phrase.html"></iframe>
+
+    <!-- 3. その他 (準備中) -->
+    <div id="view-history" class="coming-soon">
+        <div class="bg-white p-6 rounded-2xl shadow-sm text-center">
+            <div class="text-4xl mb-4">🤝</div>
+            <h2 class="font-bold text-pink-500 text-lg">LLDB history</h2>
+            <p class="text-sm text-gray-500 mt-2">あなたとaikoの年表<br>準備中だよ🌷</p>
         </div>
-        <div class="venue-tabs" id="venue-tabs-header" ondblclick="selectRandomVenue()">
-            <div class="venue-tab active" id="vt-venue" onclick="switchVenueMode('venue')">会場ランキング</div>
-            <div class="venue-tab" id="vt-region" onclick="switchVenueMode('region')">都道府県ランキング</div>
+    </div>
+    <div id="view-stats" class="coming-soon" style="background-color: #f1f5f9; color: #334155;">
+        <div class="bg-white p-6 rounded-2xl shadow-sm text-center">
+            <div class="text-4xl mb-4">📈</div>
+            <h2 class="font-bold text-slate-700 text-lg">LLDB stats</h2>
+            <p class="text-sm text-gray-500 mt-2">各種ランキング集計中...</p>
         </div>
-        <div id="venue-ranking-container" class="space-y-2 pb-10"></div>
     </div>
 
-    <!-- 傾向タブ -->
-    <div id="live-tab-pattern" class="live-sub-content hidden p-4">
-        <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700">📊 アルバム別演奏回数</h3><div class="card-base p-3"><canvas id="album-chart" style="height:350px;"></canvas></div></div>
-        <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700">🕰️ 最近演奏されていない曲 TOP 10</h3><div id="not-played-recently-songs" class="card-base p-2 space-y-1"></div></div>
-        <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700">🎬 オープニング曲 TOP 10</h3><div id="opening-songs" class="card-base p-2 space-y-1"></div></div>
-        <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700">👏 アンコール曲 TOP 10</h3><div id="encore-songs" class="card-base p-2 space-y-1"></div></div>
-        <div class="mb-10"><h3 class="font-bold mb-3 text-gray-700">🏁 大トリ曲 TOP 10</h3><div id="last-songs" class="card-base p-2 space-y-1"></div></div>
-    </div>
+    <script>
+        // アプリ定義
+        const apps = {
+            'live': { title: 'LLDB live', color: 'bg-red-500', target: 'frame-live' },
+            'phrase': { title: 'LLDB phrase', color: 'bg-orange-500', target: 'frame-phrase' },
+            'history': { title: 'LLDB history', color: 'bg-pink-500', target: 'view-history' },
+            'stats': { title: 'LLDB stats', color: 'bg-slate-700', target: 'view-stats' }
+        };
 
-    <!-- 軌跡タブ -->
-    <div id="live-tab-history" class="live-sub-content hidden p-4">
-        <h3 class="font-bold mb-4 text-gray-700">⏳ 歴史のタイムライン</h3>
-        <div class="flex text-[10px] font-bold text-gray-400 pb-1 px-1">
-            <div style="width:48px; text-align:center;">年月</div>
-            <div class="flex-1 text-center">LIVE</div>
-            <div class="flex-1 text-center">SINGLE</div>
-            <div class="flex-1 text-center">ALBUM</div>
-        </div>
-        <div id="history-grid" class="history-grid-container bg-white"></div>
-        <p class="text-center text-gray-400 text-xs mt-8 mb-10">〜 現在 〜</p>
-    </div>
-</div>
-
-<!-- 詳細ビュー -->
-<div id="live-detail-view">
-    <div class="p-4 pb-20">
-        <div id="detail-header-card" class="card-base border-l-4 border-pink-500 mb-6 clickable-item" onclick="closeLiveDetail()">
-            <p id="detail-date" class="text-xs text-gray-500 font-bold mb-1"></p>
-            <h2 id="detail-title" class="font-bold text-xl text-red-500 leading-tight mb-2"></h2>
-            <p id="detail-venue" class="text-sm font-bold text-gray-700"></p>
-        </div>
-        <div id="detail-summary" class="mb-6 p-4 bg-gray-50 rounded-lg text-[10px] font-bold flex flex-wrap gap-2 justify-center border border-gray-100"></div>
-        <div class="flex items-end justify-between mb-2">
-            <h3 class="font-bold text-gray-700">🎵 セットリスト</h3>
-            <div class="flex items-center gap-1 text-[10px] text-gray-400"><span class="w-2 h-2 rounded-full bg-pink-500"></span> 1998〜現在</div>
-        </div>
-        <div id="detail-setlist" class="card-base p-0 overflow-hidden shadow-sm"></div>
-    </div>
-</div>
-
-<div id="about-modal" class="modal-overlay" onclick="closeAboutModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="flex justify-between items-center mb-4"><h2 class="font-bold text-lg">About App</h2><button onclick="closeAboutModal()"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button></div>
-        <div class="text-center mb-6">
-            <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-red-500 mx-auto mb-3"><i data-lucide="heart" class="w-8 h-8 fill-current"></i></div>
-            <p class="font-bold text-gray-800">Love Like DataBase</p>
-            <p id="about-version-display" class="text-[10px] text-gray-400"></p>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed mb-6">このアプリは１aikoファンによる非公式なアプリです。aikoさんの楽曲やライブの歴史を楽しみながら検索できるよう制作しています。</div>
-        <div class="flex items-center justify-between text-xs border-t border-gray-100 pt-4"><span class="text-gray-400">Developed by <span class="font-bold text-gray-600">のき🌳</span></span><a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-400 font-bold hover:underline">@noki_dochibi</a></div>
-    </div>
-</div>
-
-<div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800/80 backdrop-blur text-white text-xs py-2 px-4 rounded-full opacity-0 transition-opacity pointer-events-none z-[300]">コピーしました！</div>
-
-<nav id="live-nav" class="bottom-nav">
-    <div class="nav-item active" onclick="switchLiveTab('search')"><i data-lucide="calendar-days"></i><span>公演</span></div>
-    <div class="nav-item" onclick="switchLiveTab('song')"><i data-lucide="music"></i><span>楽曲</span></div>
-    <div class="nav-item" onclick="switchLiveTab('venue')"><i data-lucide="map-pin"></i><span>場所</span></div>
-    <div class="nav-item" onclick="switchLiveTab('pattern')"><i data-lucide="shuffle"></i><span>傾向</span></div>
-    <div class="nav-item" onclick="switchLiveTab('history')"><i data-lucide="footprints"></i><span>軌跡</span></div>
-</nav>
-
-<script>
-    // --- ★定数・状態管理★ ---
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
-    const VERSION = "v5.1.8";
-    const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-    const LOADING_MESSAGES = { lyrics: ["aikoからのtelepathyを受信中...", "そんなことよりパーティ抜け出さない？"], title: ["おっ！その曲なら確かね...", "俺もそれ好きだよ！待ってて..."], shiritori: ["俺に勝負を仕掛けるとはいい度胸だ。", "なるほど、そう来たか..."] };
-
-    let allData = { liveRecords: [], songData: {}, historyData: [], albumData: [] };
-    let liveStats = { songCounts: {}, songCountsNoMedley: {}, pattern: {}, venueCounts: {}, regionCounts: {}, lastPlayed: {} };
-    let charts = {};
-    let currentApp = 'live';
-    let liveTab = 'search';
-    let phraseMode = 'lyrics';
-    let lastPhraseMode = 'lyrics';
-    let venueMode = 'venue';
-    let isDarkMode = false;
-    let selectedSongName = "";
-    let selectedVenueName = "";
-
-    // --- 初期化 ---
-    document.addEventListener('DOMContentLoaded', () => {
-        lucide.createIcons();
-        document.getElementById('header-version-display').textContent = VERSION;
-        document.getElementById('about-version-display').textContent = `Unified Version ${VERSION}`;
-        startLoadingSequence();
-        loadData();
-        setupEventListeners();
-    });
-
-    async function loadData() {
-        try {
-            const response = await fetch(`${GAS_API_URL}?action=getAllData`);
-            const data = await response.json();
-            if (data.status === 'success') {
-                allData = data;
-                analyzeLiveContent();
-                initLiveSubApp();
-                setTimeout(finishLoading, 500);
+        function toggleNoren() {
+            const menu = document.getElementById('noren-menu');
+            const overlay = document.getElementById('noren-overlay');
+            if(menu.classList.contains('open')) {
+                menu.classList.remove('open'); overlay.classList.remove('open');
+                setTimeout(() => { menu.style.display='none'; overlay.style.display='none'; }, 300);
+            } else {
+                menu.style.display='block'; overlay.style.display='block';
+                setTimeout(() => { menu.classList.add('open'); overlay.classList.add('open'); }, 10);
             }
-        } catch (e) { console.error(e); finishLoading(); }
-    }
-
-    function startLoadingSequence() {
-        const delays = [100, 1100, 2100, 3100, 3600];
-        for (let i = 1; i <= 5; i++) {
-            setTimeout(() => document.getElementById(`lt-${i}`).classList.add('visible'), delays[i-1]);
         }
-    }
 
-    function finishLoading() {
-        startConfetti();
-        const loader = document.getElementById('loading-container');
-        loader.style.transition = 'opacity 0.6s ease';
-        loader.style.opacity = '0';
-        setTimeout(() => loader.style.display = 'none', 600);
-        switchApp('live');
-    }
+        function switchApp(appName) {
+            // 全てのフレーム/ビューを非表示
+            document.querySelectorAll('.app-frame, .coming-soon').forEach(el => el.classList.remove('active'));
+            
+            const appConfig = apps[appName];
+            if (!appConfig) return;
 
-    // --- ライブデータ解析 ---
-    function analyzeLiveContent() {
-        const sc = {}, scnm = {}, pat = { open: {}, encore: {}, last: {} }, vc = {}, rc = {}, lp = {};
-        
-        // 楽曲データ初期化 (0回表示のため)
-        Object.keys(allData.songData).forEach(name => {
-            if (!name.includes('[')) { sc[name] = 0; scnm[name] = 0; }
-        });
+            // 対象を表示
+            const targetEl = document.getElementById(appConfig.target);
+            if (targetEl) targetEl.classList.add('active');
 
-        allData.liveRecords.forEach(rec => {
-            const cleanSongs = [];
-            let inMedley = false;
-            const recDate = new Date(rec.date);
+            // ヘッダーの色とタイトル変更
+            const header = document.getElementById('main-app-header');
+            const title = document.getElementById('header-title');
+            
+            header.className = `${appConfig.color} text-white transition-colors duration-300`;
+            title.textContent = appConfig.title;
 
-            rec.setlist.forEach(s => {
-                if (s === '__MEDLEY_START__') { inMedley = true; return; }
-                if (s === '__MEDLEY_END__') { inMedley = false; return; }
-                const name = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
-                if (name && name !== 'メドレー' && !name.includes('[')) {
-                    sc[name] = (sc[name] || 0) + 1;
-                    if (!inMedley) {
-                        scnm[name] = (scnm[name] || 0) + 1;
-                        cleanSongs.push(name);
-                    }
-                    if (!lp[name] || recDate > lp[name].dateObj) lp[name] = { dateObj: recDate, tour: rec.tourName, year: rec.year };
-                }
-            });
-
-            if (cleanSongs.length > 0) {
-                pat.open[cleanSongs[0]] = (pat.open[cleanSongs[0]] || 0) + 1;
-                pat.last[cleanSongs[cleanSongs.length-1]] = (pat.last[cleanSongs[cleanSongs.length-1]] || 0) + 1;
-            }
-            rec.setlist.forEach(s => {
-                if (s.includes('_アンコール')) {
-                    const name = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
-                    if (!name.includes('[')) pat.encore[name] = (pat.encore[name] || 0) + 1;
-                }
-            });
-
-            const vKey = rec.region === 'オンライン' ? 'オンライン' : `${rec.venue} (${rec.region})`;
-            vc[vKey] = (vc[vKey] || 0) + 1;
-            if (rec.region) rc[rec.region] = (rc[rec.region] || 0) + 1;
-        });
-        liveStats = { songCounts: sc, songCountsNoMedley: scnm, pattern: pat, venueCounts: vc, regionCounts: rc, lastPlayed: lp };
-    }
-
-    function initLiveSubApp() {
-        renderLiveList(allData.liveRecords);
-        renderHistory();
-        populateFilters();
-        renderSongRanking();
-        renderVenueRanking();
-        renderPatternStats();
-        renderLastPlayedRanking();
-    }
-
-    // --- 各種レンダリング ---
-    function renderSongRanking() {
-        const container = document.getElementById('song-ranking-container');
-        const isMedley = document.getElementById('medley-toggle').checked;
-        const targetStats = isMedley ? liveStats.songCounts : liveStats.songCountsNoMedley;
-        const sort = document.getElementById('song-sort').value;
-        const search = document.getElementById('song-search-input').value.toLowerCase();
-        
-        const sorted = Object.entries(targetStats)
-            .filter(([name]) => name.toLowerCase().includes(search))
-            .sort((a,b) => sort === 'count-desc' ? b[1] - a[1] : a[1] - b[1]);
-
-        document.getElementById('total-songs').textContent = Object.keys(targetStats).length;
-        container.innerHTML = sorted.map(([name, count], i) => `
-            <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectSong('${name.replace(/'/g, "\\'")}')">
-                <span class="rank-number ${i < 3 && !search && count > 0 ? 'text-red-500' : 'text-gray-300'}">${i+1}</span>
-                <span class="song-title">${name}</span>
-                <span class="song-count">${count}<span>回</span></span>
-            </div>
-        `).join('');
-    }
-
-    function renderVenueRanking() {
-        const container = document.getElementById('venue-ranking-container');
-        const targetData = venueMode === 'venue' ? liveStats.venueCounts : liveStats.regionCounts;
-        const sorted = Object.entries(targetData).sort((a,b) => b[1] - a[1]);
-        container.innerHTML = sorted.map(([name, count], i) => `
-            <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100" onclick="selectVenueItem('${name.replace(/'/g, "\\'")}')">
-                <span class="rank-number ${i < 3 ? 'text-red-500' : 'text-gray-300'}">${i+1}</span>
-                <span class="venue-name">${name}</span>
-                <span class="song-count">${count}<span>回</span></span>
-            </div>
-        `).join('');
-    }
-
-    function renderLastPlayedRanking() {
-        const container = document.getElementById('not-played-recently-songs');
-        const sorted = Object.entries(liveStats.lastPlayed).sort((a,b) => a[1].dateObj - b[1].dateObj).slice(0, 10);
-        container.innerHTML = sorted.map(([name, data], i) => `
-            <div class="p-3 clickable-item flex items-center border-b border-gray-50 last:border-0" onclick="selectSong('${name.replace(/'/g, "\\'")}')">
-                <span class="rank-number ${i < 3 ? 'text-pink-500' : 'text-gray-300'}">${i+1}</span>
-                <div class="flex-1 min-w-0"><div class="song-title">${name}</div><div class="text-[10px] text-gray-400 mt-0.5">(${data.year}) ${data.tour}</div></div>
-            </div>
-        `).join('');
-    }
-
-    // --- 選択アクション ---
-    function selectSong(name) {
-        selectedSongName = name;
-        document.getElementById('song-search-input').value = name;
-        document.getElementById('show-setlist-btn').classList.remove('hidden');
-        renderSongRanking();
-        renderLiveCountChart();
-    }
-
-    function selectVenueItem(name) {
-        selectedVenueName = name;
-        renderVenueChart();
-    }
-
-    function applySongFilterToSearch() {
-        document.getElementById('song-filter-input').value = `${selectedSongName}（楽曲タブから選択）`;
-        switchLiveTab('search');
-        applyFilters();
-    }
-
-    function selectRandomSong() {
-        const keys = Object.keys(liveStats.songCounts);
-        selectSong(keys[Math.floor(Math.random() * keys.length)]);
-    }
-
-    function selectRandomVenue() {
-        const target = venueMode === 'venue' ? liveStats.venueCounts : liveStats.regionCounts;
-        const keys = Object.keys(target);
-        selectVenueItem(keys[Math.floor(Math.random() * keys.length)]);
-    }
-
-    // --- Chart.js 復旧 ---
-    function renderLiveCountChart() {
-        const ctx = document.getElementById('live-count-chart');
-        const counts = allData.liveRecords.reduce((acc, r) => { acc[r.year] = (acc[r.year] || 0) + 1; return acc; }, {});
-        const years = Object.keys(counts).sort();
-        
-        const songData = years.map(y => {
-            if (!selectedSongName) return 0;
-            return allData.liveRecords.filter(r => r.year == y && r.setlist.some(s => s.includes(selectedSongName))).length;
-        });
-
-        if (charts.live) charts.live.destroy();
-        charts.live = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: years, datasets: [
-                { label: '楽曲演奏', data: songData, backgroundColor: 'rgba(255, 105, 180, 0.8)', stack: 's1' },
-                { label: 'その他', data: years.map((y, i) => counts[y] - songData[i]), backgroundColor: '#eee', stack: 's1' }
-            ]},
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
-        });
-    }
-
-    function renderVenueChart() {
-        const ctx = document.getElementById('venue-chart');
-        const counts = allData.liveRecords.reduce((acc, r) => { acc[r.year] = (acc[r.year] || 0) + 1; return acc; }, {});
-        const years = Object.keys(counts).sort();
-        
-        const selData = years.map(y => {
-            if (!selectedVenueName) return 0;
-            return allData.liveRecords.filter(r => {
-                const vKey = r.region === 'オンライン' ? 'オンライン' : `${r.venue} (${r.region})`;
-                return r.year == y && (venueMode === 'venue' ? vKey === selectedVenueName : r.region === selectedVenueName);
-            }).length;
-        });
-
-        if (charts.venue) charts.venue.destroy();
-        charts.venue = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: years, datasets: [
-                { label: '選択場所', data: selData, backgroundColor: 'rgba(255, 105, 180, 0.8)', stack: 's1' },
-                { label: 'その他', data: years.map((y, i) => counts[y] - selData[i]), backgroundColor: '#eee', stack: 's1' }
-            ]},
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
-        });
-    }
-
-    // --- その他基本ロジック ---
-    function startConfetti() {
-        const canvas = document.getElementById('confetti-canvas'), ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const pts = []; 
-        for(let i=0; i<200; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const velocity = Math.random() * 12 + 5;
-            pts.push({ x: canvas.width/2, y: canvas.height/2, c: ['#FF69B4','#ef4444','#FFD700','#00BFFF'][i%4], r: Math.random()*6+2, vx: Math.cos(angle)*velocity, vy: Math.sin(angle)*velocity, g: 0.2, f: 0.96 });
+            // 暖簾を閉じる
+            const menu = document.getElementById('noren-menu');
+            if(menu.classList.contains('open')) toggleNoren();
         }
-        function update() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            pts.forEach(p => { p.vx *= p.f; p.vy *= p.f; p.vy += p.g; p.x += p.vx; p.y += p.vy; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); });
-            if (Date.now() - startTime < 3000) requestAnimationFrame(update);
-            else ctx.clearRect(0,0,canvas.width,canvas.height);
-        }
-        const startTime = Date.now(); update();
-    }
 
-    function toggleNoren(open) {
-        const menu = document.getElementById('noren-menu'), overlay = document.getElementById('noren-overlay'), sakura = document.getElementById('menu-sakura');
-        const isOpen = open !== undefined ? open : !menu.classList.contains('open');
-        menu.classList.toggle('open', isOpen); overlay.style.display = isOpen ? 'block' : 'none';
-        if (isOpen) sakura.classList.add('sakura-rotate'); else sakura.classList.remove('sakura-rotate');
-    }
-
-    function switchApp(appName) {
-        currentApp = appName; document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(`app-${appName}`).classList.add('active');
-        const h = document.getElementById('main-header'), t = document.getElementById('header-title'), nav = document.getElementById('live-nav');
-        nav.classList.remove('active'); document.body.classList.remove('dark-mode');
-        if (appName === 'live') { h.className = "bg-red-500 text-white"; t.textContent = "LLDB live"; nav.classList.add('active'); document.documentElement.style.setProperty('--active-color', '#ef4444'); switchLiveTab(liveTab); }
-        else if (appName === 'music') { h.className = "bg-orange-500 text-white"; t.textContent = "LLDB phrase"; document.documentElement.style.setProperty('--active-color', '#f97316'); switchPhraseTab(phraseMode); }
-        toggleNoren(false);
-    }
-
-    function switchLiveTab(tab) {
-        liveTab = tab; document.querySelectorAll('.live-sub-content').forEach(c => c.classList.add('hidden'));
-        document.getElementById(`live-tab-${tab}`).classList.remove('hidden');
-        document.querySelectorAll('#live-nav .nav-item').forEach((i, idx) => i.classList.toggle('active', ['search','song','venue','pattern','history'][idx] === tab));
-        if (tab === 'song') renderLiveCountChart(); if (tab === 'venue') renderVenueChart(); if (tab === 'pattern') renderAlbumChart();
-    }
-
-    function switchVenueMode(mode) { venueMode = mode; document.getElementById('vt-venue').classList.toggle('active', mode === 'venue'); document.getElementById('vt-region').classList.toggle('active', mode === 'region'); renderVenueRanking(); renderVenueChart(); }
-
-    // --- その他 (Phrase / Utility) ---
-    function switchPhraseTab(mode) {
-        phraseMode = mode; ['lyrics', 'title', 'shiritori'].forEach(m => document.getElementById(`chat-container-${m}`).classList.toggle('hidden', m !== mode));
-        document.querySelectorAll('.phrase-tab-btn').forEach(b => b.classList.toggle('active', b.id === `phrase-tab-${mode}`));
-        const c = { 'lyrics': '#f97316', 'title': '#0ea5e9', 'shiritori': '#ec4899' }[mode];
-        document.documentElement.style.setProperty('--bubble-color', c);
-        document.getElementById('music-submit-btn').style.backgroundColor = c;
-        lucide.createIcons();
-    }
-
-    function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => { const t = document.getElementById('toast'); t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 2000); }); }
-    function copyElementText(id) { copyToClipboard(document.getElementById(id).textContent); }
-    function getLabelClass(n) { const l = n.toLowerCase(); return l.includes('pop') ? 'pop' : (l.includes('rock') ? 'rock' : (l.includes('aloha') ? 'aloha' : 'other')); }
-    function getLabelText(n) { const l = n.toLowerCase(); return l.includes('pop') ? 'POP' : (l.includes('rock') ? 'ROCK' : (l.includes('aloha') ? 'ALOHA' : 'OTHER')); }
-    function clearFilters() { ['live-search-input','tour-select','year-select','region-select'].forEach(id => document.getElementById(id).value = ''); document.getElementById('song-filter-input').value = ''; applyFilters(); }
-    function clearSongSearch() { document.getElementById('song-search-input').value = ''; selectedSongName = ""; document.getElementById('show-setlist-btn').classList.add('hidden'); renderSongRanking(); renderLiveCountChart(); }
-    function restartShiritori() { document.getElementById('chat-container-shiritori').innerHTML = ''; addMusicMessage('しりとりリセット！最初の曲名は？', 'bot'); }
-    function showAboutModal() { toggleNoren(false); document.getElementById('about-modal').style.display = 'flex'; }
-    function closeAboutModal() { document.getElementById('about-modal').style.display = 'none'; }
-
-    function setupEventListeners() {
-        document.getElementById('music-form').addEventListener('submit', handleMusicSubmit);
-        document.getElementById('live-search-input').addEventListener('input', applyFilters);
-        ['tour-select','year-select','region-select'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
-        document.getElementById('song-search-input').addEventListener('input', renderSongRanking);
-        document.getElementById('song-sort').addEventListener('change', renderSongRanking);
-    }
-
-    function populateFilters() {
-        const years = [...new Set(allData.liveRecords.map(r => r.year))].sort((a,b) => b-a);
-        const regions = [...new Set(allData.liveRecords.map(r => r.region))].sort();
-        const ys = document.getElementById('year-select'), rs = document.getElementById('region-select');
-        years.forEach(y => ys.add(new Option(`${y}年`, y)));
-        regions.forEach(r => rs.add(new Option(r, r)));
-    }
-
-    async function handleMusicSubmit(e) {
-        e.preventDefault(); const input = document.getElementById('music-input'), query = input.value.trim(); if (!query) return;
-        addMusicMessage(query, 'user'); input.value = ''; const loadingId = addMusicLoading();
-        try {
-            const action = phraseMode === 'lyrics' ? 'searchLyrics' : (phraseMode === 'title' ? 'searchTitleData' : 'shiritori');
-            const res = await fetch(`${GAS_API_URL}?action=${action}&q=${encodeURIComponent(query)}&mode=${phraseMode}`);
-            const data = await res.json();
-            removeMusicLoading(loadingId);
-            if (data.status === 'success') {
-                if (phraseMode === 'lyrics') renderLyricsResults(data);
-                else if (phraseMode === 'title') renderTitleResults(data);
-                else renderShiritoriResults(data);
-            }
-        } catch (e) { removeMusicLoading(loadingId); addMusicMessage("エラーが起きたよ...", 'bot'); }
-    }
-
-    function addMusicMessage(content, type) {
-        const container = document.getElementById(`chat-container-${phraseMode}`);
-        const div = document.createElement('div');
-        div.className = `flex items-start message-row relative mb-4 animate-fade-in ${type === 'user' ? 'justify-end' : ''}`;
-        div.innerHTML = type === 'user' ? `<div class="bubble bubble-right shadow-sm">${content}</div>` : `<img class="bot-icon shadow-sm" src="${ICON_URL}"><div class="bubble bubble-left shadow-sm">${content}</div>`;
-        container.appendChild(div);
-        setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50);
-    }
-
-    function addMusicLoading() {
-        const container = document.getElementById(`chat-container-${phraseMode}`);
-        const id = 'loading-' + Date.now();
-        const div = document.createElement('div'); div.id = id; div.className = "flex items-start relative mb-4";
-        const msg = LOADING_MESSAGES[phraseMode][Math.floor(Math.random() * 2)];
-        div.innerHTML = `<img class="bot-icon shadow-sm" src="${ICON_URL}"><div class="bubble bubble-left shadow-sm pulse-text">${msg}</div>`;
-        container.appendChild(div); container.scrollTop = container.scrollHeight; return id;
-    }
-    function removeMusicLoading(id) { document.getElementById(id)?.remove(); }
-
-    function renderLyricsResults(data) {
-        if (!data.results || data.results.length === 0) { addMusicMessage(`「${data.query}」は見つからなかったよ...`, 'bot'); return; }
-        let html = '<div class="flex flex-col gap-2">';
-        if (data.fuzzy_type) html += `<div class="bg-orange-100/50 border border-orange-200 rounded p-2 text-[10px]">「${data.actual_query}」で見つけたよ！</div>`;
-        data.results.forEach(item => {
-            const q = data.fuzzy_type ? data.actual_query : data.query;
-            const highlighted = item.phrase.replace(new RegExp(`(${q})`, 'gi'), '<span class="highlight-text">$1</span>');
-            const safeText = `${item.phrase}（${item.title}）`.replace(/'/g, "\\'").replace(/\n/g, " ");
-            html += `<div class="py-2 border-b border-orange-50 cursor-pointer" onclick="copyToClipboard('${safeText}')"><p class="text-sm">${highlighted} <span class="text-[10px] text-gray-400">（${item.title}）</span></p></div>`;
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
         });
-        const allText = data.results.map(item => `${item.phrase}（${item.title}）`).join('\n');
-        const textId = `c-${Date.now()}`;
-        html += `<div style="display:none;" id="${textId}">${allText}</div><div class="mt-3 flex justify-between items-center"><span class="text-xs text-gray-400 font-bold">計${data.results.length}箇所</span><button onclick="copyElementText('${textId}')" class="text-xs text-orange-500 font-bold bg-orange-50 px-2 py-1 rounded-full border border-orange-200">まとめてコピー</button></div>`;
-        html += `<div class="flex justify-center mt-3 pt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-xs text-orange-300">回答トップへ移動</button></div></div>`;
-        addMusicMessage(html, 'bot'); lucide.createIcons();
-    }
-
-    function renderTitleResults(data) {
-        if (!data.songs?.length && !data.albums?.length) { addMusicMessage("見つからなかったよ...", 'bot'); return; }
-        let html = '<div class="flex flex-col gap-4">';
-        if (data.songs) {
-            data.songs.forEach(s => {
-                html += `<div class="bg-sky-50/50 rounded-lg p-3 border border-sky-100">
-                    <div class="font-bold text-sky-700">${s.title}</div>
-                    <div class="text-[11px] text-gray-600 mt-2">${s.single_info || ''}<p>${s.album_info || 'アルバム未収録'}</p>${s.age_at_release ? `<p class="text-sky-600 font-bold">当時${s.age_at_release}歳！</p>` : ''}</div>
-                </div>`;
-            });
-        }
-        if (data.albums) {
-            data.albums.forEach(disk => {
-                const songs = disk.songs.map(s => `<li class="py-1 border-b border-sky-50 last:border-0 flex gap-2"><span class="text-sky-400 font-mono text-[10px] w-4">${s.order}.</span><span class="text-sm">${s.title}</span></li>`).join('');
-                html += `<div class="bg-sky-50/50 rounded-xl p-4 border border-sky-100"><h3 class="font-bold text-sky-700 mb-1">💿 ${disk.disk_name}</h3><p class="text-[10px] text-gray-500 mb-2">${disk.release_date} 発売</p><ul class="list-none">${songs}</ul></div>`;
-            });
-        }
-        html += `<div class="flex justify-center mt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-xs text-sky-300">回答トップへ移動</button></div></div>`;
-        addMusicMessage(html, 'bot');
-    }
-
-    function renderShiritoriResults(data) {
-        if (data.result === 'unknown_song') { addMusicMessage(data.message, 'bot'); return; }
-        if (data.result === 'user_lose' || data.result === 'user_win') { addMusicMessage(`${data.message}<br><div class="flex gap-2 mt-3"><button onclick="restartShiritori()" class="flex-1 bg-pink-500 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm">もう一度</button><button onclick="activateSecretMode()" class="flex-1 bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-bold">おしまい</button></div>`, 'bot'); return; }
-        let h = `<p>${data.message}</p>`;
-        if (data.hints?.length) {
-            const hId = 'h-'+Date.now();
-            h += `<div class="mt-2"><button onclick="document.getElementById('${hId}').classList.toggle('hidden')" class="text-[10px] font-bold text-pink-500 flex items-center gap-1"><i data-lucide="lightbulb" class="w-3 h-3"></i> ヒント</button><div id="${hId}" class="hidden mt-2 flex flex-wrap gap-2 animate-fade-in">`;
-            data.hints.forEach(hint => h += `<button onclick="sendShiritoriAnswer('${hint.title}')" class="bg-white border border-pink-200 text-pink-500 px-3 py-1 rounded-full text-[10px] font-bold">${hint.title}</button>`);
-            h += `</div></div>`;
-        }
-        addMusicMessage(h, 'bot'); lucide.createIcons();
-    }
-
-    function activateSecretMode() {
-        if (currentApp !== 'music') return; isDarkMode = !isDarkMode; document.body.classList.toggle('dark-mode', isDarkMode);
-        if (isDarkMode) { lastPhraseMode = phraseMode; addMusicMessage("しりとり起動！", "bot"); switchPhraseTab('shiritori'); document.getElementById('phrase-tabs').classList.add('hidden'); }
-        else { switchPhraseTab(lastPhraseMode); document.getElementById('phrase-tabs').classList.remove('hidden'); }
-    }
-
-    function renderAlbumChart() {
-        const ctx = document.getElementById('album-chart'); if (!ctx || !allData.albumData.length) return;
-        if (charts.album) charts.album.destroy();
-        charts.album = new Chart(ctx, { type: 'bar', data: { labels: allData.albumData.map(a => a.albumName), datasets: [{ data: allData.albumData.map(a => a.playCount), backgroundColor: '#FF69B4' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-    }
-
-    function openLiveDetail(date, tourName) {
-        const rec = allData.liveRecords.find(r => r.date === date && r.tourName === tourName);
-        if (!rec) return;
-        document.getElementById('detail-date').textContent = `${rec.date} (${rec.dayOfWeek})`;
-        document.getElementById('detail-title').textContent = rec.tourName;
-        document.getElementById('detail-venue').textContent = `${rec.venue} (${rec.region})`;
-        const counts = { '表題曲': 0, 'カップリング曲': 0, 'アルバム曲': 0, 'その他': 0 };
-        rec.setlist.forEach(s => {
-            const name = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
-            const info = allData.songData[name];
-            if (info) counts[info.type] = (counts[info.type] || 0) + 1;
-        });
-        document.getElementById('detail-summary').innerHTML = Object.entries(counts).map(([k, v]) => `<span>${k}: ${v}</span>`).join(' / ');
-        let html = '', num = 1, medleyNum = 1, inMedley = false, encoreNum = 0;
-        const minYear = 1998, maxYear = new Date().getFullYear();
-        rec.setlist.forEach((s) => {
-            if (s === '__MEDLEY_START__') { inMedley = true; html += `<div class="setlist-item setlist-medley-title"><div class="setlist-num">${num++}.</div><div class="setlist-title">メドレー</div></div>`; medleyNum = 1; return; }
-            if (s === '__MEDLEY_END__') { inMedley = false; return; }
-            let curEncore = s.includes('_アンコール') ? (s.includes('#3') ? 3 : s.includes('#2') ? 2 : 1) : 0;
-            if (curEncore > encoreNum) { encoreNum = curEncore; html += `<div class="setlist-encore-header">アンコール ${'👏'.repeat(encoreNum)}</div>`; }
-            const cleanName = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
-            const songInfo = allData.songData[cleanName];
-            let timelineHtml = '';
-            if (songInfo && songInfo.year) {
-                const percent = Math.max(0, Math.min(100, ((songInfo.year - minYear) / (maxYear - minYear)) * 100));
-                timelineHtml = `<div class="timeline-container" onclick="this.querySelector('.timeline-dot').classList.toggle('active'); event.stopPropagation();"><div class="timeline-bar"><div class="timeline-dot" style="left:${percent}%"><div class="year-tooltip">${songInfo.year}</div></div></div></div>`;
-            }
-            html += `<div class="setlist-item ${inMedley ? 'setlist-medley' : ''} ${curEncore ? 'setlist-encore' : ''}"><div class="setlist-num">${inMedley ? '('+medleyNum++ +')' : num+++'.'}</div><div class="setlist-title truncate" style="max-width: 160px;">${cleanName}</div>${timelineHtml}</div>`;
-        });
-        document.getElementById('detail-setlist').innerHTML = html;
-        document.getElementById('live-detail-view').style.display = 'block';
-        document.getElementById('header-back-btn').classList.remove('hidden');
-    }
-
-    function closeLiveDetail() { document.getElementById('live-detail-view').style.display = 'none'; document.getElementById('header-back-btn').classList.add('hidden'); }
-    function playOmikuji() { const icon = document.getElementById('omikuji-icon'); icon.style.transform = 'scale(1.5) rotate(360deg)'; icon.style.transition = '0.5s'; setTimeout(() => { icon.style.transform = 'scale(1)'; const rec = allData.liveRecords[Math.floor(Math.random() * allData.liveRecords.length)]; openLiveDetail(rec.date, rec.tourName); }, 500); }
-</script>
+    </script>
 </body>
 </html>
