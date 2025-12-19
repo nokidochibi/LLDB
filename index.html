@@ -98,6 +98,10 @@
     .pulse-text { animation: pulse 1.5s infinite; }
     @keyframes pulse { 50% { opacity: .5; } }
     .no-scrollbar::-webkit-scrollbar { display: none; }
+
+    /* モーダル */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
+    .modal-content { background: white; border-radius: 20px; padding: 24px; width: 90%; max-width: 400px; position: relative; }
 </style>
 </head>
 <body class="theme-live">
@@ -116,7 +120,23 @@
             <div class="flex-1"><div class="font-bold">LLDB live</div><div class="text-xs text-gray-400">ライブ / セトリ検索</div></div>
             <i data-lucide="chevron-right" class="text-gray-300"></i>
         </div>
-        <!-- 他のメニューも同様に配置 -->
+        <div class="flex items-center gap-4 p-4 border-b border-gray-100" onclick="switchApp('history')">
+            <div class="w-10 h-10 bg-pink-500 rounded-xl flex items-center justify-center text-white"><i data-lucide="heart-handshake"></i></div>
+            <div class="flex-1"><div class="font-bold">LLDB history</div><div class="text-xs text-gray-400">aikoと自分 / 年表</div></div>
+            <i data-lucide="chevron-right" class="text-gray-300"></i>
+        </div>
+        <div class="flex items-center gap-4 p-4 border-b border-gray-100" onclick="switchApp('stats')">
+            <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white"><i data-lucide="bar-chart-2"></i></div>
+            <div class="flex-1"><div class="font-bold">LLDB stats</div><div class="text-xs text-gray-400">人気のaiko / 統計</div></div>
+            <i data-lucide="chevron-right" class="text-gray-300"></i>
+        </div>
+        <div class="flex items-center gap-4 p-4" onclick="showAboutModal()">
+            <div class="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center text-gray-500"><i data-lucide="info"></i></div>
+            <div class="flex-1"><div class="font-bold">About</div><div class="text-xs text-gray-400">アプリについて</div></div>
+        </div>
+    </div>
+    <div class="py-2 flex justify-center cursor-pointer" onclick="toggleNoren()">
+        <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
     </div>
 </div>
 
@@ -154,9 +174,7 @@
      2. LLDB live (Live App)
      ============================================ -->
 <div id="app-live" class="app-screen">
-    <!-- 各コンテンツ（公演、楽曲、場所、傾向、軌跡）を切り替える -->
     <div id="live-content-container" class="p-4">
-        <!-- 検索・リストエリア -->
         <div id="live-tab-search" class="live-sub-content">
             <div class="card-base bg-gray-50 border border-gray-200 mb-4">
                 <input type="text" id="live-search-input" placeholder="ライブ名・会場・年で検索" class="w-full bg-white border rounded p-2 text-sm mb-2">
@@ -168,12 +186,35 @@
             <div id="live-list" class="space-y-3"></div>
         </div>
 
-        <!-- 軌跡タブ -->
         <div id="live-tab-history" class="live-sub-content hidden">
             <div id="history-grid" class="history-grid-container bg-white"></div>
         </div>
-        
-        <!-- 他のサブタブ（楽曲、場所、傾向）も同様に実装 -->
+    </div>
+</div>
+
+<!-- ============================================
+     3. LLDB history (Placeholder)
+     ============================================ -->
+<div id="app-history" class="app-screen">
+    <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div class="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center text-pink-500 mb-4">
+            <i data-lucide="heart-handshake" class="w-10 h-10"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-pink-600 mb-2">Coming Soon?</h2>
+        <p class="text-gray-400 text-sm">aikoとあなたの歴史を重ねる機能を準備中です🌷</p>
+    </div>
+</div>
+
+<!-- ============================================
+     4. LLDB stats (Placeholder)
+     ============================================ -->
+<div id="app-stats" class="app-screen">
+    <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 mb-4">
+            <i data-lucide="bar-chart-2" class="w-10 h-10"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-700 mb-2">Coming Soon?</h2>
+        <p class="text-gray-400 text-sm">YouTubeの再生数ランキングなどの統計情報を集計中です📈</p>
     </div>
 </div>
 
@@ -190,6 +231,30 @@
     </div>
 </div>
 
+<!-- About モーダル -->
+<div id="about-modal" class="modal-overlay" onclick="closeAboutModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-bold text-lg">About App</h2>
+            <button onclick="closeAboutModal()"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+        </div>
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-red-500 mx-auto mb-3">
+                <i data-lucide="heart" class="w-8 h-8 fill-current"></i>
+            </div>
+            <p class="font-bold text-gray-800">Love Like DataBase</p>
+            <p class="text-[10px] text-gray-400">Unified Version 5.1.0</p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed mb-6">
+            このアプリは１aikoファンによる非公式なアプリです。aikoさんの楽曲やライブの歴史を、楽しみながら検索できるよう制作しています。
+        </div>
+        <div class="flex items-center justify-between text-xs border-t border-gray-100 pt-4">
+            <span class="text-gray-400">Developed by <span class="font-bold text-gray-600">のき🌳</span></span>
+            <a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-400 font-bold hover:underline">@noki_dochibi</a>
+        </div>
+    </div>
+</div>
+
 <!-- 下部ナビゲーション (Live App用) -->
 <nav id="live-nav" class="bottom-nav">
     <div class="nav-item active" onclick="switchLiveTab('search')"><i data-lucide="calendar-days"></i><span>公演</span></div>
@@ -201,7 +266,7 @@
 <script>
     // --- ★定数・状態管理★ ---
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
-    const VERSION = "v5.0.0";
+    const VERSION = "v5.1.0";
     let allData = { liveRecords: [], songData: {}, historyData: [] };
     let currentApp = 'live';
     let currentPhraseMode = 'lyrics';
@@ -232,13 +297,18 @@
     function switchApp(appName) {
         currentApp = appName;
         document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(`app-${appName}`).classList.add('active');
+        const target = document.getElementById(`app-${appName}`);
+        if (target) target.classList.add('active');
         
         // ヘッダー・テーマ制御
         const header = document.getElementById('main-header');
         const title = document.getElementById('header-title');
         const nav = document.getElementById('live-nav');
         
+        // 基本リセット
+        nav.classList.remove('active');
+        document.body.classList.remove('dark-mode');
+
         if (appName === 'live') {
             header.className = "bg-red-500 text-white";
             title.textContent = "LLDB live";
@@ -247,8 +317,13 @@
         } else if (appName === 'music') {
             header.className = "bg-orange-500 text-white";
             title.textContent = "LLDB phrase";
-            nav.classList.remove('active');
             document.documentElement.style.setProperty('--active-color', '#f97316');
+        } else if (appName === 'history') {
+            header.className = "bg-pink-500 text-white";
+            title.textContent = "LLDB history";
+        } else if (appName === 'stats') {
+            header.className = "bg-slate-900 text-white";
+            title.textContent = "LLDB stats";
         }
         
         toggleNoren(false);
@@ -264,6 +339,7 @@
 
     function renderLiveList(records) {
         const container = document.getElementById('live-list');
+        if (!container) return;
         container.innerHTML = records.sort((a,b) => new Date(b.date) - new Date(a.date)).map(rec => `
             <div class="card-base relative overflow-hidden" onclick="openLiveDetail('${rec.date}', '${rec.tourName.replace(/'/g, "\\'")}')">
                 <div class="live-card-label ${getLabelClass(rec.tourName)}">${getLabelText(rec.tourName)}</div>
@@ -300,6 +376,7 @@
 
     function renderHistory() {
         const container = document.getElementById('history-grid');
+        if (!container) return;
         let html = '';
         let lastYear = '';
         allData.historyData.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(ev => {
@@ -352,6 +429,15 @@
         }
     }
 
+    // --- モーダル制御 ---
+    function showAboutModal() {
+        toggleNoren(false);
+        document.getElementById('about-modal').style.display = 'flex';
+    }
+    function closeAboutModal() {
+        document.getElementById('about-modal').style.display = 'none';
+    }
+
     // --- ユーティリティ ---
     function toggleNoren(open) {
         const menu = document.getElementById('noren-menu');
@@ -397,7 +483,6 @@
 
     function setupEventListeners() {
         document.getElementById('music-form').addEventListener('submit', handlePhraseSearch);
-        // 検索フィルター
         document.getElementById('live-search-input').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = allData.liveRecords.filter(r => r.tourName.toLowerCase().includes(term) || r.venue.toLowerCase().includes(term));
@@ -408,6 +493,7 @@
     function populateFilters() {
         const years = [...new Set(allData.liveRecords.map(r => r.year))].sort((a,b) => b-a);
         const select = document.getElementById('year-select');
+        if (!select) return;
         years.forEach(y => select.innerHTML += `<option value="${y}">${y}年</option>`);
     }
 </script>
