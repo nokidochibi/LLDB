@@ -12,7 +12,8 @@
             font-family: 'Noto Sans JP', sans-serif;
             background-color: #fdf2f8; /* Pink-50 */
             color: #374151;
-            padding-bottom: 40px;
+            padding-bottom: 40px; /* Safe area for bottom */
+            padding-bottom: calc(40px + env(safe-area-inset-bottom));
             padding-top: 0px;
         }
         .form-select {
@@ -23,43 +24,55 @@
             background-size: 1.5em 1.5em;
         }
         .timeline-row { animation: fadeIn 0.5s ease-out; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         /* テーブルのゼブラストライプとボーダー調整 */
         .history-table tr:nth-child(even) { background-color: #fff1f2; } /* Pink-50 equivalent */
         .history-table td { border-bottom: 1px solid #fecdd3; } /* Pink-200 */
+
+        /* タブのアクティブスタイル */
+        .tab-active {
+            border-bottom: 2px solid #ec4899; /* pink-500 */
+            color: #ec4899;
+            font-weight: bold;
+        }
+        .tab-inactive {
+            color: #9ca3af; /* gray-400 */
+            border-bottom: 2px solid transparent;
+        }
     </style>
 </head>
 <body class="bg-pink-50">
 
     <main class="max-w-xl mx-auto p-4">
         <!-- Header Section -->
-        <div class="text-center mb-8 pt-4">
+        <div class="text-center mb-6 pt-4">
             <h2 class="text-xl font-bold text-pink-600 mb-2 flex items-center justify-center gap-2">
                 <i data-lucide="heart-handshake" class="w-6 h-6"></i>
                 わたしとaikoのヒストリー
             </h2>
-            <p class="text-xs text-gray-500">あなたの誕生日を入力してね。<br>aikoのリリースとあなたの人生を重ねてみよう。</p>
+            <p class="text-xs text-gray-500">生年月日を入力してね。<br>aikoのリリースとあなたの人生を重ねてみよう。</p>
         </div>
 
         <!-- Input Form -->
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 border border-pink-100">
-            <div class="flex gap-2 mb-6">
+        <div class="bg-white rounded-2xl shadow-sm p-5 mb-6 border border-pink-100">
+            <div class="flex gap-2 mb-4">
                 <div class="flex-1">
-                    <label class="block text-xs font-bold text-gray-400 mb-1">年 (Year)</label>
+                    <label class="block text-xs font-bold text-pink-400 mb-1">年 (Year)</label>
                     <select id="year" class="form-select w-full bg-pink-50 border border-pink-200 text-gray-700 rounded-lg py-3 px-3 focus:outline-none focus:ring-2 focus:ring-pink-400 text-lg font-bold"></select>
                 </div>
                 <div class="w-20">
-                    <label class="block text-xs font-bold text-gray-400 mb-1">月</label>
+                    <label class="block text-xs font-bold text-pink-400 mb-1">月</label>
                     <select id="month" class="form-select w-full bg-pink-50 border border-pink-200 text-gray-700 rounded-lg py-3 px-3 focus:outline-none focus:ring-2 focus:ring-pink-400 text-lg font-bold"></select>
                 </div>
                 <div class="w-20">
-                    <label class="block text-xs font-bold text-gray-400 mb-1">日</label>
+                    <label class="block text-xs font-bold text-pink-400 mb-1">日</label>
                     <select id="day" class="form-select w-full bg-pink-50 border border-pink-200 text-gray-700 rounded-lg py-3 px-3 focus:outline-none focus:ring-2 focus:ring-pink-400 text-lg font-bold"></select>
                 </div>
             </div>
             
-            <button onclick="generateHistory()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 rounded-xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2">
+            <button onclick="generateHistory()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3.5 rounded-xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2">
                 <i data-lucide="sparkles" class="w-5 h-5"></i>
                 ヒストリーを作成！
             </button>
@@ -67,27 +80,100 @@
 
         <!-- Loading State -->
         <div id="loading" class="hidden text-center py-12">
-            <div class="animate-spin text-pink-400 mb-2">⏳</div>
-            <p class="text-sm text-gray-400">タイムラインを構築中...</p>
+            <div class="animate-spin text-pink-400 mb-2 text-2xl">⏳</div>
+            <p class="text-sm text-gray-400 animate-pulse">aikoとの時間を計算中...</p>
         </div>
 
-        <!-- Result Table -->
-        <div id="result-container" class="hidden bg-white rounded-xl shadow-sm overflow-hidden border border-pink-100">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left history-table">
-                    <thead class="bg-pink-500 text-white font-bold">
-                        <tr>
-                            <th class="p-3 text-center whitespace-nowrap">年月</th>
-                            <th class="p-3 text-center whitespace-nowrap w-12">年齢</th>
-                            <th class="p-3 whitespace-nowrap">ライフステージ</th>
-                            <th class="p-3 min-w-[150px]">aiko Release</th>
-                        </tr>
-                    </thead>
-                    <tbody id="timeline-body">
-                        <!-- JS Generated -->
-                    </tbody>
-                </table>
+        <!-- Content Area (Tabs & Results) -->
+        <div id="content-area" class="hidden">
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 mb-4 px-2">
+                <button onclick="switchTab('history')" id="tab-history" class="flex-1 py-3 text-sm text-center transition-colors tab-active">
+                    📜 年表
+                </button>
+                <button onclick="switchTab('today')" id="tab-today" class="flex-1 py-3 text-sm text-center transition-colors tab-inactive">
+                    💖 今日の自分
+                </button>
             </div>
+
+            <!-- Tab Content: History -->
+            <div id="view-history" class="fade-in">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-pink-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left history-table">
+                            <thead class="bg-pink-500 text-white font-bold">
+                                <tr>
+                                    <th class="p-3 text-center whitespace-nowrap">年月</th>
+                                    <th class="p-3 text-center whitespace-nowrap w-12">年齢</th>
+                                    <th class="p-3 whitespace-nowrap">ライフステージ</th>
+                                    <th class="p-3 min-w-[150px]">aiko Release</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timeline-body">
+                                <!-- JS Generated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Today -->
+            <div id="view-today" class="hidden fade-in">
+                <!-- aiko Days -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-4 border border-pink-100 text-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <i data-lucide="clock" class="w-24 h-24 text-pink-500"></i>
+                    </div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">aikoと過ごした時間</h3>
+                    <div class="text-4xl font-extrabold text-pink-600 mb-1">
+                        <span id="days-with-aiko">0</span>
+                        <span class="text-base font-normal text-pink-400 ml-1">Days</span>
+                    </div>
+                    <p class="text-xs text-gray-400" id="days-detail">あなたが生まれてから...</p>
+                </div>
+
+                <!-- aiko Ratio -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-4 border border-pink-100 flex items-center justify-between relative overflow-hidden">
+                     <div class="absolute bottom-0 left-0 p-4 opacity-10">
+                        <i data-lucide="percent" class="w-20 h-20 text-pink-500"></i>
+                    </div>
+                    <div class="z-10 text-left">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">人生におけるaiko率</h3>
+                        <div class="text-5xl font-extrabold text-pink-500">
+                            <span id="aiko-ratio">0</span><span class="text-2xl">%</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">人生のほとんどがaikoと共に！</p>
+                    </div>
+                    <!-- Simple CSS Pie Chart representation -->
+                    <div class="w-24 h-24 rounded-full bg-pink-100 border-4 border-pink-200 flex items-center justify-center relative z-10">
+                        <i data-lucide="heart" class="w-10 h-10 text-pink-400 fill-pink-400 animate-pulse"></i>
+                    </div>
+                </div>
+
+                <!-- Pickup Release -->
+                <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl shadow-md p-6 text-white relative">
+                    <h3 class="text-xs font-bold text-pink-100 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="music" class="w-4 h-4"></i>
+                        PICKUP MEMORY
+                    </h3>
+                    
+                    <div id="pickup-container" class="text-center">
+                        <div class="bg-white/20 w-32 h-32 mx-auto rounded-lg mb-4 flex items-center justify-center backdrop-blur-sm">
+                            <i data-lucide="disc" class="w-16 h-16 text-white/80"></i>
+                        </div>
+                        <h4 class="text-lg font-bold mb-1" id="pickup-title">Loading...</h4>
+                        <p class="text-sm text-pink-100 mb-2" id="pickup-date">----/--/--</p>
+                        <p class="text-xs text-pink-200" id="pickup-age">当時 --歳</p>
+                    </div>
+                    
+                    <div class="mt-4 text-[10px] text-pink-200 text-center bg-black/10 rounded px-2 py-1">
+                        ※画像を表示するにはGASの設定が必要です
+                    </div>
+                </div>
+
+            </div>
+
         </div>
         
         <div id="empty-msg" class="hidden text-center py-8 text-gray-400 text-xs">
@@ -98,6 +184,12 @@
 
     <script>
         const GAS_API_URL = parent.GAS_API_URL || "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+        
+        // aiko debut date: 1998-07-17
+        const AIKO_DEBUT = new Date(1998, 6, 17); // Month is 0-indexed
+
+        let currentTimelineData = [];
+        let birthDate = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -115,7 +207,7 @@
                 const opt = document.createElement('option');
                 opt.value = i;
                 opt.text = i;
-                if (i === 1998) opt.selected = true; // Default
+                if (i === 1998) opt.selected = true; 
                 yearSelect.appendChild(opt);
             }
             // Month
@@ -123,7 +215,7 @@
                 const opt = document.createElement('option');
                 opt.value = i;
                 opt.text = i;
-                if (i === 7) opt.selected = true; // Default
+                if (i === 7) opt.selected = true; 
                 monthSelect.appendChild(opt);
             }
             // Day
@@ -131,29 +223,67 @@
                 const opt = document.createElement('option');
                 opt.value = i;
                 opt.text = i;
-                if (i === 17) opt.selected = true; // Default
+                if (i === 17) opt.selected = true; 
                 daySelect.appendChild(opt);
             }
         }
 
-        async function generateHistory() {
-            const y = document.getElementById('year').value;
-            const m = document.getElementById('month').value;
-            const d = document.getElementById('day').value;
+        function switchTab(tabName) {
+            const historyView = document.getElementById('view-history');
+            const todayView = document.getElementById('view-today');
+            const tabHistory = document.getElementById('tab-history');
+            const tabToday = document.getElementById('tab-today');
 
-            document.getElementById('result-container').classList.add('hidden');
+            if (tabName === 'history') {
+                historyView.classList.remove('hidden');
+                todayView.classList.add('hidden');
+                
+                tabHistory.classList.add('tab-active');
+                tabHistory.classList.remove('tab-inactive');
+                tabToday.classList.remove('tab-active');
+                tabToday.classList.add('tab-inactive');
+            } else {
+                historyView.classList.add('hidden');
+                todayView.classList.remove('hidden');
+
+                tabHistory.classList.remove('tab-active');
+                tabHistory.classList.add('tab-inactive');
+                tabToday.classList.add('tab-active');
+                tabToday.classList.remove('tab-inactive');
+                
+                // タブ切り替え時に「今日の自分」データを更新（もしデータがあれば）
+                if (currentTimelineData.length > 0 && birthDate) {
+                    renderTodayStats();
+                }
+            }
+        }
+
+        async function generateHistory() {
+            const y = parseInt(document.getElementById('year').value);
+            const m = parseInt(document.getElementById('month').value);
+            const d = parseInt(document.getElementById('day').value);
+            
+            birthDate = new Date(y, m - 1, d);
+
+            document.getElementById('content-area').classList.add('hidden');
             document.getElementById('empty-msg').classList.add('hidden');
             document.getElementById('loading').classList.remove('hidden');
+            
+            // Reset Tab to history initially
+            switchTab('history');
 
             try {
+                // Fetch timeline data
                 const res = await fetch(`${GAS_API_URL}?action=generateHistoryTimeline&year=${y}&month=${m}&day=${d}`);
                 const json = await res.json();
 
                 document.getElementById('loading').classList.add('hidden');
 
                 if (json.status === 'success' && json.data.length > 0) {
+                    currentTimelineData = json.data;
                     renderTimeline(json.data);
-                    document.getElementById('result-container').classList.remove('hidden');
+                    renderTodayStats(); // Pre-calculate stats
+                    document.getElementById('content-area').classList.remove('hidden');
                 } else {
                     document.getElementById('empty-msg').classList.remove('hidden');
                 }
@@ -168,10 +298,9 @@
             const tbody = document.getElementById('timeline-body');
             tbody.innerHTML = '';
 
-            data.forEach((row, index) => {
+            data.forEach((row) => {
                 const tr = document.createElement('tr');
                 tr.className = 'timeline-row';
-                // aikoリリースがある行はハイライト
                 if (row.release) {
                     tr.classList.add('font-bold');
                 }
@@ -188,6 +317,58 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function renderTodayStats() {
+            if (!birthDate) return;
+
+            const today = new Date();
+            
+            // 1. Calculate Life Days
+            const diffTimeLife = Math.abs(today - birthDate);
+            const diffDaysLife = Math.ceil(diffTimeLife / (1000 * 60 * 60 * 24));
+
+            // 2. Calculate aiko Days
+            // If born before debut, aiko days starts from debut.
+            // If born after debut, aiko days starts from birth (same as life days).
+            let diffDaysAiko = 0;
+            if (birthDate < AIKO_DEBUT) {
+                const diffTimeAiko = Math.abs(today - AIKO_DEBUT);
+                diffDaysAiko = Math.ceil(diffTimeAiko / (1000 * 60 * 60 * 24));
+            } else {
+                diffDaysAiko = diffDaysLife;
+            }
+
+            // 3. Calculate Ratio
+            let ratio = (diffDaysAiko / diffDaysLife) * 100;
+            if (ratio > 100) ratio = 100; // Should not happen but safe guard
+
+            // DOM Updates
+            document.getElementById('days-with-aiko').innerText = diffDaysAiko.toLocaleString();
+            document.getElementById('aiko-ratio').innerText = ratio.toFixed(1);
+            
+            const detailText = (birthDate < AIKO_DEBUT) 
+                ? `デビューから今日まで、あなたはaikoと共に生きてきました。`
+                : `あなたは生まれた時からずっとaikoと共に生きています。`;
+            document.getElementById('days-detail').innerText = detailText;
+
+
+            // 4. Pickup Random Release from Timeline Data
+            // Filter rows that have a release
+            const releaseRows = currentTimelineData.filter(row => row.release && row.release.length > 1);
+            
+            if (releaseRows.length > 0) {
+                const randomRow = releaseRows[Math.floor(Math.random() * releaseRows.length)];
+                document.getElementById('pickup-title').innerText = randomRow.release;
+                document.getElementById('pickup-date').innerText = `${randomRow.year}年${randomRow.month}月`;
+                document.getElementById('pickup-age').innerText = `当時 ${randomRow.age}歳`;
+            } else {
+                document.getElementById('pickup-title').innerText = "aikoの曲を聴こう";
+                document.getElementById('pickup-date').innerText = "";
+                document.getElementById('pickup-age').innerText = "";
+            }
+            
+            lucide.createIcons();
         }
     </script>
 </body>
