@@ -50,7 +50,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v5.4.2"; 
+        const APP_VERSION = "v5.4.3"; 
     </script>
 </head>
 <body class="bg-gray-100">
@@ -114,7 +114,6 @@
             </div>
             <div class="noren-item" onclick="switchApp('phrase')">
                 <div class="noren-icon bg-orange-500"><i data-lucide="music" class="w-6 h-6"></i></div>
-                <!-- 修正: LLDB phrase -> LLDB lookup -->
                 <div class="flex-1"><div class="font-bold text-gray-800">LLDB lookup</div><div class="text-xs text-gray-400"> 楽曲 / 歌詞フレーズ検索 </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
@@ -156,27 +155,28 @@
     <!-- About Modal -->
     <div id="about-modal" onclick="closeAboutModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="text-center mb-4">
-                <!-- 🌸アイコンをユーザーアイコン画像に変更 -->
-                <img src="https://unavatar.io/twitter/noki_dochibi" class="w-20 h-20 rounded-full mx-auto shadow-md border-2 border-white mb-2" alt="icon">
+            <!-- Header Section -->
+            <div class="text-center mb-6">
+                <!-- アイコンを削除し、タイトルのみに -->
                 <h2 class="font-bold text-xl mt-2 text-gray-800">Love Like DataBase</h2>
-                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.4.2</p>
+                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.4.3</p>
             </div>
             
+            <!-- Description Section -->
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
                 <p>
                     このアプリは、個人開発者が趣味で作った、非公式のファンアプリです。データの誤りを含んでいる可能性があります。
-                </p>
-                <p>
-                    ライブのセトリ、歌詞のフレーズ、リリース情報...<br>
-                    愛しい時間をいつでも手元に置いておけるように作りました。
                 </p>
                 <p>
                     不具合報告や、「ここ間違ってるよ！」というご指摘は、X (旧Twitter) までお寄せいただけると嬉しいです。
                 </p>
             </div>
 
-            <div class="mt-6 flex justify-center">
+            <!-- Developer Section -->
+            <div class="mt-8 flex flex-col items-center gap-3">
+                <!-- アイコンを下部に移動 -->
+                <img src="https://unavatar.io/twitter/noki_dochibi" class="w-16 h-16 rounded-full shadow-md border-2 border-white" alt="icon">
+                
                 <a href="https://twitter.com/noki_dochibi" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-xs font-bold hover:bg-gray-800 transition shadow-sm">
                     <!-- X icon SVG -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -229,7 +229,6 @@
         // アプリ定義 (タイトル更新)
         const apps = {
             'live': { title: 'Love Like DataBase vol.5.4.1', color: 'bg-red-500' },
-            // 修正: LLDB phrase -> LLDB lookup
             'phrase': { title: 'LLDB lookup', color: 'bg-orange-500' },
             'history': { title: 'LLDB history', color: 'bg-pink-500' },
             'trends': { title: 'LLDB trends', color: 'bg-blue-600' }
