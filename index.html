@@ -50,7 +50,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v5.6.0";
+        const APP_VERSION = "v5.5.0";
     </script>
 </head>
 <body class="bg-gray-100">
@@ -112,9 +112,10 @@
                 <div class="flex-1"><div class="font-bold text-gray-800">LLDB live</div><div class="text-xs text-gray-400"> ライブ / セトリ / ツアー </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
+            <!-- phrase -> lookup に変更 -->
             <div class="noren-item" onclick="switchApp('lookup')">
-                <div class="noren-icon bg-orange-500"><i data-lucide="search" class="w-6 h-6"></i></div>
-                <div class="flex-1"><div class="font-bold text-gray-800">LLDB lookup</div><div class="text-xs text-gray-400"> 楽曲 / 歌詞検索 / しりとり </div></div>
+                <div class="noren-icon bg-orange-500"><i data-lucide="music" class="w-6 h-6"></i></div>
+                <div class="flex-1"><div class="font-bold text-gray-800">LLDB lookup</div><div class="text-xs text-gray-400"> 楽曲 / 歌詞フレーズ検索 </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
             <div class="noren-item" onclick="switchApp('history')">
@@ -158,7 +159,7 @@
             <div class="text-center mb-4">
                 <span class="text-4xl">🌸</span>
                 <h2 class="font-bold text-xl mt-2 text-gray-800">Love Like DataBase</h2>
-                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.6.0</p>
+                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.5.0</p>
             </div>
             
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
@@ -199,8 +200,8 @@
     </div>
 
     <!-- ==========================================================================
-         【3. APP: LLDB lookup】 歌詞・検索アプリ (Iframe Container)
-         ※ ファイル名も index_LLDBlookup.html に変更されます
+         【3. APP: LLDB lookup】 歌詞・辞書アプリ (Iframe Container)
+         ※ IDとsrcを変更しました
          ========================================================================== -->
     <div id="app-lookup" class="app-screen">
         <iframe src="./index_LLDBlookup.html" class="w-full h-full border-none"></iframe>
@@ -225,9 +226,9 @@
          【6. ROUTING】 共通ルーティング制御
          ========================================================================== -->
     <script>
-        // アプリ定義
+        // アプリ定義 (phrase -> lookup にキー変更)
         const apps = {
-            'live': { title: 'Love Like DataBase vol.5.4.0', color: 'bg-red-500' },
+            'live': { title: 'Love Like DataBase vol.5.5.0', color: 'bg-red-500' },
             'lookup': { title: 'LLDB lookup', color: 'bg-orange-500' },
             'history': { title: 'LLDB history', color: 'bg-pink-500' },
             'trends': { title: 'LLDB trends', color: 'bg-blue-600' }
