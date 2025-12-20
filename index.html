@@ -50,7 +50,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v5.1.0";
+        const APP_VERSION = "v5.2.0";
     </script>
 </head>
 <body class="bg-gray-100">
@@ -122,9 +122,9 @@
                 <div class="flex-1"><div class="font-bold text-gray-800">LLDB history</div><div class="text-xs text-gray-400"> aikoとわたし / 人生年表 </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
-            <div class="noren-item" onclick="switchApp('stats')">
-                <div class="noren-icon bg-slate-700"><i data-lucide="bar-chart-2" class="w-6 h-6"></i></div>
-                <div class="flex-1"><div class="font-bold text-gray-800">LLDB stats</div><div class="text-xs text-gray-400"> 人気のaiko / 統計 </div></div>
+            <div class="noren-item" onclick="switchApp('trends')">
+                <div class="noren-icon bg-blue-600"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
+                <div class="flex-1"><div class="font-bold text-gray-800">LLDB trends</div><div class="text-xs text-gray-400"> Youtube再生数 / ランキング </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
             
@@ -157,7 +157,7 @@
             <div class="text-center mb-4">
                 <span class="text-4xl">🌸</span>
                 <h2 class="font-bold text-xl mt-2 text-gray-800">Love Like DataBase</h2>
-                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.1.0</p>
+                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.2.0</p>
             </div>
             
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
@@ -205,27 +205,30 @@
     </div>
 
     <!-- ==========================================================================
-         【4. APP: Others】 その他アプリ (Placeholder)
+         【4. APP: LLDB trends】 トレンドアプリ (New!)
+         ========================================================================== -->
+    <div id="app-trends" class="app-screen">
+        <iframe src="./index_LLDBtrends.html" class="w-full h-full border-none"></iframe>
+    </div>
+
+    <!-- ==========================================================================
+         【5. APP: Others】 その他アプリ (Placeholder)
          ========================================================================== -->
     <div id="app-history" class="app-screen items-center justify-center p-6">
         <div class="bg-pink-50 p-6 rounded-2xl shadow-sm max-w-xs border border-pink-100 text-center"><div class="text-4xl mb-4">🤝</div><h2 class="font-bold text-pink-500 text-lg mb-2">LLDB history</h2><p class="text-sm text-gray-500 leading-relaxed"> あなたとaikoの年表を作れる機能を <br>準備中です🌷</p></div>
     </div>
-   
-    <div id="app-stats" class="app-screen items-center justify-center p-6">
-        <div class="bg-white p-6 rounded-2xl shadow-sm max-w-xs text-center"><div class="text-4xl mb-4">📈</div><h2 class="font-bold text-slate-700 text-lg mb-2">LLDB stats</h2><p class="text-sm text-gray-500 leading-relaxed"> Youtube再生数ランキングなどを <br> 集計中です！ </p></div>
-    </div>
 
 
     <!-- ==========================================================================
-         【5. ROUTING】 共通ルーティング制御
+         【6. ROUTING】 共通ルーティング制御
          ========================================================================== -->
     <script>
         // アプリ定義
         const apps = {
-            'live': { title: 'Love Like DataBase vol.5.1.0', color: 'bg-red-500' },
+            'live': { title: 'Love Like DataBase vol.5.2.0', color: 'bg-red-500' },
             'phrase': { title: 'LLDB phrase', color: 'bg-orange-500' },
             'history': { title: 'LLDB history', color: 'bg-pink-500' },
-            'stats': { title: 'LLDB stats', color: 'bg-slate-700' }
+            'trends': { title: 'LLDB trends', color: 'bg-blue-600' }
         };
 
         // アプリ切り替え
