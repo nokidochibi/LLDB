@@ -136,11 +136,6 @@
             border-color: #475569;
             background-color: #1e293b;
         }
-        /* ランダムエリア */
-        body.dark-mode #random-lyric-container {
-            background-color: #1e293b;
-            border-color: #334155;
-        }
         /* しりとりボタン */
         body.dark-mode button.bg-white {
             background-color: #1e293b;
@@ -156,6 +151,10 @@
             display: none;
         }
 
+        /* エフェクト */
+        .tap-highlight { animation: highlight 0.3s ease-out; }
+        @keyframes highlight { 0% { transform: scale(1); } 50% { transform: scale(1.1); filter: brightness(1.2); } 100% { transform: scale(1); } }
+
         :root {
             --bubble-color: #f97316;
         }
@@ -168,11 +167,12 @@
 
     <header class="bg-white/95 backdrop-blur-sm shadow-sm flex flex-col items-center justify-center sticky top-0 z-20 border-b border-theme relative transition-colors duration-300 h-14">
         <div class="w-full flex items-center justify-center relative">
-            <!-- ★ダブルタップイベント: 名称変更 -->
-            <h1 id="app-title" ondblclick="activateSecretMode()" class="text-lg font-bold text-theme tracking-wider flex items-baseline transition-colors duration-300 select-none cursor-pointer active:scale-95 transition-transform">
+            <!-- ★ヘッダーはシンプルにテキストのみに戻しました -->
+            <h1 id="app-title" class="text-lg font-bold text-theme tracking-wider flex items-baseline transition-colors duration-300">
                 LLDB lookup
                 <span id="version-display" class="ml-2 text-[10px] text-gray-400 font-normal opacity-50"></span>
             </h1>
+            
             <!-- ★アイコン変更: sparkles -> 🌷 (絵文字) -->
             <button onclick="toggleModal(true)" class="absolute right-4 transition p-1 rounded-full hover:bg-orange-50">
                 <span class="text-xl">🌷</span>
@@ -183,7 +183,8 @@
     <!-- 1. 歌詞チャット -->
     <main id="chat-container-lyrics" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-64"> 
         <div class="flex items-start space-x-2">
-            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10" alt="icon">
+            <!-- ★trigger-secret: このアイコンをダブルタップするとしりとり起動 -->
+            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" alt="icon">
             <div class="bubble bubble-left bg-white p-3 shadow-sm max-w-[80%]">
                 <p class="text-sm leading-relaxed">
                     調べたいフレーズを入力してね。<br>aikoの曲から探してくるよ！
@@ -195,7 +196,7 @@
     <!-- 2. 楽曲DBチャット -->
     <main id="chat-container-title" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-64 hidden"> 
         <div class="flex items-start space-x-2">
-            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10" alt="icon">
+            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" alt="icon">
             <div class="bubble bubble-left bg-white p-3 shadow-sm max-w-[80%]">
                 <p class="text-sm leading-relaxed">
                     曲名やアルバム名を入力してね。<br>リリース情報や収録曲順を教えるよ💿
@@ -207,7 +208,7 @@
     <!-- 3. しりとりチャット -->
     <main id="chat-container-shiritori" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-64 hidden"> 
         <div class="flex items-start space-x-2">
-            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10" alt="icon">
+            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" alt="icon">
             <div class="bubble bubble-left bg-white p-3 shadow-sm max-w-[80%]">
                 <p class="text-sm leading-relaxed">
                     さぁ、しりとりの時間だ。<br>
@@ -221,10 +222,7 @@
     <!-- フッター -->
     <footer class="bg-white border-t border-gray-100 fixed bottom-0 w-full safe-pb z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex flex-col" style="padding-bottom: calc(env(safe-area-inset-bottom));">
         
-        <!-- ランダム歌詞エリア -->
-        <div id="random-lyric-container" class="bg-orange-50/50 border-b border-orange-100 py-1 px-4 transition-all duration-300 opacity-0 h-0 overflow-hidden">
-             <div id="random-lyric-area" class="text-[10px] text-orange-400 text-center truncate h-4 leading-4"></div>
-        </div>
+        <!-- ★ランダム表示エリアを削除しました -->
 
         <!-- 入力フォーム -->
         <form id="search-form" class="flex items-center gap-2 px-3 py-3 border-b border-gray-50">
@@ -307,7 +305,7 @@
                             <i data-lucide="gamepad-2" class="w-4 h-4"></i> Secret Mode
                         </h3>
                         <p class="text-xs leading-5 relative z-10">
-                            画面最上部のタイトルをダブルタップすると...
+                            <span class="text-pink-300 font-bold">チャットアイコン</span>をダブルタップすると...
                         </p>
                     </div>
                 </div>
@@ -319,14 +317,14 @@
                         <img src="https://unavatar.io/twitter/noki_dochibi" class="w-5 h-5 rounded-full shadow-sm">
                         @noki_dochibi
                     </a>
-                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v1.2.0</p>
+                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v1.2.2</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const APP_VERSION = 'v1.2.0';
+        const APP_VERSION = 'v1.2.2';
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycby49eACsPr_lGblpklhK13gt4TroRwNyKwnQcKQ3GPhACQ8zV96YZ9_CDXfFn5wOj85/exec"; 
         const TWITTER_ID = "noki_dochibi";
         const ICON_URL = `https://unavatar.io/twitter/${TWITTER_ID}?v=${APP_VERSION}`;
@@ -348,8 +346,6 @@
             containerShiritori: document.getElementById('chat-container-shiritori'),
             searchForm: document.getElementById('search-form'),
             searchInput: document.getElementById('search-input'),
-            randomContainer: document.getElementById('random-lyric-container'),
-            randomArea: document.getElementById('random-lyric-area'),
             toast: document.getElementById('toast'),
             version: document.getElementById('version-display'),
             modal: document.getElementById('readme-modal'),
@@ -362,10 +358,91 @@
             if (dom.version) dom.version.textContent = APP_VERSION;
             dom.botIcons.forEach(img => img.src = ICON_URL);
             new Image().src = ICON_URL;
-            dom.randomArea.textContent = "";
-            dom.randomContainer.classList.add('opacity-0', 'h-0', 'overflow-hidden');
-            dom.randomContainer.style.height = '0';
+
+            // ダブルタップイベントの設定
+            attachDoubleTapEvents();
         });
+
+        // ==========================================
+        // ★ダブルタップイベントハンドラ
+        // ==========================================
+        function createDoubleTapHandler(callback) {
+            let tapCount = 0;
+            let timer = null;
+            let lastTouchX = 0;
+            let lastTouchY = 0;
+
+            const reset = () => {
+                tapCount = 0;
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+            };
+
+            const handler = (e) => {
+                // タッチ開始
+                if (e.type === 'touchstart') {
+                    lastTouchX = e.changedTouches[0].screenX;
+                    lastTouchY = e.changedTouches[0].screenY;
+                    return;
+                }
+                // タッチ終了
+                if (e.type === 'touchend') {
+                    const touch = e.changedTouches[0];
+                    if (Math.abs(touch.screenX - lastTouchX) > 10 || Math.abs(touch.screenY - lastTouchY) > 10) {
+                        reset(); // スクロール判定
+                        return;
+                    }
+                }
+
+                tapCount++;
+                
+                if (tapCount === 1) {
+                    timer = setTimeout(reset, 350); 
+                } else if (tapCount === 2) {
+                    e.preventDefault(); // ズームなどを防止
+                    reset();
+                    
+                    // ハイライト演出
+                    if (e.currentTarget) {
+                        e.currentTarget.classList.remove('tap-highlight');
+                        void e.currentTarget.offsetWidth;
+                        e.currentTarget.classList.add('tap-highlight');
+                    }
+                    callback();
+                }
+            };
+
+            return {
+                touchstart: handler,
+                touchend: handler,
+                dblclick: (e) => {
+                    e.preventDefault();
+                    callback();
+                }
+            };
+        }
+
+        // ページ内の対象要素(trigger-secret)にイベントを付与
+        function attachDoubleTapEvents() {
+            const targets = document.querySelectorAll('.trigger-secret');
+            const handler = createDoubleTapHandler(activateSecretMode);
+            
+            targets.forEach(el => {
+                // 重複登録防止
+                if (el.dataset.hasDoubleTap) return;
+                
+                el.addEventListener('touchstart', handler.touchstart, {passive: false});
+                el.addEventListener('touchend', handler.touchend, {passive: false});
+                el.addEventListener('dblclick', handler.dblclick);
+                el.dataset.hasDoubleTap = "true";
+            });
+        }
+
+        // ==========================================
+        // モード制御
+        // ==========================================
 
         // ★隠しコマンド: 裏モード切替 (Toggle)
         window.activateSecretMode = function() {
@@ -374,14 +451,13 @@
                 isDarkMode = false;
                 dom.body.classList.remove('dark-mode');
                 switchTab(lastMode);
-                // メッセージ削除
+                addMessage("しりとり終了！またね👋", 'bot');
             } else {
                 // 裏モードへ
                 lastMode = currentMode;
                 isDarkMode = true;
                 dom.body.classList.add('dark-mode');
                 switchTab('shiritori');
-                // メッセージ削除
             }
         };
 
@@ -400,8 +476,6 @@
             dom.containerLyrics.classList.add('hidden');
             dom.containerTitle.classList.add('hidden');
             dom.containerShiritori.classList.add('hidden');
-            dom.randomContainer.classList.add('opacity-0', 'h-0', 'overflow-hidden');
-            dom.randomContainer.style.height = '0';
 
             if (mode === 'lyrics') {
                 dom.body.classList.replace('theme-title', 'theme-lyrics');
@@ -411,11 +485,6 @@
                 
                 dom.containerLyrics.classList.remove('hidden');
                 
-                if (dom.randomArea.textContent.trim() !== "") {
-                    dom.randomContainer.style.height = 'auto';
-                    dom.randomContainer.classList.remove('opacity-0', 'h-0', 'overflow-hidden');
-                    dom.randomContainer.classList.add('opacity-100');
-                }
                 dom.searchInput.placeholder = "例：甘い匂いに";
                 document.documentElement.style.setProperty('--bubble-color', '#f97316');
 
@@ -482,19 +551,16 @@
             }
         });
 
-        // しりとり結果表示 (v0.3.7 改修: 対話形式 & ヒント)
+        // しりとり結果表示
         function handleShiritoriResults(data) {
-            // エラー・不明な曲
             if (data.result === 'unknown_song') {
                 addMessage(data.message, 'bot');
                 return;
             }
 
-            // 勝敗がついた場合
             if (data.result === 'user_lose' || data.result === 'user_win') {
                 let contentHtml = `<div class="flex flex-col gap-2"><p>${data.message}</p>`;
                 
-                // ボタン表示
                 contentHtml += `
                     <div class="flex gap-2 mt-3">
                         <button onclick="restartShiritori()" class="flex-1 bg-pink-500 text-white border border-pink-600 px-3 py-2 rounded-lg text-xs font-bold shadow-sm hover:bg-pink-600 active:scale-95 transition">
@@ -510,11 +576,9 @@
                 return;
             }
 
-            // 継続中 (result === 'continue')
-            // Botの回答を表示
+            // 継続中
             let contentHtml = `<div class="flex flex-col gap-2"><p>${data.message}</p>`;
             
-            // ヒントボタンエリア
             if (data.hints && data.hints.length > 0) {
                 const hintId = 'hint-' + Date.now();
                 contentHtml += `
@@ -525,7 +589,6 @@
                         <div id="${hintId}" class="hidden mt-2 flex flex-wrap gap-2 animate-fade-in">
                 `;
                 
-                // ヒント候補のボタン化（クリックで入力送信）
                 data.hints.forEach(cand => {
                     contentHtml += `<button onclick="sendShiritoriAnswer('${cand.title}')" class="bg-white border border-pink-200 text-pink-600 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-pink-50 active:scale-95 transition">${cand.title}</button>`;
                 });
@@ -537,18 +600,19 @@
 
             contentHtml += `</div>`;
             addMessage(contentHtml, 'bot');
-            lucide.createIcons(); // アイコン再描画
+            lucide.createIcons();
         }
 
         window.restartShiritori = function() {
             dom.containerShiritori.innerHTML = `
                 <div class="flex items-start space-x-2">
-                    <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10" src="${ICON_URL}">
+                    <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" src="${ICON_URL}">
                     <div class="bubble bubble-left bg-white px-4 py-3 shadow-sm max-w-[80%] text-sm break-words leading-relaxed">
                         <p>しりとりリセット！<br>最初の曲名を入力してね。<br>（例：花火）</p>
                     </div>
                 </div>
             `;
+            attachDoubleTapEvents(); // 新しいアイコンにイベント付与
         };
 
         window.exitShiritori = function() {
@@ -557,12 +621,7 @@
 
         // 共通関数群
         function handleLyricsResults(data) {
-            if (data.random_message) {
-                dom.randomArea.textContent = 'ランダム表示：' + data.random_message;
-                dom.randomContainer.style.height = 'auto';
-                dom.randomContainer.classList.remove('opacity-0', 'h-0', 'overflow-hidden');
-                dom.randomContainer.classList.add('opacity-100');
-            }
+            // ランダムメッセージ処理は削除
             if (!data.results || data.results.length === 0) {
                 addMessage(`「${data.query}」は見つからなかったよ。歌詞カードと同じ表記にしてみて！`, 'bot');
                 return;
@@ -570,7 +629,6 @@
 
             let contentHtml = '<div class="flex flex-col animate-fade-in">';
             
-            // ★ もしかして検索のヒット表示
             if (data.fuzzy_type) {
                 contentHtml += `<div class="bg-orange-100/50 border border-orange-200 rounded-lg p-2.5 mb-3 text-xs text-orange-700">
                     「<span class="font-bold">${data.query}</span>」は見つからなかったけど、<br>
@@ -578,7 +636,6 @@
                 </div>`;
             }
 
-            // ハイライトさせる対象のワード（fuzzyの場合はそちらを使う）
             const highlightWord = data.fuzzy_type ? data.actual_query : data.query;
 
             data.results.forEach((item, index) => {
@@ -588,7 +645,6 @@
             });
             contentHtml += '</div>';
             
-            // ★ v1.1.0 変更点: 曲数カウントを追加
             const uniqueSongs = new Set(data.results.map(item => item.title)).size;
             const allText = data.results.map(item => item.display_text).join('\\n').replace(/'/g, "\\'");
             
@@ -643,10 +699,13 @@
             else if (currentMode === 'shiritori') userBgClass = 'bg-pink-500';
 
             const finalBubbleClass = type === 'user' ? `${bubbleClass} ${userBgClass}` : bubbleClass;
-            const iconHtml = type === 'bot' ? `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10">` : '';
+            const iconHtml = type === 'bot' ? `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer">` : '';
             div.innerHTML = type === 'bot' ? iconHtml + `<div class="${finalBubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm break-words leading-relaxed">${htmlOrText}</div>` : `<div class="${finalBubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm break-words leading-relaxed">${htmlOrText}</div>`;
             getActiveContainer().appendChild(div);
             if (shouldScroll) scrollToBottom();
+            
+            // 追加されたメッセージ（アイコン）に対してもイベントを付与
+            attachDoubleTapEvents();
         }
 
         function addLoading() {
@@ -656,9 +715,13 @@
             div.className = "flex items-start space-x-2";
             const msgs = LOADING_MESSAGES[currentMode];
             const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
-            div.innerHTML = `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10"><div class="bubble bubble-left bg-white px-4 py-3 shadow-sm"><p class="text-sm text-gray-500 pulse-text">${randomMsg}</p></div>`;
+            div.innerHTML = `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer"><div class="bubble bubble-left bg-white px-4 py-3 shadow-sm"><p class="text-sm text-gray-500 pulse-text">${randomMsg}</p></div>`;
             getActiveContainer().appendChild(div);
             scrollToBottom();
+            
+            // ローディングアイコンにもイベント付与
+            attachDoubleTapEvents();
+            
             return id;
         }
 
