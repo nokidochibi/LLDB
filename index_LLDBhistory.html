@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LLDB history v0.3.1</title>
+    <title>LLDB history v0.3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -115,7 +115,7 @@
 
     <main class="w-full max-w-lg mx-auto">
         
-        <!-- 入力エリア -->
+        <!-- 入力エリア (常に表示) -->
         <div id="input-area" class="card-base m-4">
             <div class="flex items-end gap-2">
                 <div class="flex-1">
@@ -136,7 +136,6 @@
         <div id="content-area" class="hidden fade-in">
             
             <!-- Tab: 年表 -->
-            <!-- 高さ制限を撤廃し、画面全体でスクロールするように変更 -->
             <div id="view-history" class="bg-white shadow-sm border-t border-b border-pink-100 min-h-screen">
                 <table class="history-table">
                     <thead>
@@ -151,8 +150,7 @@
                         <!-- JS Generated -->
                     </tbody>
                 </table>
-                
-                <!-- 最後の余白（フッター被り防止の念押し） -->
+                <!-- 最後の余白 -->
                 <div class="h-20"></div>
             </div>
 
@@ -236,12 +234,10 @@
         let allData = null;
         let birthDate = null;
 
-        // 初期化
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             populateDates();
             
-            // ローカルストレージから誕生日を復元
             const savedBirth = localStorage.getItem('lldb_user_birth');
             if (savedBirth) {
                 const [y, m, d] = savedBirth.split('-');
@@ -277,28 +273,21 @@
             const m = document.getElementById('month').value;
             const d = document.getElementById('day').value;
             birthDate = new Date(y, m - 1, d);
-            
-            // 保存
             localStorage.setItem('lldb_user_birth', `${y}-${m}-${d}`);
 
-            document.getElementById('input-area').classList.add('hidden'); // 入力後は隠す
+            // 入力エリアは隠さない
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('content-area').classList.add('hidden');
 
-            // データ未取得なら取得
             if (!allData) {
                 try {
-                    // キャッシュ確認
                     const cache = localStorage.getItem('lldb_data_v3_9_fix7');
                     if (cache) {
                         try {
                             const parsed = JSON.parse(cache);
-                            if (parsed.liveRecords) {
-                                allData = parsed;
-                            }
+                            if (parsed.liveRecords) allData = parsed;
                         } catch(e) {}
                     }
-
                     if (!allData) {
                         const res = await fetch(`${GAS_API_URL}?action=getAllData`);
                         const json = await res.json();
@@ -317,31 +306,47 @@
             switchTab('history');
         }
 
-        // 日付文字列からDateオブジェクトを生成するヘルパー
+        // 日付解析（強化版）
         function parseDateFromInfo(infoStr) {
             if (!infoStr) return null;
-            // "yyyy/MM/dd 発売の..." 形式から日付を抽出
-            const match = infoStr.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+            // 全角数字を半角に変換
+            infoStr = infoStr.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+            // yyyy/m/d, yyyy.m.d, yyyy年m月d日 対応
+            let match = infoStr.match(/(\d{4})[\/\.年](\d{1,2})[\/\.月](\d{1,2})/);
             if (match) {
                 return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
             }
             return null;
         }
 
+        // ライブ名フォーマット（F列優先ロジック）
+        function getShortTourName(rec) {
+            // もしデータにshortTourNameがあればそれを使う
+            if (rec.shortTourName) return rec.shortTourName;
+            
+            // なければ自動整形
+            let name = rec.tourName;
+            name = name.replace(/^Love Like Pop /i, 'Pop ');
+            name = name.replace(/^Love Like Rock /i, 'Rock ');
+            name = name.replace(/^Love Like Aloha /i, 'Aloha ');
+            name = name.replace(/^Love Like /i, '');
+            // "vol." を削除
+            name = name.replace(/vol\./i, '');
+            name = name.replace(/追加公演/g, '(追加)');
+            return name.trim();
+        }
+
         function renderTimeline() {
             const tbody = document.getElementById('timeline-body');
             tbody.innerHTML = '';
 
-            // マージデータの作成
-            // 1. 年表の開始終了（誕生日〜現在）
             const startYear = birthDate.getFullYear();
             const startMonth = birthDate.getMonth();
             const now = new Date();
             const endYear = now.getFullYear();
             const endMonth = now.getMonth();
 
-            // 2. イベントデータを年月キーで整理
-            const eventsMap = {}; // "YYYY-M": []
+            const eventsMap = {}; 
 
             // Live Data
             if (allData.liveRecords) {
@@ -350,10 +355,7 @@
                     const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
                     if (!eventsMap[key]) eventsMap[key] = [];
                     
-                    // F列相当(shortTourName) or tourName
-                    const tourName = rec.shortTourName || rec.tourName;
-                    
-                    // 重複排除: 同じキーの中に既に同じツアー名があればスキップ
+                    const tourName = getShortTourName(rec);
                     const exists = eventsMap[key].some(e => e.type === 'live' && e.name === tourName);
                     if (!exists) {
                         eventsMap[key].push({ type: 'live', name: tourName, date: d });
@@ -365,12 +367,10 @@
             if (allData.songData) {
                 const releases = new Set();
                 Object.values(allData.songData).forEach(song => {
-                     // アルバム情報 (album_infoから日付抽出)
+                     // アルバム抽出
                      if (song.album_info) {
                          const d = parseDateFromInfo(song.album_info);
-                         // songDataには各曲ごとにアルバム情報が入っているため、アルバム名で重複排除
-                         const albumName = song.albumTitle || song.album_info.match(/アルバム『(.*?)』/)?.[1] || "アルバム";
-                         
+                         const albumName = song.albumTitle || song.album_info.match(/アルバム『(.*?)』/)?.[1] || "Album";
                          if (d) {
                              const k = `A-${d.getFullYear()}-${d.getMonth() + 1}-${albumName}`;
                              if (!releases.has(k)) {
@@ -381,13 +381,10 @@
                              }
                          }
                      }
-                     
-                     // シングル情報 (single_infoから日付抽出)
+                     // シングル抽出
                      if (song.single_info) {
                          const d = parseDateFromInfo(song.single_info);
-                         // シングルも曲ごとに情報があるため重複排除
-                         const singleName = song.singleTitle || song.single_info.match(/シングル『(.*?)』/)?.[1] || song.title; // タイトルフォールバック
-                         
+                         const singleName = song.singleTitle || song.single_info.match(/シングル『(.*?)』/)?.[1] || song.title;
                          if (d) {
                              const k = `S-${d.getFullYear()}-${d.getMonth() + 1}-${singleName}`;
                              if (!releases.has(k)) {
@@ -401,7 +398,6 @@
                 });
             }
 
-            // ループ生成 (全期間)
             let current = new Date(startYear, startMonth, 1);
             const end = new Date(endYear, endMonth, 1);
 
@@ -410,11 +406,9 @@
                 const m = current.getMonth() + 1;
                 const key = `${y}-${m}`;
                 
-                // 年齢計算
                 let age = y - birthDate.getFullYear();
                 if (m < (birthDate.getMonth() + 1)) age--;
 
-                // ライフステージ判定
                 let lifeStage = '';
                 if (age === 6 && m === 4) lifeStage = '小学校<br>入学';
                 else if (age === 12 && m === 4) lifeStage = '中学校<br>入学';
@@ -424,23 +418,18 @@
                 else if (age === 22 && m === 4) lifeStage = '社会人?';
                 else if (age === 0 && m === (birthDate.getMonth() + 1)) lifeStage = '誕生';
 
-                // イベント取得
                 let eventHtml = '';
                 if (eventsMap[key]) {
-                    // 日付順ソート
                     eventsMap[key].sort((a,b) => a.date - b.date);
-                    
                     eventsMap[key].forEach(ev => {
                         if (ev.type === 'live') {
                             eventHtml += `<div class="text-[10px] text-red-500 mb-1 leading-tight"><span class="mr-0.5">🎤</span>${ev.name}</div>`;
                         } else {
-                            // CD
                             eventHtml += `<div class="text-[10px] text-blue-600 mb-1 leading-tight"><span class="mr-0.5">💿</span>${ev.name}</div>`;
                         }
                     });
                 }
 
-                // イベントがなくても行を作成する (全表示)
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="text-center text-gray-400 font-mono">${y}<br><span class="text-xs font-bold text-gray-600">${m}月</span></td>
@@ -458,7 +447,6 @@
             if (!birthDate) return;
             const today = new Date();
             
-            // Days
             const diffTime = Math.abs(today - birthDate);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
@@ -475,7 +463,6 @@
             document.getElementById('days-with-aiko').innerText = aikoDays.toLocaleString();
             document.getElementById('aiko-ratio').innerText = ratio.toFixed(1);
 
-            // Sync Age (Time Travel)
             let currentAge = today.getFullYear() - birthDate.getFullYear();
             if (today.getMonth() < birthDate.getMonth() || (today.getMonth() == birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
                 currentAge--;
@@ -486,13 +473,10 @@
             
             document.getElementById('sync-age-highlight').innerText = `${currentAge}歳`;
             
-            // その期間のリリースを探す
             let found = null;
-            
             if (allData.songData) {
                  const candidates = [];
                  Object.values(allData.songData).forEach(s => {
-                     // single_info / album_info から日付を取得して判定
                      if (s.single_info) {
                          const d = parseDateFromInfo(s.single_info);
                          if (d && d >= syncDateStart && d < syncDateEnd) {
@@ -506,7 +490,6 @@
                          }
                      }
                  });
-                 
                  if (candidates.length > 0) {
                      found = candidates[Math.floor(Math.random() * candidates.length)];
                  }
