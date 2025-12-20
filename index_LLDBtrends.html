@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LLDB trends</title>
+    <title>LLDB trends v1.1.0</title>
     
     <!-- Tailwind CSS & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,42 +17,73 @@
             background-color: #f0f9ff;
             color: #334155;
             -webkit-tap-highlight-color: transparent;
-            padding-bottom: 80px;
-            padding-top: 0px; /* 親ヘッダーの分 */
+            /* フッターの高さ + Safe Area 分の余白 */
+            padding-bottom: calc(70px + env(safe-area-inset-bottom));
+            padding-top: 0px; 
         }
 
         /* カスタムアニメーション */
         @keyframes stretch { 0% { width: 0; } 100% { width: 100%; } }
         .animate-stretch { animation: stretch 3s ease-out forwards; }
 
-        .sortable-th { cursor: pointer; user-select: none; }
+        .sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
         .sortable-th::after { content: ''; display: inline-block; margin-left: 2px; width: 0; height: 0; border: 4px solid transparent; opacity: 0.3; vertical-align: middle; }
         .sortable-th.asc::after { border-bottom-color: #334155; border-top: none; opacity: 1; }
         .sortable-th.desc::after { border-top-color: #334155; border-bottom: none; opacity: 1; }
 
         .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
         
-        /* タブ */
-        .tab-button {
-            border-bottom: 2px solid transparent;
-            color: #64748b;
-            transition: all 0.3s;
+        /* Safe Area 対応ユーティリティ */
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
+
+        /* フッターナビゲーション */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top: 1px solid #e2e8f0;
+            z-index: 50;
+            display: flex;
+            height: calc(60px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
         }
-        .tab-button.active {
-            border-bottom-color: #3b82f6;
-            color: #3b82f6;
-            font-weight: bold;
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: #94a3b8; /* slate-400 */
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #3b82f6; /* blue-500 */
+            background-color: #eff6ff; /* blue-50 */
+        }
+        
+        .nav-item.active svg {
+            stroke-width: 2.5px;
         }
 
         /* グラフ用モーダル */
         .modal-enter { opacity: 0; transform: scale(0.95); }
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.2s, transform 0.2s; }
+        
+        /* テーブル調整 */
+        .nowrap-cell { white-space: nowrap; }
     </style>
 </head>
 <body class="bg-slate-50">
 
     <!-- Loading Screen -->
-    <div id="loading-screen" class="flex flex-col items-center justify-center pt-10 pb-6 bg-slate-50 transition-all duration-500">
+    <div id="loading-screen" class="flex flex-col items-center justify-center pt-20 pb-6 bg-slate-50 transition-all duration-500 fixed inset-0 z-[60]">
         <div class="flex items-baseline mb-2">
             <span id="counting-number" class="text-4xl font-bold text-slate-700">0</span>
             <span class="text-sm text-slate-500 ml-1">回視聴</span>
@@ -64,40 +95,38 @@
     </div>
 
     <!-- Main Content -->
-    <main id="main-content" class="px-2 opacity-0 transition-opacity duration-500 hidden">
+    <main id="main-content" class="px-3 py-4 opacity-0 transition-opacity duration-500 hidden">
         
-        <!-- Tab Navigation -->
-        <div class="flex border-b border-slate-200 mb-4 sticky top-0 bg-slate-50 z-10">
-            <button onclick="switchTab('views')" class="tab-button active flex-1 py-3 text-sm text-center">YT視聴回数</button>
-            <button onclick="switchTab('followers')" class="tab-button flex-1 py-3 text-sm text-center">フォロワー</button>
-        </div>
-
         <!-- Tab 1: YT視聴回数 -->
         <div id="tab-views" class="tab-content">
-            <!-- Filter Controls -->
-            <div class="bg-white rounded-xl p-3 card-shadow mb-4 flex flex-wrap gap-2 justify-center">
-                <button class="filter-btn active" data-cat="isMV">MV</button>
-                <button class="filter-btn active" data-cat="isFullOther">Live</button>
-                <button class="filter-btn active" data-cat="isNYMovie">New Year</button>
-                <button class="filter-btn active" data-cat="isOther">その他</button>
+            <!-- Filter Controls: ボタンを大きく押しやすく -->
+            <div class="bg-white rounded-xl p-4 card-shadow mb-4">
+                <div class="flex flex-wrap gap-2 justify-between">
+                    <button class="filter-btn active flex-1" data-cat="isMV">MV</button>
+                    <button class="filter-btn active flex-1" data-cat="isFullOther">Live</button>
+                    <button class="filter-btn active flex-1" data-cat="isNYMovie">New Year</button>
+                    <button class="filter-btn active flex-1" data-cat="isOther">その他</button>
+                </div>
             </div>
 
-            <p class="text-center text-[10px] text-slate-400 mb-2">項目タップで並び替え</p>
+            <div class="flex justify-between items-end mb-2 px-1">
+                <h2 class="font-bold text-slate-700 text-lg">📹 動画ランキング</h2>
+                <span id="update-time" class="text-[10px] text-slate-400 font-mono"></span>
+            </div>
 
             <!-- Data Table -->
             <div class="bg-white rounded-xl overflow-hidden card-shadow relative">
-                <div id="update-time" class="absolute top-2 right-3 text-[10px] text-slate-400 font-mono"></div>
-                
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left whitespace-nowrap">
+                    <!-- w-full だが min-w を設定せず、レスポンシブに -->
+                    <table class="w-full text-sm text-left">
                         <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200 text-xs">
                             <tr>
-                                <th class="p-2 text-center w-6">#</th>
-                                <th class="p-2 min-w-[140px] whitespace-normal">動画タイトル</th>
-                                <th class="p-2 text-right cursor-pointer sortable-th desc" data-key="totalViews">視聴回数</th>
-                                <th class="p-2 text-center cursor-pointer sortable-th" data-key="publishedDate">公開日</th>
-                                <th class="p-2 text-right cursor-pointer sortable-th" data-key="avgDailyViews">平均/日<br><span class="text-[9px] font-normal">(全期間)</span></th>
-                                <th class="p-2 text-right cursor-pointer sortable-th" data-key="avgViews7Days">平均/日<br><span class="text-[9px] font-normal">(過去7日)</span></th>
+                                <th class="p-3 text-center w-8 nowrap-cell">#</th>
+                                <!-- タイトル列は幅指定なし（可変） -->
+                                <th class="p-3">動画タイトル</th>
+                                <th class="p-3 text-right cursor-pointer sortable-th desc" data-key="totalViews">視聴回数</th>
+                                <th class="p-3 text-center cursor-pointer sortable-th" data-key="publishedDate">公開日</th>
+                                <th class="p-3 text-right cursor-pointer sortable-th hidden sm:table-cell" data-key="avgDailyViews">平均/日</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="divide-y divide-slate-100">
@@ -105,16 +134,19 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="p-2 text-center text-[10px] text-slate-400 sm:hidden">
+                    ※スマホでは一部の列（平均/日など）を省略しています
+                </div>
             </div>
         </div>
 
         <!-- Tab 2: フォロワー -->
         <div id="tab-followers" class="tab-content hidden">
-            <div class="space-y-6 pb-20">
+            <div class="space-y-6">
                 <!-- Youtube Graph -->
                 <div class="bg-white rounded-xl p-4 card-shadow">
-                    <h3 class="font-bold text-red-600 flex items-center gap-2 mb-4">
-                        <i data-lucide="youtube" class="w-5 h-5"></i> Youtube登録者数
+                    <h3 class="font-bold text-red-600 flex items-center gap-2 mb-4 text-lg">
+                        <i data-lucide="youtube" class="w-6 h-6"></i> Youtube登録者数
                     </h3>
                     <div class="h-64 relative w-full">
                         <canvas id="chart-youtube"></canvas>
@@ -124,8 +156,8 @@
 
                 <!-- Twitter Graph -->
                 <div class="bg-white rounded-xl p-4 card-shadow">
-                    <h3 class="font-bold text-sky-500 flex items-center gap-2 mb-4">
-                        <i data-lucide="twitter" class="w-5 h-5"></i> Twitterフォロワー数
+                    <h3 class="font-bold text-sky-500 flex items-center gap-2 mb-4 text-lg">
+                        <i data-lucide="twitter" class="w-6 h-6"></i> Twitterフォロワー数
                     </h3>
                     <div class="h-64 relative w-full">
                         <canvas id="chart-twitter"></canvas>
@@ -133,21 +165,34 @@
                     </div>
                 </div>
                 
-                <p class="text-center text-xs text-slate-400 mt-4">※ データは毎日自動更新されます</p>
+                <p class="text-center text-xs text-slate-400 mt-8 mb-4">※ データは毎日自動更新されます</p>
+                
+                <div class="text-center text-slate-400 text-xs pb-4">
+                    <p class="mb-1">Produced with 💙</p>
+                    <a href="https://lit.link/nokidochibi" target="_blank" class="underline hover:text-slate-600">nokidochibi</a>
+                </div>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="mt-8 text-center text-slate-400 text-xs pb-8">
-            <p class="mb-2">Produced with 💙</p>
-            <a href="https://lit.link/nokidochibi" target="_blank" class="underline hover:text-slate-600">nokidochibi</a>
-        </div>
     </main>
 
+    <!-- フッターナビゲーション (New!) -->
+    <nav>
+        <div onclick="switchTab('views')" class="nav-item active" data-tab="views">
+            <i data-lucide="trending-up" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">YT視聴回数</span>
+        </div>
+        <div onclick="switchTab('followers')" class="nav-item" data-tab="followers">
+            <i data-lucide="users" class="w-6 h-6"></i>
+            <span class="text-[10px] font-bold">フォロワー</span>
+        </div>
+    </nav>
+
+
     <!-- Graph Modal (Individual Video) -->
-    <div id="graph-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onclick="closeGraphModal()">
+    <div id="graph-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick="closeGraphModal()">
         <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl relative" onclick="event.stopPropagation()">
-            <button onclick="closeGraphModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+            <button onclick="closeGraphModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
             <h3 id="graph-title" class="text-lg font-bold text-slate-700 mb-4 pr-8 leading-tight"></h3>
@@ -162,13 +207,15 @@
 
     <!-- Script -->
     <script>
-        const GAS_API_URL = parent.GAS_API_URL || "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+        // 親ウィンドウからURLをもらう、なければデフォルト
+        const GAS_API_URL = (window.parent && window.parent.GAS_API_URL) ? window.parent.GAS_API_URL : "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         
         let allData = [];
         let filteredData = [];
         let sortKey = 'totalViews';
         let sortDesc = true;
         let chartInstance = null;
+        // フォロワーデータ読み込み済みフラグ
         let followersDataLoaded = false;
 
         // 初期化
@@ -176,20 +223,27 @@
             lucide.createIcons();
             initFilterButtons();
             initSortHeaders();
-            fetchData(); // 動画データ取得
+            
+            // 動画データ取得開始
+            fetchData(); 
+            // 【改善点】フォロワーデータも裏で即座に取得開始
+            fetchFollowersData(); 
         });
 
         function switchTab(tabName) {
+            // コンテンツ切り替え
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('tab-' + tabName).classList.remove('hidden');
             
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
-
-            if (tabName === 'followers' && !followersDataLoaded) {
-                fetchFollowersData();
-                followersDataLoaded = true;
-            }
+            // ナビゲーション切り替え
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.nav-item[data-tab="${tabName}"]`).classList.add('active');
+            
+            // アイコン再生成（念のため）
+            lucide.createIcons();
+            
+            // ページトップへ
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ----------------------------------------
@@ -208,10 +262,12 @@
         }
 
         function updateFilterBtnStyle(btn) {
+            // ボタンを大きく、押しやすくスタイル変更
+            const baseClass = "filter-btn rounded-lg text-sm font-bold border transition-all py-3 px-1 shadow-sm";
             if (btn.classList.contains('active')) {
-                btn.className = 'filter-btn active px-3 py-1.5 rounded-full text-[10px] font-bold border transition-colors bg-blue-500 text-white border-blue-600';
+                btn.className = `${baseClass} bg-blue-500 text-white border-blue-600 shadow-md transform scale-100`;
             } else {
-                btn.className = 'filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold border transition-colors bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
+                btn.className = `${baseClass} bg-white text-slate-500 border-slate-200 hover:bg-slate-50`;
             }
         }
 
@@ -243,6 +299,7 @@
                 allData = json.data;
                 document.getElementById('update-time').textContent = `最終更新: ${json.lastUpdateTime || '-'}`;
                 
+                // ロード演出
                 completeLoading(json.maxTotalViews || 1000000);
                 applyFilterAndRender();
 
@@ -264,8 +321,7 @@
                     clearInterval(timer);
                     setTimeout(() => {
                         document.getElementById('loading-screen').style.display = 'none';
-                        document.getElementById('main-content').classList.remove('hidden'); // まず表示
-                        // 少し遅らせてフェードイン
+                        document.getElementById('main-content').classList.remove('hidden'); 
                         setTimeout(() => document.getElementById('main-content').classList.remove('opacity-0'), 50);
                     }, 300);
                 }
@@ -280,19 +336,15 @@
         }
 
         function formatTitle(title) {
-            // 『』か「」で囲まれた部分を抽出して太字にする。それ以外は小さく。
-            // 例: aiko『カブトムシ』Music Video -> <small>aiko</small><br><b>カブトムシ</b><br><small>Music Video</small>
-            
-            // 簡易的な実装: 最初のカッコの中身をメインとする
+            // 改行を許可し、タイトルを読みやすく
             const match = title.match(/([『「])(.*?)([』」])(.*)/);
             if (match) {
                 const prefix = title.substring(0, match.index);
                 const content = match[2];
                 const suffix = match[4];
-                return `<span class="text-[10px] text-slate-400">${prefix}</span><br><span class="font-bold text-slate-700 text-sm">『${content}』</span><br><span class="text-[10px] text-slate-400">${suffix}</span>`;
+                return `<div class="leading-relaxed"><span class="text-[10px] text-slate-400 block">${prefix}</span><span class="font-bold text-slate-700 text-sm text-base leading-tight block my-0.5">『${content}』</span><span class="text-[10px] text-slate-400 block">${suffix}</span></div>`;
             }
-            // カッコがない場合はそのまま
-            return `<span class="font-bold text-slate-700 text-sm">${title}</span>`;
+            return `<span class="font-bold text-slate-700 text-sm leading-tight block">${title}</span>`;
         }
 
         function renderTable() {
@@ -307,16 +359,11 @@
             });
 
             if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">データがありません</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">データがありません</td></tr>';
                 return;
             }
 
-            // 最大値計算（👑 🔥用）
             const maxAvgAll = Math.max(...filteredData.map(d => parseFloat(d.avgDailyViews) || 0));
-            const maxAvg7 = Math.max(...filteredData.map(d => {
-                const v = parseFloat(d.avgViews7Days);
-                return isNaN(v) ? -1 : v;
-            }));
             const maxViews = Math.max(...filteredData.map(d => parseFloat(d.totalViews) || 0));
 
             filteredData.forEach((item, index) => {
@@ -325,42 +372,36 @@
                 
                 const barWidth = ((parseFloat(item.totalViews) || 0) / maxViews) * 100;
                 const pubDate = new Date(item.publishedDate);
-                const dateStr = `<span class="text-[10px] text-slate-400">${pubDate.getFullYear()}</span><br><span class="font-bold text-slate-600">${pubDate.getMonth()+1}/${pubDate.getDate()}</span>`;
+                // 日付表示改善: 西暦も同じサイズで濃く
+                const dateStr = `<div class="text-center"><span class="font-bold text-slate-600 text-xs block">${pubDate.getFullYear()}</span><span class="font-bold text-slate-400 text-[10px] block">/</span><span class="font-bold text-slate-600 text-sm block">${pubDate.getMonth()+1}/${pubDate.getDate()}</span></div>`;
 
                 const avgAll = Math.round(parseFloat(item.avgDailyViews) || 0);
-                const avg7Val = parseFloat(item.avgViews7Days);
-                const avg7 = isNaN(avg7Val) ? '-' : Math.round(avg7Val);
-                
-                // バッジ
-                const badgeAll = (avgAll > 0 && avgAll === Math.round(maxAvgAll)) ? '<span class="absolute -top-3 right-0 text-lg">👑</span>' : '';
-                const badge7 = (avg7 !== '-' && avg7 > 0 && avg7 === Math.round(maxAvg7)) ? '<span class="absolute -top-3 right-0 text-lg">🔥</span>' : '';
+                const badgeAll = (avgAll > 0 && avgAll === Math.round(maxAvgAll)) ? '<span class="absolute -top-2 -right-1 text-base">👑</span>' : '';
 
                 tr.innerHTML = `
-                    <td class="p-2 text-center text-[10px] font-bold text-slate-400">${index + 1}</td>
-                    <td class="p-2 leading-tight">
-                        <a href="${item.url}" target="_blank" class="block">
+                    <td class="p-3 text-center text-xs font-bold text-slate-400 nowrap-cell">${index + 1}</td>
+                    <!-- タイトル: 改行OK -->
+                    <td class="p-3 min-w-[120px]">
+                        <a href="${item.url}" target="_blank" class="block no-underline">
                             ${formatTitle(item.title)}
                         </a>
                     </td>
-                    <td class="p-2 text-right align-middle">
+                    <!-- 視聴回数: 改行させない -->
+                    <td class="p-3 text-right align-middle nowrap-cell">
                         <div class="flex flex-col items-end cursor-pointer w-full" onclick="openGraph('${item.url}', '${item.title.replace(/'/g, "\\'")}')">
-                            <span class="font-bold text-blue-600 text-xs">${Number(item.totalViews).toLocaleString()}</span>
-                            <div class="w-full max-w-[80px] h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                            <span class="font-bold text-blue-600 text-sm">${Number(item.totalViews).toLocaleString()}</span>
+                            <div class="w-20 h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden">
                                 <div class="h-full bg-blue-400" style="width: ${barWidth}%"></div>
                             </div>
                         </div>
                     </td>
-                    <td class="p-2 text-center text-xs leading-tight">${dateStr}</td>
-                    <td class="p-2 text-right text-xs font-mono relative">
+                    <!-- 公開日 -->
+                    <td class="p-3 nowrap-cell">${dateStr}</td>
+                    <!-- 平均 (PCのみ表示) -->
+                    <td class="p-3 text-right text-xs font-mono relative nowrap-cell hidden sm:table-cell">
                         <div class="relative inline-block">
                             ${badgeAll}
                             ${avgAll.toLocaleString()}
-                        </div>
-                    </td>
-                    <td class="p-2 text-right text-xs font-mono relative">
-                        <div class="relative inline-block">
-                            ${badge7}
-                            ${item.avgViews7Days === '(集計中)' ? '<span class="text-orange-400 text-[9px]">集計中</span>' : avg7.toLocaleString()}
                         </div>
                     </td>
                 `;
@@ -373,26 +414,32 @@
         // ----------------------------------------
 
         async function fetchFollowersData() {
+            if (followersDataLoaded) return; // 二重取得防止
+
             try {
                 const res = await fetch(`${GAS_API_URL}?action=getFollowersHistory`);
                 const json = await res.json();
                 
-                document.getElementById('loader-youtube').style.display = 'none';
-                document.getElementById('loader-twitter').style.display = 'none';
+                // 既にDOM要素はあるので非表示にする
+                const loaderY = document.getElementById('loader-youtube');
+                const loaderT = document.getElementById('loader-twitter');
+                if(loaderY) loaderY.style.display = 'none';
+                if(loaderT) loaderT.style.display = 'none';
 
                 if (json.status === 'success' && json.data.length > 0) {
                     renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
                     renderFollowerChart('chart-twitter', json.data, 'twitter', '#0ea5e9');
+                    followersDataLoaded = true; // 読み込み完了
                 }
             } catch (err) {
-                console.error(err);
+                console.error("Followers fetch error:", err);
             }
         }
 
         function renderFollowerChart(canvasId, data, key, color) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             
-            // 日付と数値を抽出（null除外）
+            // データフィルタリング
             const validData = data.filter(d => d[key] !== null);
             const labels = validData.map(d => d.date.substring(5)); // 月/日
             const values = validData.map(d => d[key]);
@@ -420,10 +467,11 @@
                     plugins: { legend: { display: false } },
                     scales: {
                         y: {
-                            ticks: { font: {size: 10} }
+                            ticks: { font: {size: 10}, color: '#94a3b8' },
+                            grid: { color: '#f1f5f9' }
                         },
                         x: {
-                            ticks: { font: {size: 10}, maxTicksLimit: 7 },
+                            ticks: { font: {size: 10}, maxTicksLimit: 7, color: '#94a3b8' },
                             grid: { display: false }
                         }
                     }
