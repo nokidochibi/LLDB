@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LLDB history v0.3.0</title>
+    <title>LLDB history v0.3.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* 入力フォームのスタイル（Liveアプリ合わせ） */
+        /* 入力フォームのスタイル */
         .card-base {
             background-color: white;
             border-radius: 12px;
@@ -52,7 +52,7 @@
             color: white;
             font-size: 12px;
             padding: 8px 4px;
-            z-index: 10;
+            z-index: 20; /* ヘッダーより手前に */
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             white-space: nowrap;
         }
@@ -61,6 +61,7 @@
             border-bottom: 1px solid #fbcfe8; /* Pink-200 */
             vertical-align: middle;
             font-size: 12px;
+            height: 40px; /* 行の高さを確保 */
         }
         .history-table tr:nth-child(even) { background-color: #fff1f2; } /* Pink-50 */
         
@@ -112,10 +113,10 @@
 </head>
 <body>
 
-    <main class="p-4 w-full max-w-lg mx-auto">
+    <main class="w-full max-w-lg mx-auto">
         
         <!-- 入力エリア -->
-        <div id="input-area" class="card-base">
+        <div id="input-area" class="card-base m-4">
             <div class="flex items-end gap-2">
                 <div class="flex-1">
                     <label class="block text-[10px] font-bold text-pink-400 mb-1">生年月日</label>
@@ -132,27 +133,31 @@
         </div>
 
         <!-- コンテンツエリア -->
-        <div id="content-area" class="hidden fade-in pb-4">
+        <div id="content-area" class="hidden fade-in">
             
             <!-- Tab: 年表 -->
-            <div id="view-history" class="bg-white rounded-xl shadow-sm overflow-hidden border border-pink-100 h-[calc(100vh-200px)] overflow-y-auto relative">
+            <!-- 高さ制限を撤廃し、画面全体でスクロールするように変更 -->
+            <div id="view-history" class="bg-white shadow-sm border-t border-b border-pink-100 min-h-screen">
                 <table class="history-table">
                     <thead>
                         <tr>
                             <th style="width: 15%;">年月</th>
                             <th style="width: 10%;">年齢</th>
-                            <th style="width: 25%;">ライフ<br>ステージ</th>
-                            <th style="width: 50%;">aiko Release</th>
+                            <th style="width: 20%;">ライフ<br>ステージ</th>
+                            <th style="width: 55%;">aiko Release</th>
                         </tr>
                     </thead>
                     <tbody id="timeline-body">
                         <!-- JS Generated -->
                     </tbody>
                 </table>
+                
+                <!-- 最後の余白（フッター被り防止の念押し） -->
+                <div class="h-20"></div>
             </div>
 
             <!-- Tab: 今日の自分 -->
-            <div id="view-today" class="hidden">
+            <div id="view-today" class="hidden p-4">
                  <!-- aiko Days -->
                  <div class="bg-white rounded-2xl shadow-sm p-6 mb-4 border border-pink-100 text-center relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10">
@@ -276,7 +281,7 @@
             // 保存
             localStorage.setItem('lldb_user_birth', `${y}-${m}-${d}`);
 
-            document.getElementById('input-area').classList.add('hidden'); // 入力後は隠す（またはコンパクトにする）
+            document.getElementById('input-area').classList.add('hidden'); // 入力後は隠す
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('content-area').classList.add('hidden');
 
@@ -312,6 +317,17 @@
             switchTab('history');
         }
 
+        // 日付文字列からDateオブジェクトを生成するヘルパー
+        function parseDateFromInfo(infoStr) {
+            if (!infoStr) return null;
+            // "yyyy/MM/dd 発売の..." 形式から日付を抽出
+            const match = infoStr.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+            if (match) {
+                return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+            }
+            return null;
+        }
+
         function renderTimeline() {
             const tbody = document.getElementById('timeline-body');
             tbody.innerHTML = '';
@@ -345,46 +361,47 @@
                 });
             }
 
-            // Song Data (Single/Album) -> ここは簡易的に楽曲データから抽出が必要だが、
-            // allDataにsongDataが含まれている。ここからリリース日を抽出する。
+            // Song Data (Single/Album)
             if (allData.songData) {
-                // songDataは曲単位なので、アルバム・シングル単位にまとめる必要がある
-                // しかしsongDataにはアルバム発売日情報が曲ごとに入っている。
-                // 重複を除いて抽出する。
                 const releases = new Set();
                 Object.values(allData.songData).forEach(song => {
-                     // アルバム
-                     if (song.albumTitle && song.albumReleaseDate && song.albumReleaseDate !== '未収録') {
-                         const d = new Date(song.albumReleaseDate);
-                         const k = `${d.getFullYear()}-${d.getMonth() + 1}-${song.albumTitle}`;
-                         if (!releases.has(k)) {
-                             releases.add(k);
-                             const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
-                             if (!eventsMap[key]) eventsMap[key] = [];
-                             eventsMap[key].push({ type: 'album', name: song.albumTitle, date: d });
-                         }
-                     }
-                     // シングル（表題曲のみから抽出したいが、songDataからは判断難しい場合も）
-                     // ここではシンプルにsongDataのreleaseDateを見る
-                     if (song.releaseDate && song.releaseDate !== '未収録') {
-                         // シングル判定: typeに「シングル」含む、かつ albumTitleと違う名前
-                         if (song.type && song.type.includes('シングル')) {
-                             const d = new Date(song.releaseDate);
-                             const k = `S-${d.getFullYear()}-${d.getMonth() + 1}-${song.singleTitle || song.title}`; // タイトルでユニーク化
+                     // アルバム情報 (album_infoから日付抽出)
+                     if (song.album_info) {
+                         const d = parseDateFromInfo(song.album_info);
+                         // songDataには各曲ごとにアルバム情報が入っているため、アルバム名で重複排除
+                         const albumName = song.albumTitle || song.album_info.match(/アルバム『(.*?)』/)?.[1] || "アルバム";
+                         
+                         if (d) {
+                             const k = `A-${d.getFullYear()}-${d.getMonth() + 1}-${albumName}`;
                              if (!releases.has(k)) {
                                  releases.add(k);
                                  const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
                                  if (!eventsMap[key]) eventsMap[key] = [];
-                                 // シングル名は曲名ではなくシングルタイトルが欲しいが、songData構造依存
-                                 // ここでは便宜上タイトルを使う
-                                 eventsMap[key].push({ type: 'single', name: song.singleTitle || song.title, date: d });
+                                 eventsMap[key].push({ type: 'album', name: albumName, date: d });
+                             }
+                         }
+                     }
+                     
+                     // シングル情報 (single_infoから日付抽出)
+                     if (song.single_info) {
+                         const d = parseDateFromInfo(song.single_info);
+                         // シングルも曲ごとに情報があるため重複排除
+                         const singleName = song.singleTitle || song.single_info.match(/シングル『(.*?)』/)?.[1] || song.title; // タイトルフォールバック
+                         
+                         if (d) {
+                             const k = `S-${d.getFullYear()}-${d.getMonth() + 1}-${singleName}`;
+                             if (!releases.has(k)) {
+                                 releases.add(k);
+                                 const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+                                 if (!eventsMap[key]) eventsMap[key] = [];
+                                 eventsMap[key].push({ type: 'single', name: singleName, date: d });
                              }
                          }
                      }
                 });
             }
 
-            // ループ生成
+            // ループ生成 (全期間)
             let current = new Date(startYear, startMonth, 1);
             const end = new Date(endYear, endMonth, 1);
 
@@ -423,16 +440,15 @@
                     });
                 }
 
-                if (lifeStage || eventHtml) {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="text-center text-gray-400 font-mono">${y}<br><span class="text-xs font-bold text-gray-600">${m}月</span></td>
-                        <td class="text-center font-bold text-pink-500 text-sm">${age}</td>
-                        <td class="text-center">${lifeStage ? `<span class="lifestage-cell">${lifeStage}</span>` : ''}</td>
-                        <td>${eventHtml}</td>
-                    `;
-                    tbody.appendChild(tr);
-                }
+                // イベントがなくても行を作成する (全表示)
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center text-gray-400 font-mono">${y}<br><span class="text-xs font-bold text-gray-600">${m}月</span></td>
+                    <td class="text-center font-bold text-pink-500 text-sm">${age}</td>
+                    <td class="text-center">${lifeStage ? `<span class="lifestage-cell">${lifeStage}</span>` : ''}</td>
+                    <td>${eventHtml}</td>
+                `;
+                tbody.appendChild(tr);
 
                 current.setMonth(current.getMonth() + 1);
             }
@@ -460,14 +476,11 @@
             document.getElementById('aiko-ratio').innerText = ratio.toFixed(1);
 
             // Sync Age (Time Travel)
-            // 今の自分の年齢
             let currentAge = today.getFullYear() - birthDate.getFullYear();
             if (today.getMonth() < birthDate.getMonth() || (today.getMonth() == birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
                 currentAge--;
             }
             
-            // aikoがその年齢だった時の日付
-            // aiko誕生 + currentAge年
             const syncDateStart = new Date(AIKO_BIRTH.getFullYear() + currentAge, AIKO_BIRTH.getMonth(), AIKO_BIRTH.getDate());
             const syncDateEnd = new Date(AIKO_BIRTH.getFullYear() + currentAge + 1, AIKO_BIRTH.getMonth(), AIKO_BIRTH.getDate());
             
@@ -477,22 +490,24 @@
             let found = null;
             
             if (allData.songData) {
-                 // songDataから期間内のリリースを探す (アルバム優先)
                  const candidates = [];
                  Object.values(allData.songData).forEach(s => {
-                     const rd = s.releaseDate !== '未収録' ? new Date(s.releaseDate) : null;
-                     const ad = s.albumReleaseDate !== '未収録' ? new Date(s.albumReleaseDate) : null;
-                     
-                     if (rd && rd >= syncDateStart && rd < syncDateEnd) {
-                         candidates.push({ name: s.singleTitle || s.title, date: rd, type: 'single' });
+                     // single_info / album_info から日付を取得して判定
+                     if (s.single_info) {
+                         const d = parseDateFromInfo(s.single_info);
+                         if (d && d >= syncDateStart && d < syncDateEnd) {
+                             candidates.push({ name: s.singleTitle || s.single_info.match(/シングル『(.*?)』/)?.[1] || s.title, date: d });
+                         }
                      }
-                     if (ad && ad >= syncDateStart && ad < syncDateEnd) {
-                         candidates.push({ name: s.albumTitle, date: ad, type: 'album' });
+                     if (s.album_info) {
+                         const d = parseDateFromInfo(s.album_info);
+                         if (d && d >= syncDateStart && d < syncDateEnd) {
+                             candidates.push({ name: s.albumTitle || s.album_info.match(/アルバム『(.*?)』/)?.[1], date: d });
+                         }
                      }
                  });
                  
                  if (candidates.length > 0) {
-                     // ランダムに1つ
                      found = candidates[Math.floor(Math.random() * candidates.length)];
                  }
             }
