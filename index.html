@@ -50,8 +50,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        /* Hub自体のバージョンも更新 */
-        const APP_VERSION = "v5.5.1"; 
+        const APP_VERSION = "v5.4.2"; 
     </script>
 </head>
 <body class="bg-gray-100">
@@ -115,6 +114,7 @@
             </div>
             <div class="noren-item" onclick="switchApp('phrase')">
                 <div class="noren-icon bg-orange-500"><i data-lucide="music" class="w-6 h-6"></i></div>
+                <!-- 修正: LLDB phrase -> LLDB lookup -->
                 <div class="flex-1"><div class="font-bold text-gray-800">LLDB lookup</div><div class="text-xs text-gray-400"> 楽曲 / 歌詞フレーズ検索 </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
@@ -144,6 +144,7 @@
 
     <!-- 共通ヘッダーHTML -->
     <header id="main-app-header" class="bg-red-500 text-white transition-colors duration-300">
+        <!-- ★ タイトルフォントサイズ変更: text-[17px] -> text-[22px] -->
         <h1 class="font-black text-[22px] tracking-wide flex-1 truncate pr-2" id="header-title">LLDB live</h1>
         
         <!-- 🌸 Menu Button -->
@@ -156,19 +157,16 @@
     <div id="about-modal" onclick="closeAboutModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="text-center mb-4">
-                <span class="text-4xl">🌸</span>
+                <!-- 🌸アイコンをユーザーアイコン画像に変更 -->
+                <img src="https://unavatar.io/twitter/noki_dochibi" class="w-20 h-20 rounded-full mx-auto shadow-md border-2 border-white mb-2" alt="icon">
                 <h2 class="font-bold text-xl mt-2 text-gray-800">Love Like DataBase</h2>
-                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.5.1</p>
+                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.4.2</p>
             </div>
             
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
                 <p>
-                    このアプリは、aikoジャンキーである個人開発者が<span class="font-bold text-pink-500">「好き」</span>と<span class="font-bold text-pink-500">「情熱」</span>だけで作り上げた、完全非公式のファンアプリです。
+                    このアプリは、個人開発者が趣味で作った、非公式のファンアプリです。データの誤りを含んでいる可能性があります。
                 </p>
-                <div class="bg-red-50 p-3 rounded-lg border border-red-100 text-red-600 text-xs">
-                    <p class="font-bold mb-1">⚠️ ご注意</p>
-                    公式（aiko official、ポニーキャニオン等）とは一切関係ありません。データの誤りを含んでいる可能性があります。
-                </div>
                 <p>
                     ライブのセトリ、歌詞のフレーズ、リリース情報...<br>
                     愛しい時間をいつでも手元に置いておけるように作りました。
@@ -179,8 +177,10 @@
             </div>
 
             <div class="mt-6 flex justify-center">
-                <a href="https://twitter.com/noki_dochibi" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-full text-xs font-bold hover:bg-gray-700 transition">
-                    <i data-lucide="twitter" class="w-4 h-4"></i> 開発者 @noki_dochibi
+                <a href="https://twitter.com/noki_dochibi" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-xs font-bold hover:bg-gray-800 transition shadow-sm">
+                    <!-- X icon SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    開発者 @noki_dochibi
                 </a>
             </div>
             
@@ -194,6 +194,7 @@
     <!-- ==========================================================================
          【2. APP: LLDB live】 ライブアプリ (Iframe Container)
          ========================================================================== -->
+    <!-- キャッシュ対策: ?v=5.4.1 -->
     <div id="app-live" class="app-screen active">
         <iframe src="./index_LLDBlive.html?v=5.4.1" class="w-full h-full border-none"></iframe>
     </div>
@@ -206,16 +207,16 @@
     </div>
 
     <!-- ==========================================================================
-         【4. APP: LLDB trends】 トレンドアプリ (Updated!)
+         【4. APP: LLDB trends】 トレンドアプリ (New!)
          ========================================================================== -->
     <div id="app-trends" class="app-screen">
-        <!-- ★ここで v1.1.1 を指定してキャッシュを更新 -->
-        <iframe src="./index_LLDBtrends.html?v=1.1.1" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBtrends.html?v=1.0.0" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
          【5. APP: LLDB history】 軌跡アプリ (Iframe Container)
          ========================================================================== -->
+    <!-- キャッシュ対策: ?v=0.3.0 に更新 -->
     <div id="app-history" class="app-screen">
         <iframe src="./index_LLDBhistory.html?v=0.3.0" class="w-full h-full border-none"></iframe>
     </div>
@@ -228,6 +229,7 @@
         // アプリ定義 (タイトル更新)
         const apps = {
             'live': { title: 'Love Like DataBase vol.5.4.1', color: 'bg-red-500' },
+            // 修正: LLDB phrase -> LLDB lookup
             'phrase': { title: 'LLDB lookup', color: 'bg-orange-500' },
             'history': { title: 'LLDB history', color: 'bg-pink-500' },
             'trends': { title: 'LLDB trends', color: 'bg-blue-600' }
