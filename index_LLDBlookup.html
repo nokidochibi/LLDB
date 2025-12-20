@@ -208,32 +208,34 @@
     </main>
 
     <!-- フッター -->
-    <footer class="bg-white border-t border-gray-100 fixed bottom-0 w-full safe-pb z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex flex-col" style="padding-bottom: calc(env(safe-area-inset-bottom));">
+    <footer class="fixed bottom-0 w-full z-30">
         
-        <!-- 入力フォーム -->
-        <form id="search-form" class="flex items-center gap-2 px-3 py-3 border-b border-gray-50">
-            <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2.5 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-200 border border-transparent focus-within:border-gray-200">
-                <input type="text" id="search-input" 
-                    class="flex-1 bg-transparent border-none focus:outline-none text-sm placeholder-gray-400"
-                    placeholder="例：甘い匂いに" required autocomplete="off">
-            </div>
-            
-            <button type="submit" 
-                class="send-btn-active text-theme p-2.5 rounded-full hover:bg-theme-soft transition flex-shrink-0 shadow-sm border border-transparent hover:border-theme">
-                <i data-lucide="send" class="w-5 h-5 fill-current transition-colors duration-300"></i>
-            </button>
-        </form>
+        <!-- 入力フォーム (タブバーの上に浮く配置) -->
+        <div class="absolute bottom-[85px] left-0 w-full px-4 pb-2 pointer-events-none">
+            <form id="search-form" class="flex items-center gap-2 pointer-events-auto bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-gray-100">
+                <div class="flex-1 bg-gray-100 rounded-xl flex items-center px-4 py-2.5 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-200 border border-transparent focus-within:border-gray-200">
+                    <input type="text" id="search-input" 
+                        class="flex-1 bg-transparent border-none focus:outline-none text-base placeholder-gray-400"
+                        placeholder="例：甘い匂いに" required autocomplete="off">
+                </div>
+                
+                <button type="submit" 
+                    class="send-btn-active text-theme p-2.5 rounded-xl hover:bg-theme-soft transition flex-shrink-0 shadow-sm border border-transparent hover:border-theme bg-white">
+                    <i data-lucide="send" class="w-6 h-6 fill-current transition-colors duration-300"></i>
+                </button>
+            </form>
+        </div>
 
-        <!-- タブ切り替え (IDを付与) -->
-        <div id="footer-tab-area" class="flex w-full bg-white relative">
-            <button id="tab-lyrics" data-tab="lyrics" onclick="switchTab('lyrics')" class="tab-btn active flex-1 py-3 text-center transition-all flex flex-col items-center justify-center gap-1">
-                <i data-lucide="music" class="w-5 h-5 mb-0.5"></i>
-                <span class="text-base leading-none">歌詞</span>
+        <!-- タブ切り替え -->
+        <div id="footer-tab-area" class="flex w-full h-full border-t border-gray-100 bg-white/95 backdrop-blur">
+            <button id="tab-lyrics" data-tab="lyrics" onclick="switchTab('lyrics')" class="tab-btn active flex-1 text-center transition-all flex flex-col items-center">
+                <i data-lucide="music" class="w-7 h-7"></i>
+                <span class="text-[10px] font-bold">歌詞</span>
             </button>
-            <div class="w-[1px] bg-gray-100 my-2"></div>
-            <button id="tab-title" data-tab="title" onclick="switchTab('title')" class="tab-btn flex-1 py-3 text-center transition-all flex flex-col items-center justify-center gap-1">
-                <i data-lucide="disc" class="w-5 h-5 mb-0.5"></i>
-                <span class="text-base leading-none">楽曲</span>
+            
+            <button id="tab-title" data-tab="title" onclick="switchTab('title')" class="tab-btn flex-1 text-center transition-all flex flex-col items-center">
+                <i data-lucide="disc" class="w-7 h-7"></i>
+                <span class="text-[10px] font-bold">楽曲</span>
             </button>
         </div>
     </footer>
