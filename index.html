@@ -114,7 +114,8 @@
             </div>
             <div class="noren-item" onclick="switchApp('phrase')">
                 <div class="noren-icon bg-orange-500"><i data-lucide="music" class="w-6 h-6"></i></div>
-                <div class="flex-1"><div class="font-bold text-gray-800">LLDB phrase</div><div class="text-xs text-gray-400"> 楽曲 / 歌詞フレーズ検索 </div></div>
+                <!-- 修正: LLDB phrase -> LLDB lookup -->
+                <div class="flex-1"><div class="font-bold text-gray-800">LLDB lookup</div><div class="text-xs text-gray-400"> 楽曲 / 歌詞フレーズ検索 </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
             <div class="noren-item" onclick="switchApp('history')">
@@ -200,7 +201,7 @@
     </div>
 
     <!-- ==========================================================================
-         【3. APP: LLDB phrase】 歌詞アプリ (Iframe Container)
+         【3. APP: LLDB lookup】 歌詞アプリ (Iframe Container)
          ========================================================================== -->
     <div id="app-phrase" class="app-screen">
         <iframe src="./index_LLDBlookup.html?v=1.2.3" class="w-full h-full border-none"></iframe>
@@ -229,7 +230,8 @@
         // アプリ定義 (タイトル更新)
         const apps = {
             'live': { title: 'Love Like DataBase vol.5.4.1', color: 'bg-red-500' },
-            'phrase': { title: 'LLDB phrase', color: 'bg-orange-500' },
+            // 修正: LLDB phrase -> LLDB lookup
+            'phrase': { title: 'LLDB lookup', color: 'bg-orange-500' },
             'history': { title: 'LLDB history', color: 'bg-pink-500' },
             'trends': { title: 'LLDB trends', color: 'bg-blue-600' }
         };
