@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LLDB history</title>
+    <title>LLDB history v0.2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -151,24 +151,37 @@
                     </div>
                 </div>
 
-                <!-- Pickup Release -->
+                <!-- Age Sync Release -->
                 <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl shadow-md p-6 text-white relative">
                     <h3 class="text-xs font-bold text-pink-100 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <i data-lucide="music" class="w-4 h-4"></i>
-                        PICKUP MEMORY
+                        <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                        TIME TRAVEL
                     </h3>
                     
-                    <div id="pickup-container" class="text-center">
-                        <div class="bg-white/20 w-32 h-32 mx-auto rounded-lg mb-4 flex items-center justify-center backdrop-blur-sm">
+                    <div class="text-center mb-4">
+                        <p class="text-sm text-pink-100">もし、あなたがaikoだったら...</p>
+                        <p class="text-lg font-bold mt-1">
+                            今のあなたと同じ<span id="sync-age-highlight" class="text-yellow-300 text-xl mx-1">--歳</span>の頃
+                        </p>
+                        <p class="text-xs text-pink-200 mt-1">
+                            aikoは <span id="sync-date-display">----年--月</span> に<br>この曲をリリースしていました
+                        </p>
+                    </div>
+
+                    <div id="pickup-container" class="text-center mt-6">
+                        <!-- Image Container: CD Jacket or Placeholder -->
+                        <div id="pickup-image-area" class="bg-white/20 w-32 h-32 mx-auto rounded-lg mb-4 flex items-center justify-center backdrop-blur-sm overflow-hidden shadow-inner">
                             <i data-lucide="disc" class="w-16 h-16 text-white/80"></i>
                         </div>
-                        <h4 class="text-lg font-bold mb-1" id="pickup-title">Loading...</h4>
-                        <p class="text-sm text-pink-100 mb-2" id="pickup-date">----/--/--</p>
-                        <p class="text-xs text-pink-200" id="pickup-age">当時 --歳</p>
+                        
+                        <h4 class="text-xl font-bold mb-2 leading-tight" id="pickup-title">Loading...</h4>
+                        <div class="inline-block bg-white/20 px-3 py-1 rounded-full text-xs text-white backdrop-blur-sm">
+                            <span id="pickup-type">Release</span>
+                        </div>
                     </div>
                     
-                    <div class="mt-4 text-[10px] text-pink-200 text-center bg-black/10 rounded px-2 py-1">
-                        ※画像を表示するにはGASの設定が必要です
+                    <div class="mt-6 text-[10px] text-pink-200 text-center bg-black/10 rounded px-2 py-2">
+                        ※ジャケット画像が表示されない場合はGASの設定を確認してください
                     </div>
                 </div>
 
@@ -185,8 +198,9 @@
     <script>
         const GAS_API_URL = parent.GAS_API_URL || "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         
-        // aiko debut date: 1998-07-17
-        const AIKO_DEBUT = new Date(1998, 6, 17); // Month is 0-indexed
+        // aiko data
+        const AIKO_DEBUT = new Date(1998, 6, 17); // 1998-07-17 (Month is 0-indexed)
+        const AIKO_BIRTH = new Date(1975, 10, 22); // 1975-11-22
 
         let currentTimelineData = [];
         let birthDate = null;
@@ -324,13 +338,20 @@
 
             const today = new Date();
             
-            // 1. Calculate Life Days
+            // ----------------------------------------------------
+            // 1. Calculate Life Days & Ratio
+            // ----------------------------------------------------
             const diffTimeLife = Math.abs(today - birthDate);
             const diffDaysLife = Math.ceil(diffTimeLife / (1000 * 60 * 60 * 24));
+            
+            // Calculate current age simply for display
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
 
-            // 2. Calculate aiko Days
-            // If born before debut, aiko days starts from debut.
-            // If born after debut, aiko days starts from birth (same as life days).
+            // Calculate aiko Days
             let diffDaysAiko = 0;
             if (birthDate < AIKO_DEBUT) {
                 const diffTimeAiko = Math.abs(today - AIKO_DEBUT);
@@ -339,33 +360,66 @@
                 diffDaysAiko = diffDaysLife;
             }
 
-            // 3. Calculate Ratio
+            // Ratio
             let ratio = (diffDaysAiko / diffDaysLife) * 100;
-            if (ratio > 100) ratio = 100; // Should not happen but safe guard
+            if (ratio > 100) ratio = 100;
 
-            // DOM Updates
+            // DOM Updates for Stats
             document.getElementById('days-with-aiko').innerText = diffDaysAiko.toLocaleString();
             document.getElementById('aiko-ratio').innerText = ratio.toFixed(1);
-            
             const detailText = (birthDate < AIKO_DEBUT) 
                 ? `デビューから今日まで、あなたはaikoと共に生きてきました。`
                 : `あなたは生まれた時からずっとaikoと共に生きています。`;
             document.getElementById('days-detail').innerText = detailText;
 
 
-            // 4. Pickup Random Release from Timeline Data
-            // Filter rows that have a release
+            // ----------------------------------------------------
+            // 2. Age Sync Logic (Time Travel)
+            // ----------------------------------------------------
+            
+            // Calculate the date when aiko was the User's current Exact Age (in ms)
+            // Target Date = aikoBirth + (Today - UserBirth)
+            const aikoMatchDate = new Date(AIKO_BIRTH.getTime() + diffTimeLife);
+
+            // Find closest release to this date
             const releaseRows = currentTimelineData.filter(row => row.release && row.release.length > 1);
             
+            let closestRow = null;
+            let minDiff = Infinity;
+
             if (releaseRows.length > 0) {
-                const randomRow = releaseRows[Math.floor(Math.random() * releaseRows.length)];
-                document.getElementById('pickup-title').innerText = randomRow.release;
-                document.getElementById('pickup-date').innerText = `${randomRow.year}年${randomRow.month}月`;
-                document.getElementById('pickup-age').innerText = `当時 ${randomRow.age}歳`;
+                releaseRows.forEach(row => {
+                    // Create date object from row (assume 1st of month)
+                    const rowDate = new Date(row.year, row.month - 1, 1);
+                    const diff = Math.abs(rowDate - aikoMatchDate);
+                    
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestRow = row;
+                    }
+                });
+            }
+
+            // Update UI
+            document.getElementById('sync-age-highlight').innerText = `${age}歳`;
+            
+            if (closestRow) {
+                document.getElementById('pickup-title').innerText = closestRow.release;
+                document.getElementById('pickup-type').innerText = "Released";
+                document.getElementById('sync-date-display').innerText = `${closestRow.year}年${closestRow.month}月`;
+                
+                // Image Handling
+                const imgArea = document.getElementById('pickup-image-area');
+                if (closestRow.imageUrl) {
+                    imgArea.innerHTML = `<img src="${closestRow.imageUrl}" alt="${closestRow.release}" class="w-full h-full object-cover">`;
+                } else {
+                    // Placeholder
+                    imgArea.innerHTML = `<i data-lucide="disc" class="w-16 h-16 text-white/80"></i>`;
+                }
+
             } else {
-                document.getElementById('pickup-title').innerText = "aikoの曲を聴こう";
-                document.getElementById('pickup-date').innerText = "";
-                document.getElementById('pickup-age').innerText = "";
+                document.getElementById('pickup-title').innerText = "データがありません";
+                document.getElementById('sync-date-display').innerText = "----/--";
             }
             
             lucide.createIcons();
