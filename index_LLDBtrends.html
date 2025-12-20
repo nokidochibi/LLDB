@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>伸びろ!推しaV</title>
+    <title>LLDB trends</title>
     
     <!-- Chart.js & Icons -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -17,116 +17,42 @@
            1. Base & Theme Colors (Blue Theme)
            ========================================= */
         :root {
-            --bg-color: #f0f9ff;       /* 元: #ffe0e0 */
-            --header-bg: #f0f9ff;      /* 元: #ffe0e0 */
-            --accent-color: #3b82f6;   /* 元: #d32f2f (赤) -> 青 */
-            --bar-color: #3b82f6;      /* 元: #ff9800 (オレンジ) -> 青 */
+            --bg-color: #f0f9ff;
+            --header-bg: #f0f9ff;
+            --accent-color: #3b82f6;
+            --bar-color: #3b82f6;
             --text-main: #334155;
-            --border-color: #cbd5e1;
-            --hover-bg: #e0f2fe;
+            --nav-height: 65px; /* タブバーの高さ調整 */
         }
 
         body {
-            font-family: 'Noto Sans JP', sans-serif; /* フォントのみモダンに */
+            font-family: 'Noto Sans JP', sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding-bottom: calc(70px + env(safe-area-inset-bottom)); /* フッター分空ける */
+            /* フッターの高さ + Safe Area 分の余白 */
+            padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
 
         /* =========================================
-           2. GAS版レイアウトの移植 (Layout & Table)
+           2. Layout & Table
            ========================================= */
-        h1 {
-            text-align: center;
-            color: var(--text-main);
-            margin: 0;
-            font-size: 2.2em; /* 少し調整 */
-            background-color: var(--header-bg);
-            padding: 40px 10px 10px 10px;
-            box-sizing: border-box;
-            width: 100%;
-            font-weight: bold;
-            letter-spacing: 0.1em;
-            line-height: 1.2;
-        }
-
-        .loading-animation-container {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 0 10px;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .counting-container {
-            order: 1;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: baseline;
-            justify-content: center;
-        }
-        .counting-number {
-            font-size: 1.5em;
-            color: var(--text-main);
-            font-weight: bold;
-        }
-        .counting-unit {
-            font-size: 0.9em;
-            color: #64748b;
-            margin-left: 5px;
-        }
-        .underline-container {
-            width: 100%;
-            height: 30px;
-            margin: 5px auto 10px auto;
-            overflow: hidden;
-            position: relative;
-            order: 2;
-        }
-        .underline-bar {
-            height: 100%;
-            width: 0;
-            background-color: var(--bar-color);
-            position: absolute;
-            top: 0;
-            left: 0;
-            animation: stretch-to-end 3s ease-out forwards;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 5px;
-            box-sizing: border-box;
-        }
-        .loading-text {
-            color: white;
-            font-size: 0.8em;
-            white-space: nowrap;
-            font-weight: bold;
-        }
-        @keyframes stretch-to-end {
-            0% { width: 0; }
-            100% { width: 100%; }
-        }
-
+        
         .subtitle {
             text-align: center;
-            font-size: 0.85em;
-            color: #64748b;
-            margin-bottom: 15px;
+            font-size: 0.75em;
+            color: #94a3b8;
+            margin: 10px 0;
             display: block;
-            padding: 0 10px;
-            background-color: var(--bg-color);
         }
 
         /* フィルタボタン */
         .filter-controls {
             text-align: center;
-            margin-bottom: 15px;
+            margin: 10px;
             padding: 10px;
             background-color: #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -135,11 +61,10 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 8px;
-            margin: 0 10px 15px 10px;
         }
         .filter-option {
             display: inline-block;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border: 1px solid var(--accent-color);
             border-radius: 20px;
             background-color: white;
@@ -160,14 +85,14 @@
         .table-container {
             position: relative;
             margin: 0 5px;
-            margin-top: 30px;
+            margin-top: 10px;
             box-sizing: border-box;
         }
         .update-time {
             position: absolute;
-            top: -22px;
-            right: 5px;
-            font-size: 0.75em;
+            top: -20px;
+            right: 8px;
+            font-size: 0.7em;
             color: #64748b;
             z-index: 2;
             font-family: monospace;
@@ -176,31 +101,25 @@
         /* テーブルスタイル */
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate; /* stickyを効かせるため */
+            border-spacing: 0;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             background-color: #fff;
             box-sizing: border-box;
             font-size: 1em;
-            table-layout: fixed; /* 重要: これがないと幅指定が効かない */
+            table-layout: fixed;
             border-radius: 8px;
-            overflow: hidden;
+            overflow: hidden; /* 角丸のため */
         }
+        
         thead {
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 40; /* 高めに設定 */
             background-color: var(--header-bg);
-            border-bottom: 2px solid #e2e8f0;
         }
-        th, td {
-            padding: 8px 2px;
-            border-bottom: 1px solid #f1f5f9;
-            word-break: break-word;
-            white-space: normal;
-            vertical-align: middle;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        
+        /* ヘッダーセルのスタイル調整 */
         th {
             background-color: var(--header-bg);
             color: #475569;
@@ -209,8 +128,24 @@
             text-align: center;
             line-height: 1.3;
             font-size: 0.85em;
+            padding: 10px 2px;
+            border-bottom: 2px solid #e2e8f0;
+            /* Sticky時の背景透過防止 */
+            position: sticky;
+            top: 0;
+            z-index: 40;
         }
         th small { font-size: 0.8em; opacity: 0.8; }
+
+        td {
+            padding: 8px 2px;
+            border-bottom: 1px solid #f1f5f9;
+            word-break: break-word;
+            white-space: normal;
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         /* ソートアイコン */
         .sortable th::after {
@@ -241,8 +176,8 @@
 
         /* Tablet (max 768px) */
         @media (max-width: 768px) {
-            h1 { font-size: 1.8em; padding: 15px 5px; }
-            .table-container { margin: 20px 2px 0 2px; }
+            .table-container { margin: 10px 2px 0 2px; }
+            th { font-size: 0.8em; padding: 8px 1px; }
             
             th:nth-child(1), td:nth-child(1) { width: 6%; text-align: center; font-weight: bold; color: #94a3b8; font-size: 0.8em; }
             th:nth-child(2), td:nth-child(2) { width: 34%; text-align: left; padding-right: 4px; line-height: 1.4; font-size: 0.9em; }
@@ -257,12 +192,12 @@
             th:nth-child(1), td:nth-child(1) { width: 8%; }
             th:nth-child(2), td:nth-child(2) { width: 30%; }
             th:nth-child(3), td:nth-child(3) { width: 22%; }
-            th:nth-child(4), td:nth-child(4) { width: 14%; } /* 公開日 */
-            th:nth-child(5), td:nth-child(5) { width: 13%; } /* 平均 */
-            th:nth-child(6), td:nth-child(6) { width: 13%; } /* 直近 */
+            th:nth-child(4), td:nth-child(4) { width: 14%; }
+            th:nth-child(5), td:nth-child(5) { width: 13%; }
+            th:nth-child(6), td:nth-child(6) { width: 13%; }
             
             td { padding: 4px 1px; font-size: 0.85em; }
-            th { padding: 4px 1px; font-size: 0.75em; }
+            th { padding: 8px 1px; font-size: 0.75em; }
         }
 
         /* セル内装飾 */
@@ -291,22 +226,35 @@
            3. UI Components (Modal, Footer, Tabs)
            ========================================= */
         
-        /* フッターナビ */
+        /* フッターナビ (アプリライク調整) */
         nav {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background-color: white; border-top: 1px solid #e2e8f0;
+            background-color: rgba(255, 255, 255, 0.98);
+            border-top: 1px solid #e2e8f0;
             z-index: 50; display: flex;
-            height: calc(60px + env(safe-area-inset-bottom));
+            /* 高さを確保し、Safe Area分の余白を足す */
+            height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.03);
         }
         .nav-item {
             flex: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 4px; color: #94a3b8; cursor: pointer; transition: all 0.2s;
+            align-items: center; 
+            /* アイコンを少し上に配置するための調整 */
+            justify-content: flex-start; 
+            padding-top: 10px; 
+            gap: 4px; 
+            color: #94a3b8; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            /* タップ領域を最大化 */
+            height: 100%;
         }
         .nav-item.active {
-            color: var(--accent-color); background-color: #eff6ff;
+            color: var(--accent-color);
+        }
+        .nav-item:active {
+            background-color: #f8fafc;
         }
         
         /* タブコンテンツ制御 */
@@ -336,7 +284,7 @@
             text-align: center; font-size: 1.1em; color: var(--text-main);
             margin-bottom: 20px; font-weight: bold; padding-right: 20px;
         }
-        #loading, #error { text-align: center; padding: 20px; color: #64748b; font-size: 0.9em; }
+        #loading, #error { text-align: center; padding: 40px; color: #64748b; font-size: 0.9em; }
         #error { color: #ef4444; }
 
         /* フォロワーグラフ用スタイル */
@@ -344,26 +292,23 @@
             background: white; border-radius: 12px; padding: 16px;
             margin: 16px 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
+        
+        /* スピナー */
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%; width: 24px; height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Tab 1: ランキング (GAS版踏襲) -->
+    <!-- Tab 1: ランキング -->
     <div id="tab-views" class="tab-content active">
-        <h1>伸びろ!推しaV</h1>
-
-        <!-- Loading Animation -->
-        <div id="loadingAnimation" class="loading-animation-container">
-            <div class="counting-container">
-                <span id="countingNumber" class="counting-number">0</span><span class="counting-unit">回視聴</span>
-            </div>
-            <div class="underline-container">
-                <div class="underline-bar">
-                    <span class="loading-text">ねがう夜</span>
-                </div>
-            </div>
-        </div>
-
+        
         <!-- Filter -->
         <div class="filter-controls">
             <span class="filter-option" data-category="isMV" data-checkbox-id="filterMV">MV</span>
@@ -379,26 +324,27 @@
             <input type="checkbox" class="category-checkbox-hidden" id="filterOther" data-category="isOther" checked>
         </div>
 
-        <span class="subtitle">「視聴回数」とかタップしたら順番入れ替わるで</span>
+        <span class="subtitle">「視聴回数」などをタップすると並び替えできます</span>
+        
+        <div id="loading">
+            <div class="spinner"></div>
+            <div>データを読み込んでいます...</div>
+        </div>
         <div id="error" style="display:none;"></div>
 
         <!-- Table -->
-        <div class="table-container">
+        <div class="table-container" id="tableContainer" style="display:none;">
             <span id="lastUpdateTimeDisplay" class="update-time"></span>
             <table id="dataTable">
                 <thead><tr id="tableHeader"></tr></thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        
-        <div style="text-align:center; padding: 20px; font-size:0.8em; color:#94a3b8;">
-            <p>※列幅・レイアウトはオリジナルを踏襲しています</p>
-        </div>
     </div>
 
-    <!-- Tab 2: フォロワー (New) -->
+    <!-- Tab 2: フォロワー -->
     <div id="tab-followers" class="tab-content">
-        <h1 style="font-size: 1.5em; padding: 20px;">SNSフォロワー推移</h1>
+        <h1 style="font-size: 1.5em; padding: 20px 20px 10px; text-align: center; font-weight: bold; color: var(--text-main);">SNSフォロワー推移</h1>
         
         <div class="follower-card">
             <h3 class="font-bold text-red-600 flex items-center gap-2 mb-4 text-base">
@@ -459,13 +405,6 @@
     let currentSortColumn = 'totalViews';
     let currentSortDirection = 'desc';
     let followersDataLoaded = false;
-
-    // Animation vars
-    const countingNumberElement = document.getElementById('countingNumber');
-    const loadingAnimationDiv = document.getElementById('loadingAnimation');
-    let animationFrameId = null;
-    let currentCount = 0;
-    let animationStartTime = null;
     let dailyViewsChartInstance = null;
 
     // ==========================================
@@ -473,8 +412,7 @@
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
-        animateCountingNumber(1874093, 3000, 0, false); // Start fake loading
-        fetchData(); // Get data
+        fetchData(); // Get data immediately
         
         // Filter Click Events
         document.querySelectorAll('.filter-option').forEach(span => {
@@ -512,7 +450,7 @@
     }
 
     // ==========================================
-    // 3. RANKING LOGIC (from GAS)
+    // 3. RANKING LOGIC
     // ==========================================
     async function fetchData() {
         try {
@@ -536,7 +474,6 @@
                     avgDailyViews: parseFloat(item.avgDailyViews) || 0,
                     avgViews7Days: (item.avgViews7Days === "(集計中)" ? item.avgViews7Days : parseFloat(item.avgViews7Days) || 0)
                 })),
-                maxLoadingCount: json.maxTotalViews || 2000000,
                 maxTotalViews: json.maxTotalViews || 0,
                 lastUpdateTime: json.lastUpdateTime || ''
             };
@@ -544,9 +481,9 @@
             displayData(adaptedData);
 
         } catch (e) {
-            document.getElementById('error').textContent = e.message;
+            document.getElementById('error').textContent = "通信エラーが発生しました: " + e.message;
             document.getElementById('error').style.display = 'block';
-            loadingAnimationDiv.style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
         }
     }
 
@@ -555,9 +492,9 @@
         tableHeaders = data.headers;
         maxTotalViews = data.maxTotalViews;
 
-        // Header Generation
+        // Render Header
         const thead = document.getElementById('tableHeader');
-        thead.innerHTML = '<th style="cursor:default">#</th>';
+        thead.innerHTML = '<th style="cursor:default; width:4%;">#</th>';
         tableHeaders.forEach(h => {
             const th = document.createElement('th');
             th.innerHTML = h.text;
@@ -578,8 +515,9 @@
             document.getElementById('lastUpdateTimeDisplay').style.display = 'block';
         }
 
-        // Finish Animation
-        animateCountingNumber(data.maxLoadingCount, 1000, currentCount, true);
+        // Show Table
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('tableContainer').style.display = 'block';
         
         filterAndDisplay(true);
     }
@@ -606,13 +544,8 @@
         currentSortColumn = key;
         currentSortDirection = dir;
         
-        // Update Icons
-        document.querySelectorAll('th.sortable').forEach(th => {
-            th.classList.remove('asc', 'desc');
-            // Simplified check based on innerHTML content match is risky, 
-            // but for now relying on index order is safer or data attr
-        });
-        // Re-render headers to update sort class (lazy way) or iterate
+        document.querySelectorAll('th.sortable').forEach(th => th.classList.remove('asc', 'desc'));
+        
         const ths = document.getElementById('tableHeader').children;
         for(let i=1; i<ths.length; i++) { // skip #
             if(tableHeaders[i-1].key === key) ths[i].classList.add(dir);
@@ -640,17 +573,13 @@
             return;
         }
 
-        // Calculate Max for Emojis
         const maxDaily = Math.max(...data.map(d => parseFloat(d.avgDailyViews)||0));
         const max7Days = Math.max(...data.map(d => parseFloat(d.avgViews7Days)||0));
 
         data.forEach((row, i) => {
             const tr = document.createElement('tr');
-            
-            // #
             tr.innerHTML += `<td style="text-align:center; font-weight:bold; color:#94a3b8;">${i+1}</td>`;
             
-            // Cells
             tableHeaders.forEach(h => {
                 let td = document.createElement('td');
                 const val = row[h.key];
@@ -661,8 +590,10 @@
                     const num = parseFloat(val)||0;
                     const pct = (maxTotalViews > 0) ? (num / maxTotalViews * 100) : 0;
                     td.innerHTML = `
-                        <span class="views-number" onclick="openGraph('${row.url}', '${row.title.replace(/'/g,"\\'")}')">${num.toLocaleString()}</span>
-                        <div class="views-graph-container"><div class="views-graph-bar" style="width:${pct}%"></div></div>
+                        <div class="views-cell-container">
+                            <span class="views-number" onclick="openGraph('${row.url}', '${row.title.replace(/'/g,"\\'")}')">${num.toLocaleString()}</span>
+                            <div class="views-graph-container"><div class="views-graph-bar" style="width:${pct}%"></div></div>
+                        </div>
                     `;
                 } else if (h.key === 'publishedDate') {
                     const d = new Date(val);
@@ -772,44 +703,12 @@
     // ==========================================
     // 5. UTILS
     // ==========================================
-    function animateCountingNumber(target, duration, start, isFinal) {
-        const startTime = performance.now();
-        const initial = start;
-        
-        function update(now) {
-            const elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            if (!isDataLoaded && elapsed < 3000) {
-                currentCount = Math.floor(initial + (target - initial) * progress);
-                countingNumberElement.textContent = currentCount.toLocaleString();
-                animationFrameId = requestAnimationFrame(update);
-            } else if (!isDataLoaded) {
-                // Random walk while waiting
-                currentCount = Math.floor(Math.random() * 50000) + 1800000;
-                countingNumberElement.textContent = currentCount.toLocaleString();
-                animationFrameId = requestAnimationFrame(update);
-            } else if (progress < 1) {
-                currentCount = Math.floor(initial + (target - initial) * progress);
-                countingNumberElement.textContent = currentCount.toLocaleString();
-                animationFrameId = requestAnimationFrame(update);
-            } else {
-                currentCount = target;
-                countingNumberElement.textContent = currentCount.toLocaleString();
-                loadingAnimationDiv.style.display = 'none';
-            }
-        }
-        if(animationFrameId) cancelAnimationFrame(animationFrameId);
-        animationFrameId = requestAnimationFrame(update);
-    }
-
     function closeGraphModal() {
         document.getElementById('graphModal').classList.remove('open');
         document.getElementById('noGraphData').style.display = 'none';
     }
 
     function formatTitle(title) {
-        // Original logic for 『』 brackets formatting
         const match = title.match(/[「『]/);
         if (match) {
             const idx = match.index;
