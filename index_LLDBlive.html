@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.5.4.0</title>
+<title>Love Like DataBase vol.5.4.1</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- アイコン変更 -->
@@ -401,7 +401,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.5.4.0</h1>
+  <h1 class="font-bold text-left" style="font-size:17px; color:white; flex:1;">Love Like DataBase vol.5.4.1</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -410,8 +410,7 @@ button { font-size: 14px !important; }
 
   <!-- 公演タブ -->
   <div id="tab-search" class="tab-content" style="display:block">
-    <!-- 注釈削除 -->
-    <div class="h-4"></div>
+    <!-- 以前の無駄な余白(h-4)を削除 -->
     
     <div class="card-base bg-gray-50 border border-gray-200">
       <div class="flex gap-1 mb-2 items-center">
@@ -601,9 +600,9 @@ button { font-size: 14px !important; }
       </ul>
       
       <!-- 最新のお知らせエリア（ここだけ表示する運用） -->
-      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v5.4.0)</h3>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v5.4.1)</h3>
       <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-6 text-sm text-gray-600">
-        <p>タイトルを大きく、エフェクトを銀テープ仕様に変更しました。</p>
+        <p>銀テープのエフェクトを「キャノン砲」仕様に変更しました✨</p>
       </div>
 
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
@@ -1267,27 +1266,33 @@ function startConfetti() {
   canvas.height = height;
 
   const particles = [];
-  const particleCount = 100; // 銀テープなので数は少なめに
+  const particleCount = 100; // 銀テープの数
+  
+  // 金色・銀色・プラチナ・ゴールデンロッドなど、キラキラ系の色定義
+  const colors = ['#FFD700', '#C0C0C0', '#E5E4E2', '#DAA520']; 
   
   class Particle {
     constructor() {
-      // 画面上部からランダムに
-      this.x = Math.random() * width;
-      this.y = -Math.random() * height * 0.5 - 50; 
+      // 初期位置: 画面下部（左右はランダム）
+      this.x = Math.random() * width; 
+      this.y = height + 10; 
       
-      // 銀テープ色（キラキラ）
-      const colors = ['#C0C0C0', '#FFD700', '#FF69B4', '#e5e7eb', '#00BFFF']; 
       this.color = colors[Math.floor(Math.random() * colors.length)];
       
-      // テープの形状（細長い）
+      // テープの形状
       this.w = Math.random() * 8 + 4; // 幅
       this.h = Math.random() * 60 + 30; // 長さ
       
-      // 速度（上から降ってくる）
-      this.vy = Math.random() * 8 + 5; 
-      this.vx = (Math.random() - 0.5) * 4; // 左右に揺れる
+      // キャノン砲（上向きの爆発的な初速）
+      // vyをマイナス（上向き）に大きく設定
+      this.vy = - (Math.random() * 15 + 15); // -15 ~ -30 くらいの勢いで発射
+      this.vx = (Math.random() - 0.5) * 8; // 左右に散らす
       
-      // ひらひら回転
+      // 物理パラメータ
+      this.gravity = 0.4; // 重力
+      this.friction = 0.96; // 空気抵抗（横方向）
+      
+      // 回転アニメーション用
       this.angle = Math.random() * 360;
       this.angleSpeed = (Math.random() - 0.5) * 15;
       
@@ -1297,19 +1302,30 @@ function startConfetti() {
     }
     
     update() {
-      this.y += this.vy;
-      this.x += this.vx;
+      // 重力を加算（徐々に落下へ転じる）
+      this.vy += this.gravity;
       
-      // 空気抵抗的な減速（終端速度）
-      if (this.vy > 3) this.vy *= 0.98;
+      // 空気抵抗（横移動の減衰）
+      this.vx *= this.friction;
+      
+      // 位置更新
+      this.x += this.vx;
+      this.y += this.vy;
+      
+      // ある程度落ちてきたら（vyがプラスになったら）、空気抵抗を強めて「ひらひら」させる
+      if (this.vy > 0) {
+          // 終端速度（これ以上速くならない）
+          if (this.vy > 4) this.vy *= 0.95;
+      }
       
       this.angle += this.angleSpeed;
       this.flip += this.flipSpeed;
     }
     
     draw(ctx) {
-      // 画面外（下）に行ったら描画しない
-      if (this.y > height + 100) return;
+      // 画面外（下）に行ったら描画しない（ただし発射直後は画面外下なので、vy>0の時だけ判定するなどの工夫が必要だが、
+      // 実際には描画領域外でもdrawしても見えないだけなので、パフォーマンス最適化以外では問題ない）
+      if (this.y > height + 100 && this.vy > 0) return;
 
       ctx.save();
       ctx.translate(this.x, this.y);
@@ -1337,8 +1353,10 @@ function startConfetti() {
     particles.forEach(p => {
       p.update();
       p.draw(ctx);
-      if (p.y < height + 100) activeParticles++;
+      // まだ画面内にいるか、これから画面内に入ってくる（上向き移動中）ならアクティブ
+      if (p.y < height + 100 || p.vy < 0) activeParticles++;
     });
+    
     if (activeParticles > 0) {
       requestAnimationFrame(animate);
     } else {
