@@ -136,6 +136,11 @@
             border-color: #475569;
             background-color: #1e293b;
         }
+        /* ランダムエリア */
+        body.dark-mode #random-lyric-container {
+            background-color: #1e293b;
+            border-color: #334155;
+        }
         /* しりとりボタン */
         body.dark-mode button.bg-white {
             background-color: #1e293b;
@@ -167,13 +172,11 @@
 
     <header class="bg-white/95 backdrop-blur-sm shadow-sm flex flex-col items-center justify-center sticky top-0 z-20 border-b border-theme relative transition-colors duration-300 h-14">
         <div class="w-full flex items-center justify-center relative">
-            <!-- ★ヘッダーはシンプルにテキストのみに戻しました -->
             <h1 id="app-title" class="text-lg font-bold text-theme tracking-wider flex items-baseline transition-colors duration-300">
                 LLDB lookup
                 <span id="version-display" class="ml-2 text-[10px] text-gray-400 font-normal opacity-50"></span>
             </h1>
             
-            <!-- ★アイコン変更: sparkles -> 🌷 (絵文字) -->
             <button onclick="toggleModal(true)" class="absolute right-4 transition p-1 rounded-full hover:bg-orange-50">
                 <span class="text-xl">🌷</span>
             </button>
@@ -183,8 +186,8 @@
     <!-- 1. 歌詞チャット -->
     <main id="chat-container-lyrics" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-64"> 
         <div class="flex items-start space-x-2">
-            <!-- ★trigger-secret: このアイコンをダブルタップするとしりとり起動 -->
-            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" alt="icon">
+            <!-- ★ onclickでシンプルに起動するように修正 -->
+            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()" alt="icon">
             <div class="bubble bubble-left bg-white p-3 shadow-sm max-w-[80%]">
                 <p class="text-sm leading-relaxed">
                     調べたいフレーズを入力してね。<br>aikoの曲から探してくるよ！
@@ -196,7 +199,7 @@
     <!-- 2. 楽曲DBチャット -->
     <main id="chat-container-title" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-64 hidden"> 
         <div class="flex items-start space-x-2">
-            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" alt="icon">
+            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()" alt="icon">
             <div class="bubble bubble-left bg-white p-3 shadow-sm max-w-[80%]">
                 <p class="text-sm leading-relaxed">
                     曲名やアルバム名を入力してね。<br>リリース情報や収録曲順を教えるよ💿
@@ -208,7 +211,7 @@
     <!-- 3. しりとりチャット -->
     <main id="chat-container-shiritori" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-64 hidden"> 
         <div class="flex items-start space-x-2">
-            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" alt="icon">
+            <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()" alt="icon">
             <div class="bubble bubble-left bg-white p-3 shadow-sm max-w-[80%]">
                 <p class="text-sm leading-relaxed">
                     さぁ、しりとりの時間だ。<br>
@@ -222,8 +225,6 @@
     <!-- フッター -->
     <footer class="bg-white border-t border-gray-100 fixed bottom-0 w-full safe-pb z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex flex-col" style="padding-bottom: calc(env(safe-area-inset-bottom));">
         
-        <!-- ★ランダム表示エリアを削除しました -->
-
         <!-- 入力フォーム -->
         <form id="search-form" class="flex items-center gap-2 px-3 py-3 border-b border-gray-50">
             <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2.5 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-200 border border-transparent focus-within:border-gray-200">
@@ -305,7 +306,7 @@
                             <i data-lucide="gamepad-2" class="w-4 h-4"></i> Secret Mode
                         </h3>
                         <p class="text-xs leading-5 relative z-10">
-                            <span class="text-pink-300 font-bold">チャットアイコン</span>をダブルタップすると...
+                            <span class="text-pink-300 font-bold">チャットアイコン</span>をタップすると...
                         </p>
                     </div>
                 </div>
@@ -317,18 +318,19 @@
                         <img src="https://unavatar.io/twitter/noki_dochibi" class="w-5 h-5 rounded-full shadow-sm">
                         @noki_dochibi
                     </a>
-                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v1.2.2</p>
+                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v1.2.3</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const APP_VERSION = 'v1.2.2';
+        const APP_VERSION = 'v1.2.3';
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycby49eACsPr_lGblpklhK13gt4TroRwNyKwnQcKQ3GPhACQ8zV96YZ9_CDXfFn5wOj85/exec"; 
         const TWITTER_ID = "noki_dochibi";
         const ICON_URL = `https://unavatar.io/twitter/${TWITTER_ID}?v=${APP_VERSION}`;
 
+        // 状態管理変数
         let currentMode = 'lyrics'; 
         let lastMode = 'lyrics'; 
         let isDarkMode = false; 
@@ -358,103 +360,35 @@
             if (dom.version) dom.version.textContent = APP_VERSION;
             dom.botIcons.forEach(img => img.src = ICON_URL);
             new Image().src = ICON_URL;
-
-            // ダブルタップイベントの設定
-            attachDoubleTapEvents();
         });
-
-        // ==========================================
-        // ★ダブルタップイベントハンドラ
-        // ==========================================
-        function createDoubleTapHandler(callback) {
-            let tapCount = 0;
-            let timer = null;
-            let lastTouchX = 0;
-            let lastTouchY = 0;
-
-            const reset = () => {
-                tapCount = 0;
-                if (timer) {
-                    clearTimeout(timer);
-                    timer = null;
-                }
-            };
-
-            const handler = (e) => {
-                // タッチ開始
-                if (e.type === 'touchstart') {
-                    lastTouchX = e.changedTouches[0].screenX;
-                    lastTouchY = e.changedTouches[0].screenY;
-                    return;
-                }
-                // タッチ終了
-                if (e.type === 'touchend') {
-                    const touch = e.changedTouches[0];
-                    if (Math.abs(touch.screenX - lastTouchX) > 10 || Math.abs(touch.screenY - lastTouchY) > 10) {
-                        reset(); // スクロール判定
-                        return;
-                    }
-                }
-
-                tapCount++;
-                
-                if (tapCount === 1) {
-                    timer = setTimeout(reset, 350); 
-                } else if (tapCount === 2) {
-                    e.preventDefault(); // ズームなどを防止
-                    reset();
-                    
-                    // ハイライト演出
-                    if (e.currentTarget) {
-                        e.currentTarget.classList.remove('tap-highlight');
-                        void e.currentTarget.offsetWidth;
-                        e.currentTarget.classList.add('tap-highlight');
-                    }
-                    callback();
-                }
-            };
-
-            return {
-                touchstart: handler,
-                touchend: handler,
-                dblclick: (e) => {
-                    e.preventDefault();
-                    callback();
-                }
-            };
-        }
-
-        // ページ内の対象要素(trigger-secret)にイベントを付与
-        function attachDoubleTapEvents() {
-            const targets = document.querySelectorAll('.trigger-secret');
-            const handler = createDoubleTapHandler(activateSecretMode);
-            
-            targets.forEach(el => {
-                // 重複登録防止
-                if (el.dataset.hasDoubleTap) return;
-                
-                el.addEventListener('touchstart', handler.touchstart, {passive: false});
-                el.addEventListener('touchend', handler.touchend, {passive: false});
-                el.addEventListener('dblclick', handler.dblclick);
-                el.dataset.hasDoubleTap = "true";
-            });
-        }
 
         // ==========================================
         // モード制御
         // ==========================================
 
-        // ★隠しコマンド: 裏モード切替 (Toggle)
+        // ★隠しコマンド: 裏モード切替 (Toggle - Single Tap)
         window.activateSecretMode = function() {
+            // エフェクト演出（アイコンが跳ねる）
+            const activeIcon = document.querySelector(`#chat-container-${currentMode} .bot-icon`);
+            if (activeIcon) {
+                activeIcon.classList.remove('tap-highlight');
+                void activeIcon.offsetWidth;
+                activeIcon.classList.add('tap-highlight');
+            }
+
             if (currentMode === 'shiritori') {
                 // 通常モードに戻る
                 isDarkMode = false;
                 dom.body.classList.remove('dark-mode');
+                // lastModeが未定義またはshiritori自身になってしまっている場合の安全策
+                if (!lastMode || lastMode === 'shiritori') {
+                    lastMode = 'lyrics';
+                }
                 switchTab(lastMode);
-                addMessage("しりとり終了！またね👋", 'bot');
+                // メッセージは表示しない
             } else {
                 // 裏モードへ
-                lastMode = currentMode;
+                lastMode = currentMode; // 現在のモードを記憶
                 isDarkMode = true;
                 dom.body.classList.add('dark-mode');
                 switchTab('shiritori');
@@ -484,7 +418,6 @@
                 dom.body.classList.replace('bg-pink-50', 'bg-orange-50');
                 
                 dom.containerLyrics.classList.remove('hidden');
-                
                 dom.searchInput.placeholder = "例：甘い匂いに";
                 document.documentElement.style.setProperty('--bubble-color', '#f97316');
 
@@ -495,7 +428,6 @@
                 dom.body.classList.replace('bg-pink-50', 'bg-sky-50');
                 
                 dom.containerTitle.classList.remove('hidden');
-                
                 dom.searchInput.placeholder = "例：ポニーテール";
                 document.documentElement.style.setProperty('--bubble-color', '#0ea5e9');
 
@@ -506,7 +438,6 @@
                 dom.body.classList.replace('bg-sky-50', 'bg-pink-50');
                 
                 dom.containerShiritori.classList.remove('hidden');
-                
                 dom.searchInput.placeholder = "曲名を正しい表記で入力してね";
                 document.documentElement.style.setProperty('--bubble-color', '#ec4899');
             }
@@ -606,13 +537,12 @@
         window.restartShiritori = function() {
             dom.containerShiritori.innerHTML = `
                 <div class="flex items-start space-x-2">
-                    <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" src="${ICON_URL}">
+                    <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()" src="${ICON_URL}">
                     <div class="bubble bubble-left bg-white px-4 py-3 shadow-sm max-w-[80%] text-sm break-words leading-relaxed">
                         <p>しりとりリセット！<br>最初の曲名を入力してね。<br>（例：花火）</p>
                     </div>
                 </div>
             `;
-            attachDoubleTapEvents(); // 新しいアイコンにイベント付与
         };
 
         window.exitShiritori = function() {
@@ -621,7 +551,6 @@
 
         // 共通関数群
         function handleLyricsResults(data) {
-            // ランダムメッセージ処理は削除
             if (!data.results || data.results.length === 0) {
                 addMessage(`「${data.query}」は見つからなかったよ。歌詞カードと同じ表記にしてみて！`, 'bot');
                 return;
@@ -699,13 +628,10 @@
             else if (currentMode === 'shiritori') userBgClass = 'bg-pink-500';
 
             const finalBubbleClass = type === 'user' ? `${bubbleClass} ${userBgClass}` : bubbleClass;
-            const iconHtml = type === 'bot' ? `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer">` : '';
+            const iconHtml = type === 'bot' ? `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()">` : '';
             div.innerHTML = type === 'bot' ? iconHtml + `<div class="${finalBubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm break-words leading-relaxed">${htmlOrText}</div>` : `<div class="${finalBubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm break-words leading-relaxed">${htmlOrText}</div>`;
             getActiveContainer().appendChild(div);
             if (shouldScroll) scrollToBottom();
-            
-            // 追加されたメッセージ（アイコン）に対してもイベントを付与
-            attachDoubleTapEvents();
         }
 
         function addLoading() {
@@ -715,12 +641,9 @@
             div.className = "flex items-start space-x-2";
             const msgs = LOADING_MESSAGES[currentMode];
             const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
-            div.innerHTML = `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer"><div class="bubble bubble-left bg-white px-4 py-3 shadow-sm"><p class="text-sm text-gray-500 pulse-text">${randomMsg}</p></div>`;
+            div.innerHTML = `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()"><div class="bubble bubble-left bg-white px-4 py-3 shadow-sm"><p class="text-sm text-gray-500 pulse-text">${randomMsg}</p></div>`;
             getActiveContainer().appendChild(div);
             scrollToBottom();
-            
-            // ローディングアイコンにもイベント付与
-            attachDoubleTapEvents();
             
             return id;
         }
