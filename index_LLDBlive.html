@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.5.4.1</title>
+<title>Love Like DataBase vol.5.4.5</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- アイコン変更 -->
@@ -401,7 +401,8 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:17px; color:white; flex:1;">Love Like DataBase vol.5.4.1</h1>
+  <!-- ★ タイトルフォントサイズ変更: 17px -> 22px -->
+  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.5.4.5</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -600,9 +601,9 @@ button { font-size: 14px !important; }
       </ul>
       
       <!-- 最新のお知らせエリア（ここだけ表示する運用） -->
-      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v5.4.1)</h3>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v5.4.5)</h3>
       <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-6 text-sm text-gray-600">
-        <p>銀テープのエフェクトを「キャノン砲」仕様に変更しました✨</p>
+        <p>オープニングの銀テープエフェクトを豪華にしました（ポップ＆キャノン）✨</p>
       </div>
 
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
@@ -814,8 +815,6 @@ function initializeApp(data) {
           return d > latest ? d : latest;
         }, new Date(0));
         
-        // 注釈削除に伴い、last-update-date の更新処理は不要ですが、
-        // 念のためJSのエラーを防ぐために要素があるか確認してから実行
         const dateEl = document.getElementById('last-update-date');
         if (dateEl && !isNaN(latestDate.getTime())) {
             dateEl.textContent = `${latestDate.getFullYear()}/${('0' + (latestDate.getMonth() + 1)).slice(-2)}/${('0' + latestDate.getDate()).slice(-2)}`;
@@ -1257,6 +1256,9 @@ function showOmikujiResult(rec) {
     document.getElementById('modal-overlay').style.display = 'flex';
 }
 
+// -----------------------------------------------------------
+// ★ 銀テープ＆紙吹雪エフェクト (Hybrid Edition)
+// -----------------------------------------------------------
 function startConfetti() {
   const canvas = document.getElementById('confetti-canvas');
   const ctx = canvas.getContext('2d');
@@ -1266,95 +1268,126 @@ function startConfetti() {
   canvas.height = height;
 
   const particles = [];
-  const particleCount = 100; // 銀テープの数
   
-  // 金色・銀色・プラチナ・ゴールデンロッドなど、キラキラ系の色定義
-  const colors = ['#FFD700', '#C0C0C0', '#E5E4E2', '#DAA520']; 
+  // キラキラ系の色定義
+  const colors = ['#FFD700', '#C0C0C0', '#E5E4E2', '#DAA520', '#FF69B4', '#ef4444', '#FFA500']; 
   
-  class Particle {
+  // Type A: メニューから弾ける紙吹雪 (Pop from Menu)
+  class ExplosionParticle {
     constructor() {
-      // 初期位置: 画面下部（左右はランダム）
-      this.x = Math.random() * width; 
-      this.y = height + 10; 
+      // 発生源の設定（プルダウンメニュー周辺）
+      const menuRect = document.getElementById('tour-select')?.getBoundingClientRect();
+      const originX = menuRect ? (menuRect.left + menuRect.width / 2) : (width / 2);
+      const originY = menuRect ? (menuRect.top + menuRect.height / 2) : 120; // デフォルトは上の方
+
+      this.x = originX;
+      this.y = originY;
       
       this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.w = Math.random() * 8 + 4;
+      this.h = Math.random() * 4 + 2; 
       
-      // テープの形状
-      this.w = Math.random() * 8 + 4; // 幅
-      this.h = Math.random() * 60 + 30; // 長さ
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = Math.random() * 18 + 10; 
+      this.vx = Math.cos(angle) * velocity;
+      this.vy = Math.sin(angle) * velocity - 8; 
       
-      // キャノン砲（上向きの爆発的な初速）
-      // vyをマイナス（上向き）に大きく設定
-      this.vy = - (Math.random() * 15 + 15); // -15 ~ -30 くらいの勢いで発射
-      this.vx = (Math.random() - 0.5) * 8; // 左右に散らす
-      
-      // 物理パラメータ
-      this.gravity = 0.4; // 重力
-      this.friction = 0.96; // 空気抵抗（横方向）
-      
-      // 回転アニメーション用
-      this.angle = Math.random() * 360;
-      this.angleSpeed = (Math.random() - 0.5) * 15;
-      
-      // 奥行きの回転（裏返る動き）
-      this.flip = 0;
-      this.flipSpeed = Math.random() * 0.2 + 0.05;
+      this.gravity = 0.4;
+      this.friction = 0.92; 
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = (Math.random() - 0.5) * 20;
+      this.alpha = 1;
     }
-    
     update() {
-      // 重力を加算（徐々に落下へ転じる）
       this.vy += this.gravity;
-      
-      // 空気抵抗（横移動の減衰）
       this.vx *= this.friction;
-      
-      // 位置更新
+      this.vy *= this.friction;
       this.x += this.vx;
       this.y += this.vy;
-      
-      // ある程度落ちてきたら（vyがプラスになったら）、空気抵抗を強めて「ひらひら」させる
-      if (this.vy > 0) {
-          // 終端速度（これ以上速くならない）
-          if (this.vy > 4) this.vy *= 0.95;
-      }
-      
-      this.angle += this.angleSpeed;
-      this.flip += this.flipSpeed;
+      this.rotation += this.rotationSpeed;
+      if (this.y > height + 20) this.alpha -= 0.05; 
     }
-    
     draw(ctx) {
-      // 画面外（下）に行ったら描画しない（ただし発射直後は画面外下なので、vy>0の時だけ判定するなどの工夫が必要だが、
-      // 実際には描画領域外でもdrawしても見えないだけなので、パフォーマンス最適化以外では問題ない）
-      if (this.y > height + 100 && this.vy > 0) return;
-
+      if (this.alpha <= 0) return;
       ctx.save();
       ctx.translate(this.x, this.y);
-      ctx.rotate(this.angle * Math.PI / 180);
-      
-      // 奥行き回転（ひらひら）
-      const scaleY = Math.cos(this.flip);
-      ctx.scale(1, scaleY);
-      
+      ctx.rotate(this.rotation * Math.PI / 180);
+      ctx.globalAlpha = this.alpha;
       ctx.fillStyle = this.color;
-      // テープを描画
       ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
-      
       ctx.restore();
     }
   }
 
-  for (let i = 0; i < particleCount; i++) {
-    particles.push(new Particle());
+  // Type B: 上から降り注ぐ銀テープ (Falling Tape)
+  class CannonParticle {
+    constructor() {
+      this.x = Math.random() * width; 
+      // 画面上部（見えない位置）からスタート
+      this.y = - (Math.random() * 300 + 100); 
+      
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+      
+      this.w = Math.random() * 8 + 4; 
+      this.h = Math.random() * 60 + 30; 
+      
+      this.vy = Math.random() * 5 + 5; 
+      this.vx = (Math.random() - 0.5) * 10; 
+      
+      this.gravity = 0.2; 
+      this.friction = 0.94; 
+      
+      this.angle = Math.random() * 360;
+      this.angleSpeed = (Math.random() - 0.5) * 15;
+      this.flip = 0;
+      this.flipSpeed = Math.random() * 0.2 + 0.05;
+    }
+    update() {
+      this.vy += this.gravity;
+      this.vx *= this.friction;
+      this.x += this.vx;
+      this.y += this.vy;
+      
+      if (this.vy > 6) this.vy *= 0.95; 
+      
+      this.angle += this.angleSpeed;
+      this.flip += this.flipSpeed;
+    }
+    draw(ctx) {
+      if (this.y > height + 100 && this.vy > 0) return;
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle * Math.PI / 180);
+      const scaleY = Math.cos(this.flip); 
+      ctx.scale(1, scaleY);
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+      ctx.restore();
+    }
   }
+
+  // Phase 1: Explosion (Pop!)
+  for (let i = 0; i < 200; i++) {
+    particles.push(new ExplosionParticle());
+  }
+
+  // Phase 2: Falling Tape (Delay)
+  setTimeout(() => {
+      for (let i = 0; i < 100; i++) {
+        particles.push(new CannonParticle());
+      }
+  }, 350); 
 
   function animate() {
     ctx.clearRect(0, 0, width, height);
     let activeParticles = 0;
+    
     particles.forEach(p => {
       p.update();
       p.draw(ctx);
-      // まだ画面内にいるか、これから画面内に入ってくる（上向き移動中）ならアクティブ
-      if (p.y < height + 100 || p.vy < 0) activeParticles++;
+      if (p.alpha > 0 && (p.y < height + 100 || (p.vy && p.vy < 0))) {
+          activeParticles++;
+      }
     });
     
     if (activeParticles > 0) {
