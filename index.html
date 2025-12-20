@@ -5,206 +5,299 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Love Like DataBase</title>
     <meta name="theme-color" content="#ef4444">
-    
-    <!-- アイコン (デフォルトはLiveのものを使用) -->
-    <link rel="icon" type="image/png" href="./icon_LLDBlive.png">
-    <link rel="apple-touch-icon" href="./icon_LLDBlive.png">
 
-    <!-- 共通ライブラリ -->
+    <!-- アイコン設定 -->
+    <link id="app-icon" rel="icon" type="image/png" href="./icon.png">
+    <link id="apple-touch-icon" rel="apple-touch-icon" href="./icon.png">
+
+    <!-- 外部ライブラリ (共通) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+        /* ==========================================================================
+           【0. GLOBAL】 ベーススタイル (全体共通)
+           ========================================================================== */
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            margin: 0; padding: 0;
-            overflow: hidden; /* スクロールはiframe内で */
             background-color: #F8F8F8;
+            color: #374151;
+            overflow: hidden;
+            touch-action: pan-y pinch-zoom;
+            -webkit-tap-highlight-color: transparent;
         }
+        /* アプリ画面コンテナ定義 */
+        .app-screen {
+            position: fixed; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
+            display: none; flex-direction: column;
+            overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
+            background-color: #F8F8F8; animation: fadeIn 0.3s ease-out;
+        }
+        .app-screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* ユーティリティ */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
 
-        /* アプリ表示エリア (iframe) */
-        .app-frame {
-            position: fixed;
-            top: 60px; /* ヘッダーの高さ */
-            left: 0;
-            width: 100%;
-            height: calc(100% - 60px);
-            border: none;
-            display: none; /* デフォルト非表示 */
-            background-color: #fff;
-        }
-        .app-frame.active {
-            display: block;
-        }
+    <script>
+        // ==========================================================================
+        // 【0. GLOBAL】 共通定数設定
+        // ==========================================================================
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+        const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
+        const APP_VERSION = "v5.1.0";
+    </script>
+</head>
+<body class="bg-gray-100">
 
-        /* 準備中画面 */
-        .coming-soon {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: fixed;
-            top: 60px; left: 0;
-            width: 100%; height: calc(100% - 60px);
-            background-color: #fce7f3;
-            color: #db2777;
-        }
-        .coming-soon.active { display: flex; }
-
-        /* --------------------------------------------------
-           暖簾メニュー & ヘッダー (共通UI)
-           -------------------------------------------------- */
-        #main-app-header {
-            height: 60px; width: 100%;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 16px;
-            position: fixed; top: 0; z-index: 50;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: background-color 0.3s;
-        }
-        
+    <!-- ==========================================================================
+         【1. COMMON UI】 ヘッダー & 暖簾メニュー (HTML/CSS/JS)
+         ========================================================================== -->
+    <style>
+        /* 暖簾メニュー & ヘッダー用スタイル */
         #noren-menu {
             position: fixed; top: 60px; left: 0; width: 100%;
             background-color: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); z-index: 40;
-            transform: translateY(-120%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; border-bottom: 1px solid #f3f4f6;
-            display: none;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); z-index: 50;
+            transform: translateY(-120%); 
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* スルッと降りてくる感 */
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; border-bottom: 1px solid #f3f4f6;
+            display: block; visibility: hidden; /* display:noneだとアニメーションしないためvisibility制御 */
         }
-        #noren-menu.open { transform: translateY(0); }
+        #noren-menu.open { transform: translateY(0); visibility: visible; }
         
         .noren-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background-color 0.2s; }
         .noren-item:active { background-color: #f9fafb; }
         .noren-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        #noren-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 30; display: none; opacity: 0; transition: opacity 0.3s; }
+        #noren-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 40; display: none; opacity: 0; transition: opacity 0.3s; }
         #noren-overlay.open { display: block; opacity: 1; }
+
+        #main-app-header {
+            height: 60px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+            position: fixed; top: 0; z-index: 60; /* 暖簾より上に */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
+        }
+
+        /* 🌸アイコンのアニメーション */
+        .flower-icon {
+            font-size: 24px;
+            display: inline-block;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* 弾むような回転 */
+        }
+        .flower-icon.rotate {
+            transform: rotate(180deg) scale(1.1);
+        }
+
+        /* About Modal */
+        #about-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; }
+        #about-modal.open { display: flex; opacity: 1; }
+        .modal-card { bg-white; width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); transform: scale(0.95); transition: transform 0.3s; }
+        #about-modal.open .modal-card { transform: scale(1); }
+
     </style>
-</head>
-<body>
 
-    <!-- 共通ヘッダー -->
-    <header id="main-app-header" class="bg-red-500 text-white">
-        <h1 class="font-bold text-lg tracking-wide flex-1 cursor-pointer" id="header-title" onclick="toggleNoren()">LLDB live</h1>
-        <button onclick="toggleNoren()" class="p-2 rounded-full hover:bg-white/20 transition active:scale-95">
-            <i data-lucide="menu" class="w-6 h-6"></i>
-        </button>
-    </header>
-
-    <!-- 暖簾メニュー -->
+    <!-- 暖簾メニューHTML -->
     <div id="noren-overlay" onclick="toggleNoren()"></div>
     <div id="noren-menu">
         <div class="flex flex-col">
             <div class="noren-item" onclick="switchApp('live')">
                 <div class="noren-icon bg-red-500"><i data-lucide="mic-2" class="w-6 h-6"></i></div>
-                <div class="flex-1">
-                    <div class="font-bold text-gray-800">LLDB live</div>
-                    <div class="text-xs text-gray-400">ライブ / セトリ / ツアー</div>
-                </div>
+                <div class="flex-1"><div class="font-bold text-gray-800">LLDB live</div><div class="text-xs text-gray-400"> ライブ / セトリ / ツアー </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
             <div class="noren-item" onclick="switchApp('phrase')">
                 <div class="noren-icon bg-orange-500"><i data-lucide="music" class="w-6 h-6"></i></div>
-                <div class="flex-1">
-                    <div class="font-bold text-gray-800">LLDB phrase</div>
-                    <div class="text-xs text-gray-400">楽曲 / 歌詞フレーズ検索</div>
-                </div>
+                <div class="flex-1"><div class="font-bold text-gray-800">LLDB phrase</div><div class="text-xs text-gray-400"> 楽曲 / 歌詞フレーズ検索 </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
             <div class="noren-item" onclick="switchApp('history')">
                 <div class="noren-icon bg-pink-500"><i data-lucide="heart-handshake" class="w-6 h-6"></i></div>
-                <div class="flex-1">
-                    <div class="font-bold text-gray-800">LLDB history</div>
-                    <div class="text-xs text-gray-400">aikoとわたし / 人生年表</div>
-                </div>
+                <div class="flex-1"><div class="font-bold text-gray-800">LLDB history</div><div class="text-xs text-gray-400"> aikoとわたし / 人生年表 </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
             <div class="noren-item" onclick="switchApp('stats')">
                 <div class="noren-icon bg-slate-700"><i data-lucide="bar-chart-2" class="w-6 h-6"></i></div>
-                <div class="flex-1">
-                    <div class="font-bold text-gray-800">LLDB stats</div>
-                    <div class="text-xs text-gray-400">人気のaiko / 統計</div>
-                </div>
+                <div class="flex-1"><div class="font-bold text-gray-800">LLDB stats</div><div class="text-xs text-gray-400"> 人気のaiko / 統計 </div></div>
+                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+            </div>
+            
+            <!-- About Menu -->
+            <div class="noren-item bg-gray-50/50" onclick="openAboutModal()">
+                <div class="noren-icon bg-gray-400"><i data-lucide="info" class="w-6 h-6"></i></div>
+                <div class="flex-1"><div class="font-bold text-gray-600">About</div><div class="text-xs text-gray-400"> このアプリについて </div></div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
         </div>
-        <div class="py-3 flex justify-center cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition" onclick="toggleNoren()">
+        
+        <div class="py-3 flex justify-center cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition rounded-b-[20px]" onclick="toggleNoren()">
             <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
         </div>
     </div>
 
-    <!-- アプリコンテナ (iFrame) -->
-    <!-- 1. LLDB live -->
-    <iframe id="frame-live" class="app-frame active" src="index_LLDBlive.html"></iframe>
-    
-    <!-- 2. LLDB phrase -->
-    <iframe id="frame-phrase" class="app-frame" src="index_LLDBphrase.html"></iframe>
+    <!-- 共通ヘッダーHTML -->
+    <header id="main-app-header" class="bg-red-500 text-white transition-colors duration-300">
+        <h1 class="font-bold text-lg tracking-wide flex-1" id="header-title">LLDB live</h1>
+        
+        <!-- 🌸 Menu Button -->
+        <button id="header-menu-btn" onclick="toggleNoren()" class="p-2 rounded-full hover:bg-white/20 transition active:scale-90 flex items-center justify-center w-10 h-10">
+            <span class="flower-icon select-none">🌸</span>
+        </button>
+    </header>
 
-    <!-- 3. その他 (準備中) -->
-    <div id="view-history" class="coming-soon">
-        <div class="bg-white p-6 rounded-2xl shadow-sm text-center">
-            <div class="text-4xl mb-4">🤝</div>
-            <h2 class="font-bold text-pink-500 text-lg">LLDB history</h2>
-            <p class="text-sm text-gray-500 mt-2">あなたとaikoの年表<br>準備中だよ🌷</p>
+    <!-- About Modal -->
+    <div id="about-modal" onclick="closeAboutModal()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="text-center mb-4">
+                <span class="text-4xl">🌸</span>
+                <h2 class="font-bold text-xl mt-2 text-gray-800">Love Like DataBase</h2>
+                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.1.0</p>
+            </div>
+            
+            <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
+                <p>
+                    このアプリは、aikoジャンキーである個人開発者が<span class="font-bold text-pink-500">「好き」</span>と<span class="font-bold text-pink-500">「情熱」</span>だけで作り上げた、完全非公式のファンアプリです。
+                </p>
+                <div class="bg-red-50 p-3 rounded-lg border border-red-100 text-red-600 text-xs">
+                    <p class="font-bold mb-1">⚠️ ご注意</p>
+                    公式（aiko official、ポニーキャニオン等）とは一切関係ありません。データの誤りを含んでいる可能性があります。
+                </div>
+                <p>
+                    ライブのセトリ、歌詞のフレーズ、リリース情報...<br>
+                    愛しい時間をいつでも手元に置いておけるように作りました。
+                </p>
+                <p>
+                    不具合報告や、「ここ間違ってるよ！」というご指摘は、X (旧Twitter) までお寄せいただけると嬉しいです。
+                </p>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <a href="https://twitter.com/noki_dochibi" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-full text-xs font-bold hover:bg-gray-700 transition">
+                    <i data-lucide="twitter" class="w-4 h-4"></i> 開発者 @noki_dochibi
+                </a>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-100 text-center">
+                 <button onclick="closeAboutModal()" class="text-gray-400 text-sm font-bold hover:text-gray-600 px-4 py-2">閉じる</button>
+            </div>
         </div>
     </div>
-    <div id="view-stats" class="coming-soon" style="background-color: #f1f5f9; color: #334155;">
-        <div class="bg-white p-6 rounded-2xl shadow-sm text-center">
-            <div class="text-4xl mb-4">📈</div>
-            <h2 class="font-bold text-slate-700 text-lg">LLDB stats</h2>
-            <p class="text-sm text-gray-500 mt-2">各種ランキング集計中...</p>
-        </div>
+
+
+    <!-- ==========================================================================
+         【2. APP: LLDB live】 ライブアプリ (Iframe Container)
+         ========================================================================== -->
+    <div id="app-live" class="app-screen active">
+        <iframe src="./index_LLDBlive.html" class="w-full h-full border-none"></iframe>
     </div>
 
+    <!-- ==========================================================================
+         【3. APP: LLDB phrase】 歌詞アプリ (Iframe Container)
+         ========================================================================== -->
+    <div id="app-phrase" class="app-screen">
+        <iframe src="./index_LLDBphrase.html" class="w-full h-full border-none"></iframe>
+    </div>
+
+    <!-- ==========================================================================
+         【4. APP: Others】 その他アプリ (Placeholder)
+         ========================================================================== -->
+    <div id="app-history" class="app-screen items-center justify-center p-6">
+        <div class="bg-pink-50 p-6 rounded-2xl shadow-sm max-w-xs border border-pink-100 text-center"><div class="text-4xl mb-4">🤝</div><h2 class="font-bold text-pink-500 text-lg mb-2">LLDB history</h2><p class="text-sm text-gray-500 leading-relaxed"> あなたとaikoの年表を作れる機能を <br>準備中です🌷</p></div>
+    </div>
+   
+    <div id="app-stats" class="app-screen items-center justify-center p-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm max-w-xs text-center"><div class="text-4xl mb-4">📈</div><h2 class="font-bold text-slate-700 text-lg mb-2">LLDB stats</h2><p class="text-sm text-gray-500 leading-relaxed"> Youtube再生数ランキングなどを <br> 集計中です！ </p></div>
+    </div>
+
+
+    <!-- ==========================================================================
+         【5. ROUTING】 共通ルーティング制御
+         ========================================================================== -->
     <script>
         // アプリ定義
         const apps = {
-            'live': { title: 'LLDB live', color: 'bg-red-500', target: 'frame-live' },
-            'phrase': { title: 'LLDB phrase', color: 'bg-orange-500', target: 'frame-phrase' },
-            'history': { title: 'LLDB history', color: 'bg-pink-500', target: 'view-history' },
-            'stats': { title: 'LLDB stats', color: 'bg-slate-700', target: 'view-stats' }
+            'live': { title: 'LLDB live', color: 'bg-red-500' },
+            'phrase': { title: 'LLDB phrase', color: 'bg-orange-500' },
+            'history': { title: 'LLDB history', color: 'bg-pink-500' },
+            'stats': { title: 'LLDB stats', color: 'bg-slate-700' }
         };
 
-        function toggleNoren() {
-            const menu = document.getElementById('noren-menu');
-            const overlay = document.getElementById('noren-overlay');
-            if(menu.classList.contains('open')) {
-                menu.classList.remove('open'); overlay.classList.remove('open');
-                setTimeout(() => { menu.style.display='none'; overlay.style.display='none'; }, 300);
-            } else {
-                menu.style.display='block'; overlay.style.display='block';
-                setTimeout(() => { menu.classList.add('open'); overlay.classList.add('open'); }, 10);
-            }
-        }
-
+        // アプリ切り替え
         function switchApp(appName) {
-            // 全てのフレーム/ビューを非表示
-            document.querySelectorAll('.app-frame, .coming-soon').forEach(el => el.classList.remove('active'));
-            
-            const appConfig = apps[appName];
-            if (!appConfig) return;
+            document.querySelectorAll('.app-screen').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('app-' + appName);
+            if(target) target.classList.add('active');
 
-            // 対象を表示
-            const targetEl = document.getElementById(appConfig.target);
-            if (targetEl) targetEl.classList.add('active');
-
-            // ヘッダーの色とタイトル変更
+            // ヘッダー更新
             const header = document.getElementById('main-app-header');
             const title = document.getElementById('header-title');
-            
-            header.className = `${appConfig.color} text-white transition-colors duration-300`;
-            title.textContent = appConfig.title;
+            if(apps[appName]) {
+                header.className = `${apps[appName].color} text-white transition-colors duration-300 flex items-center justify-between px-4 fixed top-0 z-30 shadow-sm w-full h-[60px]`;
+                title.textContent = apps[appName].title;
+            }
 
             // 暖簾を閉じる
             const menu = document.getElementById('noren-menu');
             if(menu.classList.contains('open')) toggleNoren();
+            
+            lucide.createIcons();
+        }
+
+        // 共通UI制御スクリプト
+        function toggleNoren() {
+            const menu = document.getElementById('noren-menu');
+            const overlay = document.getElementById('noren-overlay');
+            const flower = document.querySelector('.flower-icon');
+
+            if(menu.classList.contains('open')) {
+                // Close
+                menu.classList.remove('open'); 
+                overlay.classList.remove('open');
+                flower.classList.remove('rotate'); // 回転リセット
+                setTimeout(() => { 
+                    menu.style.visibility='hidden'; 
+                    overlay.style.display='none'; 
+                }, 400); // transition時間と合わせる
+            } else {
+                // Open
+                menu.style.visibility='visible'; 
+                overlay.style.display='block';
+                // 少し待ってからクラス付与でアニメーション発火
+                setTimeout(() => { 
+                    menu.classList.add('open'); 
+                    overlay.classList.add('open');
+                    flower.classList.add('rotate'); // 回転！
+                }, 10);
+            }
+        }
+
+        function openAboutModal() {
+            // 暖簾を閉じてからモーダルを開く
+            toggleNoren();
+            setTimeout(() => {
+                const modal = document.getElementById('about-modal');
+                modal.classList.add('open');
+            }, 300);
+        }
+
+        function closeAboutModal() {
+            const modal = document.getElementById('about-modal');
+            modal.classList.remove('open');
         }
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            // デフォルトアプリ: LLDB live
+            switchApp('live');
         });
     </script>
+
 </body>
 </html>
