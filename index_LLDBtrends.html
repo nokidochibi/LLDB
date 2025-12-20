@@ -14,26 +14,36 @@
     <style>
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f0f9ff; /* LLDB trends color (Blue base) */
+            background-color: #f0f9ff;
             color: #334155;
             -webkit-tap-highlight-color: transparent;
             padding-bottom: 80px;
+            padding-top: 0px; /* 親ヘッダーの分 */
         }
-        
-        /* 親ヘッダーの分だけ余白を空ける */
-        body { padding-top: 0px; }
 
         /* カスタムアニメーション */
         @keyframes stretch { 0% { width: 0; } 100% { width: 100%; } }
         .animate-stretch { animation: stretch 3s ease-out forwards; }
 
         .sortable-th { cursor: pointer; user-select: none; }
-        .sortable-th::after { content: ''; display: inline-block; margin-left: 4px; width: 0; height: 0; border: 4px solid transparent; opacity: 0.3; vertical-align: middle; }
+        .sortable-th::after { content: ''; display: inline-block; margin-left: 2px; width: 0; height: 0; border: 4px solid transparent; opacity: 0.3; vertical-align: middle; }
         .sortable-th.asc::after { border-bottom-color: #334155; border-top: none; opacity: 1; }
         .sortable-th.desc::after { border-top-color: #334155; border-bottom: none; opacity: 1; }
 
         .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
         
+        /* タブ */
+        .tab-button {
+            border-bottom: 2px solid transparent;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+
         /* グラフ用モーダル */
         .modal-enter { opacity: 0; transform: scale(0.95); }
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.2s, transform 0.2s; }
@@ -54,49 +64,87 @@
     </div>
 
     <!-- Main Content -->
-    <main id="main-content" class="px-3 pb-20 opacity-0 transition-opacity duration-500">
+    <main id="main-content" class="px-2 opacity-0 transition-opacity duration-500 hidden">
         
-        <!-- Filter Controls -->
-        <div class="bg-white rounded-xl p-4 card-shadow mb-4 flex flex-wrap gap-2 justify-center">
-            <button class="filter-btn active" data-cat="isMV">MV</button>
-            <button class="filter-btn active" data-cat="isFullOther">Live</button>
-            <button class="filter-btn active" data-cat="isNYMovie">New Year</button>
-            <button class="filter-btn active" data-cat="isOther">その他</button>
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-slate-200 mb-4 sticky top-0 bg-slate-50 z-10">
+            <button onclick="switchTab('views')" class="tab-button active flex-1 py-3 text-sm text-center">YT視聴回数</button>
+            <button onclick="switchTab('followers')" class="tab-button flex-1 py-3 text-sm text-center">フォロワー</button>
         </div>
 
-        <p class="text-center text-xs text-slate-500 mb-4">項目名をタップすると並び替えできるよ</p>
+        <!-- Tab 1: YT視聴回数 -->
+        <div id="tab-views" class="tab-content">
+            <!-- Filter Controls -->
+            <div class="bg-white rounded-xl p-3 card-shadow mb-4 flex flex-wrap gap-2 justify-center">
+                <button class="filter-btn active" data-cat="isMV">MV</button>
+                <button class="filter-btn active" data-cat="isFullOther">Live</button>
+                <button class="filter-btn active" data-cat="isNYMovie">New Year</button>
+                <button class="filter-btn active" data-cat="isOther">その他</button>
+            </div>
 
-        <!-- Data Table -->
-        <div class="bg-white rounded-xl overflow-hidden card-shadow relative">
-            <div id="update-time" class="absolute top-2 right-3 text-[10px] text-slate-400 font-mono"></div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
-                        <tr>
-                            <th class="p-3 text-center w-8">#</th>
-                            <th class="p-3 min-w-[120px]">動画タイトル</th>
-                            <th class="p-3 text-right cursor-pointer sortable-th desc" data-key="totalViews">視聴回数</th>
-                            <th class="p-3 text-center cursor-pointer sortable-th" data-key="publishedDate">公開日</th>
-                            <th class="p-3 text-right cursor-pointer sortable-th" data-key="avgDailyViews">平均/日<br><span class="text-[10px] font-normal">(全期間)</span></th>
-                            <th class="p-3 text-right cursor-pointer sortable-th" data-key="avgViews7Days">平均/日<br><span class="text-[10px] font-normal">(直近7日)</span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="divide-y divide-slate-100">
-                        <!-- JSで生成 -->
-                    </tbody>
-                </table>
+            <p class="text-center text-[10px] text-slate-400 mb-2">項目タップで並び替え</p>
+
+            <!-- Data Table -->
+            <div class="bg-white rounded-xl overflow-hidden card-shadow relative">
+                <div id="update-time" class="absolute top-2 right-3 text-[10px] text-slate-400 font-mono"></div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left whitespace-nowrap">
+                        <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200 text-xs">
+                            <tr>
+                                <th class="p-2 text-center w-6">#</th>
+                                <th class="p-2 min-w-[140px] whitespace-normal">動画タイトル</th>
+                                <th class="p-2 text-right cursor-pointer sortable-th desc" data-key="totalViews">視聴回数</th>
+                                <th class="p-2 text-center cursor-pointer sortable-th" data-key="publishedDate">公開日</th>
+                                <th class="p-2 text-right cursor-pointer sortable-th" data-key="avgDailyViews">平均/日<br><span class="text-[9px] font-normal">(全期間)</span></th>
+                                <th class="p-2 text-right cursor-pointer sortable-th" data-key="avgViews7Days">平均/日<br><span class="text-[9px] font-normal">(過去7日)</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-100">
+                            <!-- JSで生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: フォロワー -->
+        <div id="tab-followers" class="tab-content hidden">
+            <div class="space-y-6 pb-20">
+                <!-- Youtube Graph -->
+                <div class="bg-white rounded-xl p-4 card-shadow">
+                    <h3 class="font-bold text-red-600 flex items-center gap-2 mb-4">
+                        <i data-lucide="youtube" class="w-5 h-5"></i> Youtube登録者数
+                    </h3>
+                    <div class="h-64 relative w-full">
+                        <canvas id="chart-youtube"></canvas>
+                        <div id="loader-youtube" class="absolute inset-0 flex items-center justify-center bg-white/80 text-xs text-slate-400">読み込み中...</div>
+                    </div>
+                </div>
+
+                <!-- Twitter Graph -->
+                <div class="bg-white rounded-xl p-4 card-shadow">
+                    <h3 class="font-bold text-sky-500 flex items-center gap-2 mb-4">
+                        <i data-lucide="twitter" class="w-5 h-5"></i> Twitterフォロワー数
+                    </h3>
+                    <div class="h-64 relative w-full">
+                        <canvas id="chart-twitter"></canvas>
+                        <div id="loader-twitter" class="absolute inset-0 flex items-center justify-center bg-white/80 text-xs text-slate-400">読み込み中...</div>
+                    </div>
+                </div>
+                
+                <p class="text-center text-xs text-slate-400 mt-4">※ データは毎日自動更新されます</p>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="mt-8 text-center text-slate-400 text-xs">
+        <div class="mt-8 text-center text-slate-400 text-xs pb-8">
             <p class="mb-2">Produced with 💙</p>
             <a href="https://lit.link/nokidochibi" target="_blank" class="underline hover:text-slate-600">nokidochibi</a>
         </div>
     </main>
 
-    <!-- Graph Modal -->
+    <!-- Graph Modal (Individual Video) -->
     <div id="graph-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onclick="closeGraphModal()">
         <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeGraphModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
@@ -114,7 +162,6 @@
 
     <!-- Script -->
     <script>
-        // 設定: 親ウィンドウのGAS API URLを使用
         const GAS_API_URL = parent.GAS_API_URL || "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         
         let allData = [];
@@ -122,19 +169,35 @@
         let sortKey = 'totalViews';
         let sortDesc = true;
         let chartInstance = null;
+        let followersDataLoaded = false;
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             initFilterButtons();
             initSortHeaders();
-            fetchData();
+            fetchData(); // 動画データ取得
         });
 
-        // フィルタボタン制御
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+
+            if (tabName === 'followers' && !followersDataLoaded) {
+                fetchFollowersData();
+                followersDataLoaded = true;
+            }
+        }
+
+        // ----------------------------------------
+        // Tab 1: YT視聴回数 Logic
+        // ----------------------------------------
+
         function initFilterButtons() {
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                // 初期スタイル
                 updateFilterBtnStyle(btn);
                 btn.addEventListener('click', () => {
                     btn.classList.toggle('active');
@@ -146,13 +209,12 @@
 
         function updateFilterBtnStyle(btn) {
             if (btn.classList.contains('active')) {
-                btn.className = 'filter-btn active px-3 py-1.5 rounded-full text-xs font-bold border transition-colors bg-blue-500 text-white border-blue-600';
+                btn.className = 'filter-btn active px-3 py-1.5 rounded-full text-[10px] font-bold border transition-colors bg-blue-500 text-white border-blue-600';
             } else {
-                btn.className = 'filter-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-colors bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
+                btn.className = 'filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold border transition-colors bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
             }
         }
 
-        // ソートヘッダー制御
         function initSortHeaders() {
             document.querySelectorAll('.sortable-th').forEach(th => {
                 th.addEventListener('click', () => {
@@ -161,54 +223,40 @@
                         sortDesc = !sortDesc;
                     } else {
                         sortKey = key;
-                        sortDesc = true; // 新しいキーは降順スタート
+                        sortDesc = true;
                     }
-                    
-                    // UI更新
                     document.querySelectorAll('.sortable-th').forEach(t => t.classList.remove('asc', 'desc', 'text-blue-600'));
                     th.classList.add(sortDesc ? 'desc' : 'asc');
                     th.classList.add('text-blue-600');
-                    
                     renderTable();
                 });
             });
         }
 
-        // データ取得
         async function fetchData() {
             try {
-                // GAS APIを叩く (action=getTrendsData)
-                // ※ 現在のCode.gsにはまだ実装されていないため、後で実装する必要があります。
                 const res = await fetch(`${GAS_API_URL}?action=getTrendsData`);
                 const json = await res.json();
 
-                if (json.status === 'error' || !json.data) {
-                    throw new Error(json.message || 'データが空です');
-                }
+                if (json.status === 'error' || !json.data) throw new Error(json.message || 'データなし');
 
                 allData = json.data;
                 document.getElementById('update-time').textContent = `最終更新: ${json.lastUpdateTime || '-'}`;
                 
-                // カウントアップアニメーション完了
                 completeLoading(json.maxTotalViews || 1000000);
-                
-                // 初回描画
                 applyFilterAndRender();
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('loading-screen').innerHTML = `<p class="text-red-500 text-sm">データの読み込みに失敗しました。<br>(${err.message})</p>`;
-                // 開発用ダミーデータ（API未実装時の確認用）
-                // loadDummyData(); 
+                document.getElementById('loading-screen').innerHTML = `<p class="text-red-500 text-xs">読み込み失敗<br>${err.message}</p>`;
             }
         }
 
         function completeLoading(targetNum) {
             const el = document.getElementById('counting-number');
             let current = 0;
-            const duration = 1000;
+            const duration = 800;
             const step = targetNum / (duration / 16);
-            
             const timer = setInterval(() => {
                 current += step;
                 if (current >= targetNum) {
@@ -216,93 +264,177 @@
                     clearInterval(timer);
                     setTimeout(() => {
                         document.getElementById('loading-screen').style.display = 'none';
-                        document.getElementById('main-content').classList.remove('opacity-0');
-                    }, 500);
+                        document.getElementById('main-content').classList.remove('hidden'); // まず表示
+                        // 少し遅らせてフェードイン
+                        setTimeout(() => document.getElementById('main-content').classList.remove('opacity-0'), 50);
+                    }, 300);
                 }
                 el.textContent = Math.floor(current).toLocaleString();
             }, 16);
         }
 
-        // フィルタリングと描画
         function applyFilterAndRender() {
             const activeCats = Array.from(document.querySelectorAll('.filter-btn.active')).map(btn => btn.dataset.cat);
-            
-            filteredData = allData.filter(item => {
-                // いずれかの有効なカテゴリフラグが '1' であれば表示
-                return activeCats.some(cat => item[cat] === '1' || item[cat] === 1);
-            });
-
+            filteredData = allData.filter(item => activeCats.some(cat => item[cat] === '1' || item[cat] === 1));
             renderTable();
+        }
+
+        function formatTitle(title) {
+            // 『』か「」で囲まれた部分を抽出して太字にする。それ以外は小さく。
+            // 例: aiko『カブトムシ』Music Video -> <small>aiko</small><br><b>カブトムシ</b><br><small>Music Video</small>
+            
+            // 簡易的な実装: 最初のカッコの中身をメインとする
+            const match = title.match(/([『「])(.*?)([』」])(.*)/);
+            if (match) {
+                const prefix = title.substring(0, match.index);
+                const content = match[2];
+                const suffix = match[4];
+                return `<span class="text-[10px] text-slate-400">${prefix}</span><br><span class="font-bold text-slate-700 text-sm">『${content}』</span><br><span class="text-[10px] text-slate-400">${suffix}</span>`;
+            }
+            // カッコがない場合はそのまま
+            return `<span class="font-bold text-slate-700 text-sm">${title}</span>`;
         }
 
         function renderTable() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
 
-            // ソート
             filteredData.sort((a, b) => {
-                let va = a[sortKey];
-                let vb = b[sortKey];
-                
-                // 日付対応
-                if (sortKey === 'publishedDate') {
-                    va = new Date(va).getTime();
-                    vb = new Date(vb).getTime();
-                } else if (typeof va === 'string') {
-                    // 数値を含む文字列のクリーニング
-                    va = parseFloat(va.replace(/,/g, '')) || 0;
-                    vb = parseFloat(vb.replace(/,/g, '')) || 0;
-                }
-
+                let va = a[sortKey], vb = b[sortKey];
+                if (sortKey === 'publishedDate') { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
+                else if (typeof va === 'string') { va = parseFloat(va.replace(/,/g, '')) || 0; vb = parseFloat(vb.replace(/,/g, '')) || 0; }
                 return sortDesc ? vb - va : va - vb;
             });
 
-            // HTML生成
             if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">表示するデータがありません</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">データがありません</td></tr>';
                 return;
             }
 
-            // 最大値の計算（グラフバー用）
+            // 最大値計算（👑 🔥用）
+            const maxAvgAll = Math.max(...filteredData.map(d => parseFloat(d.avgDailyViews) || 0));
+            const maxAvg7 = Math.max(...filteredData.map(d => {
+                const v = parseFloat(d.avgViews7Days);
+                return isNaN(v) ? -1 : v;
+            }));
             const maxViews = Math.max(...filteredData.map(d => parseFloat(d.totalViews) || 0));
 
             filteredData.forEach((item, index) => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0';
                 
-                // 視聴回数グラフバーの幅
                 const barWidth = ((parseFloat(item.totalViews) || 0) / maxViews) * 100;
+                const pubDate = new Date(item.publishedDate);
+                const dateStr = `<span class="text-[10px] text-slate-400">${pubDate.getFullYear()}</span><br><span class="font-bold text-slate-600">${pubDate.getMonth()+1}/${pubDate.getDate()}</span>`;
+
+                const avgAll = Math.round(parseFloat(item.avgDailyViews) || 0);
+                const avg7Val = parseFloat(item.avgViews7Days);
+                const avg7 = isNaN(avg7Val) ? '-' : Math.round(avg7Val);
+                
+                // バッジ
+                const badgeAll = (avgAll > 0 && avgAll === Math.round(maxAvgAll)) ? '<span class="absolute -top-3 right-0 text-lg">👑</span>' : '';
+                const badge7 = (avg7 !== '-' && avg7 > 0 && avg7 === Math.round(maxAvg7)) ? '<span class="absolute -top-3 right-0 text-lg">🔥</span>' : '';
 
                 tr.innerHTML = `
-                    <td class="p-3 text-center text-xs font-bold text-slate-400">${index + 1}</td>
-                    <td class="p-3">
-                        <a href="${item.url}" target="_blank" class="font-bold text-slate-700 hover:text-blue-500 text-sm block leading-tight mb-1">
-                            ${item.title}
+                    <td class="p-2 text-center text-[10px] font-bold text-slate-400">${index + 1}</td>
+                    <td class="p-2 leading-tight">
+                        <a href="${item.url}" target="_blank" class="block">
+                            ${formatTitle(item.title)}
                         </a>
                     </td>
-                    <td class="p-3 text-right">
-                        <div class="flex flex-col items-end cursor-pointer" onclick="openGraph('${item.url}', '${item.title.replace(/'/g, "\\'")}')">
-                            <span class="font-bold text-blue-600 text-sm">${Number(item.totalViews).toLocaleString()}</span>
-                            <div class="w-20 h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                    <td class="p-2 text-right align-middle">
+                        <div class="flex flex-col items-end cursor-pointer w-full" onclick="openGraph('${item.url}', '${item.title.replace(/'/g, "\\'")}')">
+                            <span class="font-bold text-blue-600 text-xs">${Number(item.totalViews).toLocaleString()}</span>
+                            <div class="w-full max-w-[80px] h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
                                 <div class="h-full bg-blue-400" style="width: ${barWidth}%"></div>
                             </div>
                         </div>
                     </td>
-                    <td class="p-3 text-center text-xs text-slate-500 whitespace-nowrap">
-                        ${item.publishedDate.split('T')[0].replace(/-/g, '/')}
+                    <td class="p-2 text-center text-xs leading-tight">${dateStr}</td>
+                    <td class="p-2 text-right text-xs font-mono relative">
+                        <div class="relative inline-block">
+                            ${badgeAll}
+                            ${avgAll.toLocaleString()}
+                        </div>
                     </td>
-                    <td class="p-3 text-right text-xs text-slate-600 font-mono">
-                        ${Number(item.avgDailyViews).toLocaleString()}
-                    </td>
-                    <td class="p-3 text-right text-xs text-slate-600 font-mono">
-                        ${item.avgViews7Days === '(集計中)' ? '<span class="text-orange-400 text-[10px]">集計中</span>' : Number(item.avgViews7Days).toLocaleString()}
+                    <td class="p-2 text-right text-xs font-mono relative">
+                        <div class="relative inline-block">
+                            ${badge7}
+                            ${item.avgViews7Days === '(集計中)' ? '<span class="text-orange-400 text-[9px]">集計中</span>' : avg7.toLocaleString()}
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // グラフモーダル制御
+        // ----------------------------------------
+        // Tab 2: Followers Graph Logic
+        // ----------------------------------------
+
+        async function fetchFollowersData() {
+            try {
+                const res = await fetch(`${GAS_API_URL}?action=getFollowersHistory`);
+                const json = await res.json();
+                
+                document.getElementById('loader-youtube').style.display = 'none';
+                document.getElementById('loader-twitter').style.display = 'none';
+
+                if (json.status === 'success' && json.data.length > 0) {
+                    renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
+                    renderFollowerChart('chart-twitter', json.data, 'twitter', '#0ea5e9');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderFollowerChart(canvasId, data, key, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // 日付と数値を抽出（null除外）
+            const validData = data.filter(d => d[key] !== null);
+            const labels = validData.map(d => d.date.substring(5)); // 月/日
+            const values = validData.map(d => d[key]);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '登録者数',
+                        data: values,
+                        borderColor: color,
+                        backgroundColor: color + '20', // Opacity
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: color,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            ticks: { font: {size: 10} }
+                        },
+                        x: {
+                            ticks: { font: {size: 10}, maxTicksLimit: 7 },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ----------------------------------------
+        // Graph Modal Logic
+        // ----------------------------------------
+        
         async function openGraph(url, title) {
             const modal = document.getElementById('graph-modal');
             const titleEl = document.getElementById('graph-title');
@@ -312,42 +444,23 @@
             modal.classList.remove('hidden');
             loading.style.display = 'flex';
 
-            // Chart初期化・破棄
-            if (chartInstance) {
-                chartInstance.destroy();
-                chartInstance = null;
-            }
+            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
             try {
-                // GAS APIから日次データを取得
                 const res = await fetch(`${GAS_API_URL}?action=getTrendGraph&url=${encodeURIComponent(url)}`);
                 const json = await res.json();
-                
                 loading.style.display = 'none';
-
                 if (json.status === 'success' && json.data.length > 0) {
                     renderChart(json.data);
-                } else {
-                    // データなし表示
-                    const ctx = document.getElementById('dailyViewsChart');
-                    // 簡易的にメッセージを表示するなどの処理
                 }
-
-            } catch (err) {
-                console.error(err);
-                loading.textContent = "データ取得エラー";
-            }
+            } catch (err) { console.error(err); loading.textContent = "データ取得エラー"; }
         }
 
-        function closeGraphModal() {
-            document.getElementById('graph-modal').classList.add('hidden');
-        }
+        function closeGraphModal() { document.getElementById('graph-modal').classList.add('hidden'); }
 
         function renderChart(dailyData) {
             const ctx = document.getElementById('dailyViewsChart').getContext('2d');
-            
-            // データ整形
-            const labels = dailyData.map(d => d.date.substring(5)); // 月/日
+            const labels = dailyData.map(d => d.date.substring(5));
             const values = dailyData.map(d => d.views);
 
             chartInstance = new Chart(ctx, {
@@ -357,33 +470,26 @@
                     datasets: [{
                         label: '視聴回数',
                         data: values,
-                        borderColor: '#3b82f6', // blue-500
+                        borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         borderWidth: 2,
-                        pointRadius: 2,
+                        pointRadius: 0,
+                        pointHitRadius: 10,
                         fill: true,
-                        tension: 0.3
+                        tension: 0.2
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: { borderDash: [2, 4] }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
+                        y: { ticks: { font: {size:10} } },
+                        x: { grid: { display: false }, ticks: { font: {size:10}, maxTicksLimit: 6 } }
                     }
                 }
             });
         }
-
     </script>
 </body>
 </html>
