@@ -3,528 +3,823 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LLDB trends v1.1.1</title>
+    <title>伸びろ!推しaV</title>
     
-    <!-- Tailwind CSS & Icons -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js & Icons -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind (Utility用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+        /* =========================================
+           1. Base & Theme Colors (Blue Theme)
+           ========================================= */
+        :root {
+            --bg-color: #f0f9ff;       /* 元: #ffe0e0 */
+            --header-bg: #f0f9ff;      /* 元: #ffe0e0 */
+            --accent-color: #3b82f6;   /* 元: #d32f2f (赤) -> 青 */
+            --bar-color: #3b82f6;      /* 元: #ff9800 (オレンジ) -> 青 */
+            --text-main: #334155;
+            --border-color: #cbd5e1;
+            --hover-bg: #e0f2fe;
+        }
+
         body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f0f9ff;
-            color: #334155;
+            font-family: 'Noto Sans JP', sans-serif; /* フォントのみモダンに */
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: calc(70px + env(safe-area-inset-bottom)); /* フッター分空ける */
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
-            /* フッターの高さ + Safe Area 分の余白 */
-            padding-bottom: calc(70px + env(safe-area-inset-bottom));
-            padding-top: 0px; 
         }
 
-        /* カスタムアニメーション */
-        @keyframes stretch { 0% { width: 0; } 100% { width: 100%; } }
-        .animate-stretch { animation: stretch 3s ease-out forwards; }
-
-        .sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
-        .sortable-th::after { content: ''; display: inline-block; margin-left: 1px; width: 0; height: 0; border: 3px solid transparent; opacity: 0.3; vertical-align: middle; }
-        .sortable-th.asc::after { border-bottom-color: #334155; border-top: none; opacity: 1; }
-        .sortable-th.desc::after { border-top-color: #334155; border-bottom: none; opacity: 1; }
-
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        
-        /* Safe Area 対応ユーティリティ */
-        .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
-
-        /* フッターナビゲーション */
-        nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: white;
-            border-top: 1px solid #e2e8f0;
-            z-index: 50;
-            display: flex;
-            height: calc(60px + env(safe-area-inset-bottom));
-            padding-bottom: env(safe-area-inset-bottom);
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+        /* =========================================
+           2. GAS版レイアウトの移植 (Layout & Table)
+           ========================================= */
+        h1 {
+            text-align: center;
+            color: var(--text-main);
+            margin: 0;
+            font-size: 2.2em; /* 少し調整 */
+            background-color: var(--header-bg);
+            padding: 40px 10px 10px 10px;
+            box-sizing: border-box;
+            width: 100%;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            line-height: 1.2;
         }
 
-        .nav-item {
-            flex: 1;
+        .loading-animation-container {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            background-color: var(--bg-color);
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+        .counting-container {
+            order: 1;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: baseline;
             justify-content: center;
-            gap: 4px;
-            color: #94a3b8; /* slate-400 */
-            transition: all 0.2s;
+        }
+        .counting-number {
+            font-size: 1.5em;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+        .counting-unit {
+            font-size: 0.9em;
+            color: #64748b;
+            margin-left: 5px;
+        }
+        .underline-container {
+            width: 100%;
+            height: 30px;
+            margin: 5px auto 10px auto;
+            overflow: hidden;
+            position: relative;
+            order: 2;
+        }
+        .underline-bar {
+            height: 100%;
+            width: 0;
+            background-color: var(--bar-color);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: stretch-to-end 3s ease-out forwards;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 5px;
+            box-sizing: border-box;
+        }
+        .loading-text {
+            color: white;
+            font-size: 0.8em;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        @keyframes stretch-to-end {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.85em;
+            color: #64748b;
+            margin-bottom: 15px;
+            display: block;
+            padding: 0 10px;
+            background-color: var(--bg-color);
+        }
+
+        /* フィルタボタン */
+        .filter-controls {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 10px 15px 10px;
+        }
+        .filter-option {
+            display: inline-block;
+            padding: 6px 12px;
+            border: 1px solid var(--accent-color);
+            border-radius: 20px;
+            background-color: white;
+            color: var(--accent-color);
+            font-weight: bold;
             cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85em;
+        }
+        .filter-option.selected {
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+        .category-checkbox-hidden { display: none; }
+
+        /* テーブルコンテナ */
+        .table-container {
+            position: relative;
+            margin: 0 5px;
+            margin-top: 30px;
+            box-sizing: border-box;
+        }
+        .update-time {
+            position: absolute;
+            top: -22px;
+            right: 5px;
+            font-size: 0.75em;
+            color: #64748b;
+            z-index: 2;
+            font-family: monospace;
         }
 
+        /* テーブルスタイル */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background-color: #fff;
+            box-sizing: border-box;
+            font-size: 1em;
+            table-layout: fixed; /* 重要: これがないと幅指定が効かない */
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: var(--header-bg);
+            border-bottom: 2px solid #e2e8f0;
+        }
+        th, td {
+            padding: 8px 2px;
+            border-bottom: 1px solid #f1f5f9;
+            word-break: break-word;
+            white-space: normal;
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        th {
+            background-color: var(--header-bg);
+            color: #475569;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            line-height: 1.3;
+            font-size: 0.85em;
+        }
+        th small { font-size: 0.8em; opacity: 0.8; }
+
+        /* ソートアイコン */
+        .sortable th::after {
+            content: ''; display: inline-block; vertical-align: middle; margin-left: 2px;
+            width: 0; height: 0;
+            border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 4px solid #cbd5e1;
+        }
+        .sortable th.asc::after {
+            border-bottom: 4px solid var(--accent-color); border-top: none;
+        }
+        .sortable th.desc::after {
+            border-top: 4px solid var(--accent-color); border-bottom: none;
+        }
+
+        /* =========================================
+           ★ 列幅設定 (User's Favorite Layout)
+           ========================================= */
+        
+        /* PC (>= 769px) */
+        @media (min-width: 769px) {
+            th:nth-child(1), td:nth-child(1) { width: 4%; text-align: center; font-weight: bold; color: #94a3b8; }
+            th:nth-child(2), td:nth-child(2) { width: 41%; text-align: left; padding-right: 15px; }
+            th:nth-child(3), td:nth-child(3) { width: 15%; text-align: right; font-weight: bold; padding: 0 10px; font-size: 1.1em; }
+            th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; }
+            th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; }
+            th:nth-child(6), td:nth-child(6) { width: 12.5%; text-align: right; }
+        }
+
+        /* Tablet (max 768px) */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; padding: 15px 5px; }
+            .table-container { margin: 20px 2px 0 2px; }
+            
+            th:nth-child(1), td:nth-child(1) { width: 6%; text-align: center; font-weight: bold; color: #94a3b8; font-size: 0.8em; }
+            th:nth-child(2), td:nth-child(2) { width: 34%; text-align: left; padding-right: 4px; line-height: 1.4; font-size: 0.9em; }
+            th:nth-child(3), td:nth-child(3) { width: 20%; text-align: right; font-weight: bold; padding: 0 4px; font-size: 1em; white-space: nowrap; }
+            th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; font-size: 0.8em; }
+            th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; font-size: 0.85em; padding-right: 2px; }
+            th:nth-child(6), td:nth-child(6) { width: 12.5%; text-align: right; font-size: 0.85em; padding-right: 2px; }
+        }
+
+        /* Mobile (max 480px) */
+        @media (max-width: 480px) {
+            th:nth-child(1), td:nth-child(1) { width: 8%; }
+            th:nth-child(2), td:nth-child(2) { width: 30%; }
+            th:nth-child(3), td:nth-child(3) { width: 22%; }
+            th:nth-child(4), td:nth-child(4) { width: 14%; } /* 公開日 */
+            th:nth-child(5), td:nth-child(5) { width: 13%; } /* 平均 */
+            th:nth-child(6), td:nth-child(6) { width: 13%; } /* 直近 */
+            
+            td { padding: 4px 1px; font-size: 0.85em; }
+            th { padding: 4px 1px; font-size: 0.75em; }
+        }
+
+        /* セル内装飾 */
+        a { color: var(--text-main); text-decoration: none; display: block; }
+        a small { color: #64748b; font-size: 0.85em; display: block; margin-top: 1px; }
+        
+        .views-number {
+            display: block;
+            color: var(--accent-color);
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: rgba(59, 130, 246, 0.3);
+        }
+        .views-graph-container {
+            width: 100%; height: 4px; background-color: #f1f5f9; border-radius: 2px; margin-top: 2px; overflow: hidden;
+        }
+        .views-graph-bar {
+            height: 100%; background-color: var(--bar-color); width: 0; transition: width 0.5s ease-out;
+        }
+        .emoji-number-container {
+            display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+        }
+        .emoji { font-size: 1.2em; margin-bottom: 1px; }
+
+        /* =========================================
+           3. UI Components (Modal, Footer, Tabs)
+           ========================================= */
+        
+        /* フッターナビ */
+        nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background-color: white; border-top: 1px solid #e2e8f0;
+            z-index: 50; display: flex;
+            height: calc(60px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 4px; color: #94a3b8; cursor: pointer; transition: all 0.2s;
+        }
         .nav-item.active {
-            color: #3b82f6; /* blue-500 */
-            background-color: #eff6ff; /* blue-50 */
+            color: var(--accent-color); background-color: #eff6ff;
         }
         
-        .nav-item.active svg {
-            stroke-width: 2.5px;
-        }
+        /* タブコンテンツ制御 */
+        .tab-content { display: none; padding-bottom: 20px; }
+        .tab-content.active { display: block; }
 
-        /* グラフ用モーダル */
-        .modal-enter { opacity: 0; transform: scale(0.95); }
-        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.2s, transform 0.2s; }
-        
-        /* テーブル調整 */
-        .nowrap-cell { white-space: nowrap; }
-        
-        /* フォントサイズ微調整（スマホで収めるため） */
-        .text-xxs { font-size: 0.65rem; line-height: 1rem; }
+        /* モーダル */
+        .modal {
+            display: none; position: fixed; z-index: 100; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto;
+            background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+            padding-top: 60px;
+            align-items: center; justify-content: center;
+        }
+        .modal.open { display: flex; }
+        .modal-content {
+            background-color: #fff; margin: auto; padding: 20px;
+            border: 1px solid #e2e8f0; width: 90%; max-width: 600px;
+            border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .close {
+            position: absolute; top: 10px; right: 15px;
+            color: #94a3b8; font-size: 28px; font-weight: bold; cursor: pointer;
+        }
+        .graph-title {
+            text-align: center; font-size: 1.1em; color: var(--text-main);
+            margin-bottom: 20px; font-weight: bold; padding-right: 20px;
+        }
+        #loading, #error { text-align: center; padding: 20px; color: #64748b; font-size: 0.9em; }
+        #error { color: #ef4444; }
+
+        /* フォロワーグラフ用スタイル */
+        .follower-card {
+            background: white; border-radius: 12px; padding: 16px;
+            margin: 16px 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
-<body class="bg-slate-50">
+<body>
 
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="flex flex-col items-center justify-center pt-20 pb-6 bg-slate-50 transition-all duration-500 fixed inset-0 z-[60]">
-        <div class="flex items-baseline mb-2">
-            <span id="counting-number" class="text-4xl font-bold text-slate-700">0</span>
-            <span class="text-sm text-slate-500 ml-1">回視聴</span>
+    <!-- Tab 1: ランキング (GAS版踏襲) -->
+    <div id="tab-views" class="tab-content active">
+        <h1>伸びろ!推しaV</h1>
+
+        <!-- Loading Animation -->
+        <div id="loadingAnimation" class="loading-animation-container">
+            <div class="counting-container">
+                <span id="countingNumber" class="counting-number">0</span><span class="counting-unit">回視聴</span>
+            </div>
+            <div class="underline-container">
+                <div class="underline-bar">
+                    <span class="loading-text">ねがう夜</span>
+                </div>
+            </div>
         </div>
-        <div class="w-64 h-1 bg-slate-200 rounded-full overflow-hidden relative">
-            <div class="h-full bg-blue-500 absolute top-0 left-0 animate-stretch"></div>
+
+        <!-- Filter -->
+        <div class="filter-controls">
+            <span class="filter-option" data-category="isMV" data-checkbox-id="filterMV">MV</span>
+            <input type="checkbox" class="category-checkbox-hidden" id="filterMV" data-category="isMV" checked>
+            
+            <span class="filter-option" data-category="isFullOther" data-checkbox-id="filterFullOther">Live</span>
+            <input type="checkbox" class="category-checkbox-hidden" id="filterFullOther" data-category="isFullOther" checked>
+            
+            <span class="filter-option" data-category="isNYMovie" data-checkbox-id="filterNYMovie">new year</span>
+            <input type="checkbox" class="category-checkbox-hidden" id="filterNYMovie" data-category="isNYMovie" checked>
+            
+            <span class="filter-option" data-category="isOther" data-checkbox-id="filterOther">他(ショート等)</span>
+            <input type="checkbox" class="category-checkbox-hidden" id="filterOther" data-category="isOther" checked>
         </div>
-        <p class="text-xs text-slate-400 mt-2">データを読み込んでいます...</p>
-        <!-- エラー表示用エリア -->
-        <div id="error-message" class="text-red-500 text-xs mt-4 text-center hidden"></div>
+
+        <span class="subtitle">「視聴回数」とかタップしたら順番入れ替わるで</span>
+        <div id="error" style="display:none;"></div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <span id="lastUpdateTimeDisplay" class="update-time"></span>
+            <table id="dataTable">
+                <thead><tr id="tableHeader"></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        
+        <div style="text-align:center; padding: 20px; font-size:0.8em; color:#94a3b8;">
+            <p>※列幅・レイアウトはオリジナルを踏襲しています</p>
+        </div>
     </div>
 
-    <!-- Main Content -->
-    <main id="main-content" class="px-2 py-4 opacity-0 transition-opacity duration-500 hidden">
+    <!-- Tab 2: フォロワー (New) -->
+    <div id="tab-followers" class="tab-content">
+        <h1 style="font-size: 1.5em; padding: 20px;">SNSフォロワー推移</h1>
         
-        <!-- Tab 1: YT視聴回数 -->
-        <div id="tab-views" class="tab-content">
-            <!-- Filter Controls: ボタンを大きく押しやすく -->
-            <div class="bg-white rounded-xl p-3 card-shadow mb-4">
-                <div class="flex flex-wrap gap-2 justify-between">
-                    <button class="filter-btn active flex-1" data-cat="isMV">MV</button>
-                    <button class="filter-btn active flex-1" data-cat="isFullOther">Live</button>
-                    <button class="filter-btn active flex-1" data-cat="isNYMovie">NewYear</button>
-                    <button class="filter-btn active flex-1" data-cat="isOther">その他</button>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-end mb-2 px-1">
-                <h2 class="font-bold text-slate-700 text-base flex items-center gap-1">
-                    <i data-lucide="video" class="w-4 h-4"></i> 動画ランキング
-                </h2>
-                <span id="update-time" class="text-[10px] text-slate-400 font-mono"></span>
-            </div>
-
-            <!-- Data Table -->
-            <div class="bg-white rounded-xl overflow-hidden card-shadow relative">
-                <div class="overflow-x-auto">
-                    <!-- 全列表示、幅はコンテンツに合わせて自動調整 -->
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200 text-[10px] leading-tight">
-                            <tr>
-                                <th class="py-2 pl-2 text-center w-6 nowrap-cell">#</th>
-                                <th class="py-2 pl-1 pr-1">動画タイトル</th>
-                                <th class="py-2 pl-1 pr-1 text-right cursor-pointer sortable-th desc nowrap-cell" data-key="totalViews">視聴回数</th>
-                                <th class="py-2 pl-1 pr-1 text-center cursor-pointer sortable-th nowrap-cell" data-key="publishedDate">公開日</th>
-                                <!-- 省略せず表示 -->
-                                <th class="py-2 pl-1 pr-2 text-right cursor-pointer sortable-th nowrap-cell" data-key="avgDailyViews">平均/日</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body" class="divide-y divide-slate-100">
-                            <!-- JSで生成 -->
-                        </tbody>
-                    </table>
-                </div>
+        <div class="follower-card">
+            <h3 class="font-bold text-red-600 flex items-center gap-2 mb-4 text-base">
+                <i data-lucide="youtube" class="w-5 h-5"></i> Youtube登録者数
+            </h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="chart-youtube"></canvas>
             </div>
         </div>
 
-        <!-- Tab 2: フォロワー -->
-        <div id="tab-followers" class="tab-content hidden">
-            <div class="space-y-6">
-                <!-- Youtube Graph -->
-                <div class="bg-white rounded-xl p-4 card-shadow">
-                    <h3 class="font-bold text-red-600 flex items-center gap-2 mb-4 text-base">
-                        <i data-lucide="youtube" class="w-5 h-5"></i> Youtube登録者数
-                    </h3>
-                    <div class="h-64 relative w-full">
-                        <canvas id="chart-youtube"></canvas>
-                        <div id="loader-youtube" class="absolute inset-0 flex items-center justify-center bg-white/80 text-xs text-slate-400">読み込み中...</div>
-                    </div>
-                </div>
-
-                <!-- Twitter Graph -->
-                <div class="bg-white rounded-xl p-4 card-shadow">
-                    <h3 class="font-bold text-sky-500 flex items-center gap-2 mb-4 text-base">
-                        <i data-lucide="twitter" class="w-5 h-5"></i> Twitterフォロワー数
-                    </h3>
-                    <div class="h-64 relative w-full">
-                        <canvas id="chart-twitter"></canvas>
-                        <div id="loader-twitter" class="absolute inset-0 flex items-center justify-center bg-white/80 text-xs text-slate-400">読み込み中...</div>
-                    </div>
-                </div>
-                
-                <p class="text-center text-xs text-slate-400 mt-8 mb-4">※ データは毎日自動更新されます</p>
-                
-                <div class="text-center text-slate-400 text-xs pb-4">
-                    <p class="mb-1">Produced with 💙</p>
-                    <a href="https://lit.link/nokidochibi" target="_blank" class="underline hover:text-slate-600">nokidochibi</a>
-                </div>
+        <div class="follower-card">
+            <h3 class="font-bold text-sky-500 flex items-center gap-2 mb-4 text-base">
+                <i data-lucide="twitter" class="w-5 h-5"></i> Twitterフォロワー数
+            </h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="chart-twitter"></canvas>
             </div>
         </div>
+        
+        <p class="text-center text-xs text-slate-400 mt-4 mb-4">※ データは毎日自動更新されます</p>
+    </div>
 
-    </main>
-
-    <!-- フッターナビゲーション -->
+    <!-- Footer Nav -->
     <nav>
-        <div onclick="switchTab('views')" class="nav-item active" data-tab="views">
+        <div onclick="switchTab('views')" class="nav-item active" id="nav-views">
             <i data-lucide="trending-up" class="w-6 h-6"></i>
             <span class="text-[10px] font-bold">YT視聴回数</span>
         </div>
-        <div onclick="switchTab('followers')" class="nav-item" data-tab="followers">
+        <div onclick="switchTab('followers')" class="nav-item" id="nav-followers">
             <i data-lucide="users" class="w-6 h-6"></i>
             <span class="text-[10px] font-bold">フォロワー</span>
         </div>
     </nav>
 
-
-    <!-- Graph Modal -->
-    <div id="graph-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick="closeGraphModal()">
-        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl relative" onclick="event.stopPropagation()">
-            <button onclick="closeGraphModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-            <h3 id="graph-title" class="text-lg font-bold text-slate-700 mb-4 pr-8 leading-tight"></h3>
-            <div class="h-64 w-full relative">
-                <canvas id="dailyViewsChart"></canvas>
-                <div id="graph-loading" class="absolute inset-0 flex items-center justify-center bg-white/80 text-slate-500 text-sm">
-                    グラフ作成中...🌱
-                </div>
+    <!-- Modal -->
+    <div id="graphModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeGraphModal()">&times;</span>
+            <h2 id="graphTitle" class="graph-title"></h2>
+            <div id="graphLoading" style="text-align:center; padding:20px; color:#64748b;">グラフ作成中...🌱🌿🌳</div>
+            <div style="position: relative; height: 300px; width:100%;">
+                <canvas id="dailyViewsChart" style="display: none;"></canvas>
             </div>
+            <div id="noGraphData" style="text-align:center; display: none; padding:20px; color:#94a3b8;">データがありません</div>
         </div>
     </div>
 
-    <!-- Script -->
-    <script>
-        // API URLを直接定義 (読み込みエラー防止の最優先事項)
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
-        
-        let allData = [];
-        let filteredData = [];
-        let sortKey = 'totalViews';
-        let sortDesc = true;
-        let chartInstance = null;
-        let followersDataLoaded = false;
+<script>
+    // ==========================================
+    // 0. CONFIG & STATE
+    // ==========================================
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+    
+    let videoData = [];
+    let filteredVideoData = [];
+    let tableHeaders = [];
+    let maxTotalViews = 0;
+    let currentSortColumn = 'totalViews';
+    let currentSortDirection = 'desc';
+    let followersDataLoaded = false;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            initFilterButtons();
-            initSortHeaders();
+    // Animation vars
+    const countingNumberElement = document.getElementById('countingNumber');
+    const loadingAnimationDiv = document.getElementById('loadingAnimation');
+    let animationFrameId = null;
+    let currentCount = 0;
+    let animationStartTime = null;
+    let dailyViewsChartInstance = null;
+
+    // ==========================================
+    // 1. INIT
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        animateCountingNumber(1874093, 3000, 0, false); // Start fake loading
+        fetchData(); // Get data
+        
+        // Filter Click Events
+        document.querySelectorAll('.filter-option').forEach(span => {
+            const checkboxId = span.dataset.checkboxId;
+            const checkbox = document.getElementById(checkboxId);
+            if(checkbox.checked) span.classList.add('selected');
             
-            // データ取得開始
-            fetchData(); 
-            fetchFollowersData(); 
+            span.addEventListener('click', () => {
+                checkbox.checked = !checkbox.checked;
+                span.classList.toggle('selected', checkbox.checked);
+                filterAndDisplay();
+            });
         });
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.nav-item[data-tab="${tabName}"]`).classList.add('active');
-            
-            lucide.createIcons();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        // Modal Outside Click
+        window.addEventListener('click', (e) => {
+            if(e.target === document.getElementById('graphModal')) closeGraphModal();
+        });
+    });
 
-        // ----------------------------------------
-        // Tab 1: YT視聴回数 Logic
-        // ----------------------------------------
-
-        function initFilterButtons() {
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                updateFilterBtnStyle(btn);
-                btn.addEventListener('click', () => {
-                    btn.classList.toggle('active');
-                    updateFilterBtnStyle(btn);
-                    applyFilterAndRender();
-                });
-            });
-        }
-
-        function updateFilterBtnStyle(btn) {
-            const baseClass = "filter-btn rounded-lg text-xs font-bold border transition-all py-3 px-1 shadow-sm";
-            if (btn.classList.contains('active')) {
-                btn.className = `${baseClass} bg-blue-500 text-white border-blue-600 shadow-md transform scale-100`;
-            } else {
-                btn.className = `${baseClass} bg-white text-slate-500 border-slate-200 hover:bg-slate-50`;
-            }
-        }
-
-        function initSortHeaders() {
-            document.querySelectorAll('.sortable-th').forEach(th => {
-                th.addEventListener('click', () => {
-                    const key = th.dataset.key;
-                    if (sortKey === key) {
-                        sortDesc = !sortDesc;
-                    } else {
-                        sortKey = key;
-                        sortDesc = true;
-                    }
-                    document.querySelectorAll('.sortable-th').forEach(t => t.classList.remove('asc', 'desc', 'text-blue-600'));
-                    th.classList.add(sortDesc ? 'desc' : 'asc');
-                    th.classList.add('text-blue-600');
-                    renderTable();
-                });
-            });
-        }
-
-        async function fetchData() {
-            try {
-                const res = await fetch(`${GAS_API_URL}?action=getTrendsData`);
-                const json = await res.json();
-
-                if (json.status === 'error' || !json.data) throw new Error(json.message || 'データなし');
-
-                allData = json.data;
-                document.getElementById('update-time').textContent = `更新: ${json.lastUpdateTime || '-'}`;
-                
-                completeLoading(json.maxTotalViews || 1000000);
-                applyFilterAndRender();
-
-            } catch (err) {
-                console.error(err);
-                const errorDiv = document.getElementById('error-message');
-                errorDiv.classList.remove('hidden');
-                errorDiv.innerHTML = `データの読み込みに失敗しました。<br>${err.message}`;
-            }
-        }
-
-        function completeLoading(targetNum) {
-            const el = document.getElementById('counting-number');
-            let current = 0;
-            const duration = 800;
-            const step = targetNum / (duration / 16);
-            const timer = setInterval(() => {
-                current += step;
-                if (current >= targetNum) {
-                    current = targetNum;
-                    clearInterval(timer);
-                    setTimeout(() => {
-                        document.getElementById('loading-screen').style.display = 'none';
-                        document.getElementById('main-content').classList.remove('hidden'); 
-                        setTimeout(() => document.getElementById('main-content').classList.remove('opacity-0'), 50);
-                    }, 300);
-                }
-                el.textContent = Math.floor(current).toLocaleString();
-            }, 16);
-        }
-
-        function applyFilterAndRender() {
-            const activeCats = Array.from(document.querySelectorAll('.filter-btn.active')).map(btn => btn.dataset.cat);
-            filteredData = allData.filter(item => activeCats.some(cat => item[cat] === '1' || item[cat] === 1));
-            renderTable();
-        }
-
-        function formatTitle(title) {
-            // 改行を許可、フォントサイズ調整
-            const match = title.match(/([『「])(.*?)([』」])(.*)/);
-            if (match) {
-                const prefix = title.substring(0, match.index);
-                const content = match[2];
-                const suffix = match[4];
-                return `<div class="leading-tight"><span class="text-[10px] text-slate-400 block">${prefix}</span><span class="font-bold text-slate-700 text-xs block my-0.5">『${content}』</span><span class="text-[10px] text-slate-400 block">${suffix}</span></div>`;
-            }
-            return `<span class="font-bold text-slate-700 text-xs leading-tight block">${title}</span>`;
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-
-            filteredData.sort((a, b) => {
-                let va = a[sortKey], vb = b[sortKey];
-                if (sortKey === 'publishedDate') { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
-                else if (typeof va === 'string') { va = parseFloat(va.replace(/,/g, '')) || 0; vb = parseFloat(vb.replace(/,/g, '')) || 0; }
-                return sortDesc ? vb - va : va - vb;
-            });
-
-            if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">データがありません</td></tr>';
-                return;
-            }
-
-            const maxAvgAll = Math.max(...filteredData.map(d => parseFloat(d.avgDailyViews) || 0));
-            const maxViews = Math.max(...filteredData.map(d => parseFloat(d.totalViews) || 0));
-
-            filteredData.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0';
-                
-                const barWidth = ((parseFloat(item.totalViews) || 0) / maxViews) * 100;
-                const pubDate = new Date(item.publishedDate);
-                // 日付: 縦積みで省スペース化
-                const dateStr = `<div class="text-center leading-none"><span class="font-bold text-slate-500 text-[9px] block mb-[1px]">${pubDate.getFullYear()}</span><span class="font-bold text-slate-700 text-[11px] block">${pubDate.getMonth()+1}/${pubDate.getDate()}</span></div>`;
-
-                const avgAll = Math.round(parseFloat(item.avgDailyViews) || 0);
-                const badgeAll = (avgAll > 0 && avgAll === Math.round(maxAvgAll)) ? '<span class="absolute -top-1.5 -right-2 text-xs">👑</span>' : '';
-
-                tr.innerHTML = `
-                    <td class="py-2 pl-2 text-center text-[10px] font-bold text-slate-400 nowrap-cell">${index + 1}</td>
-                    <!-- タイトル: 改行OK -->
-                    <td class="py-2 pl-1 pr-1 min-w-[90px]">
-                        <a href="${item.url}" target="_blank" class="block no-underline">
-                            ${formatTitle(item.title)}
-                        </a>
-                    </td>
-                    <!-- 視聴回数 -->
-                    <td class="py-2 pl-1 pr-1 text-right align-middle nowrap-cell">
-                        <div class="flex flex-col items-end cursor-pointer w-full" onclick="openGraph('${item.url}', '${item.title.replace(/'/g, "\\'")}')">
-                            <span class="font-bold text-blue-600 text-xs">${Number(item.totalViews).toLocaleString()}</span>
-                            <div class="w-14 h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
-                                <div class="h-full bg-blue-400" style="width: ${barWidth}%"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <!-- 公開日 -->
-                    <td class="py-2 pl-1 pr-1 nowrap-cell">${dateStr}</td>
-                    <!-- 平均/日 (省略しない) -->
-                    <td class="py-2 pl-1 pr-2 text-right text-[10px] font-mono relative nowrap-cell">
-                        <div class="relative inline-block text-slate-500">
-                            ${badgeAll}
-                            ${avgAll.toLocaleString()}
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // ----------------------------------------
-        // Tab 2: Followers Graph Logic
-        // ----------------------------------------
-
-        async function fetchFollowersData() {
-            if (followersDataLoaded) return; 
-
-            try {
-                const res = await fetch(`${GAS_API_URL}?action=getFollowersHistory`);
-                const json = await res.json();
-                
-                const loaderY = document.getElementById('loader-youtube');
-                const loaderT = document.getElementById('loader-twitter');
-                if(loaderY) loaderY.style.display = 'none';
-                if(loaderT) loaderT.style.display = 'none';
-
-                if (json.status === 'success' && json.data.length > 0) {
-                    renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
-                    renderFollowerChart('chart-twitter', json.data, 'twitter', '#0ea5e9');
-                    followersDataLoaded = true;
-                }
-            } catch (err) {
-                console.error("Followers fetch error:", err);
-            }
-        }
-
-        function renderFollowerChart(canvasId, data, key, color) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            const validData = data.filter(d => d[key] !== null);
-            const labels = validData.map(d => d.date.substring(5));
-            const values = validData.map(d => d[key]);
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '登録者数',
-                        data: values,
-                        borderColor: color,
-                        backgroundColor: color + '20',
-                        borderWidth: 2,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: color,
-                        fill: true,
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { ticks: { font: {size: 10}, color: '#94a3b8' }, grid: { color: '#f1f5f9' } },
-                        x: { ticks: { font: {size: 10}, maxTicksLimit: 7, color: '#94a3b8' }, grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        // ----------------------------------------
-        // Graph Modal Logic
-        // ----------------------------------------
+    // ==========================================
+    // 2. TAB CONTROL
+    // ==========================================
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabName).classList.add('active');
         
-        async function openGraph(url, title) {
-            const modal = document.getElementById('graph-modal');
-            const titleEl = document.getElementById('graph-title');
-            const loading = document.getElementById('graph-loading');
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('nav-' + tabName).classList.add('active');
+        
+        if (tabName === 'followers' && !followersDataLoaded) {
+            fetchFollowersData();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ==========================================
+    // 3. RANKING LOGIC (from GAS)
+    // ==========================================
+    async function fetchData() {
+        try {
+            const res = await fetch(`${GAS_API_URL}?action=getTrendsData`);
+            const json = await res.json();
             
-            titleEl.textContent = title;
-            modal.classList.remove('hidden');
-            loading.style.display = 'flex';
+            if (json.status === 'error') throw new Error(json.message);
 
-            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+            // Data Adapter for GAS logic
+            const adaptedData = {
+                headers: [
+                    { text: 'YouTube<br>動画タイトル', key: 'title', type: 'string' },
+                    { text: '視聴回数', key: 'totalViews', type: 'number' },
+                    { text: '公開日', key: 'publishedDate', type: 'date' },
+                    { text: '平均/日<br><small>(全期間)</small>', key: 'avgDailyViews', type: 'number' },
+                    { text: '平均/日<br><small>(過去7日)</small>', key: 'avgViews7Days', type: 'number' }
+                ],
+                data: json.data.map(item => ({
+                    ...item,
+                    totalViews: parseFloat(item.totalViews) || 0,
+                    avgDailyViews: parseFloat(item.avgDailyViews) || 0,
+                    avgViews7Days: (item.avgViews7Days === "(集計中)" ? item.avgViews7Days : parseFloat(item.avgViews7Days) || 0)
+                })),
+                maxLoadingCount: json.maxTotalViews || 2000000,
+                maxTotalViews: json.maxTotalViews || 0,
+                lastUpdateTime: json.lastUpdateTime || ''
+            };
 
-            try {
-                const res = await fetch(`${GAS_API_URL}?action=getTrendGraph&url=${encodeURIComponent(url)}`);
-                const json = await res.json();
-                loading.style.display = 'none';
-                if (json.status === 'success' && json.data.length > 0) {
-                    renderChart(json.data);
-                }
-            } catch (err) { console.error(err); loading.textContent = "データ取得エラー"; }
+            displayData(adaptedData);
+
+        } catch (e) {
+            document.getElementById('error').textContent = e.message;
+            document.getElementById('error').style.display = 'block';
+            loadingAnimationDiv.style.display = 'none';
+        }
+    }
+
+    function displayData(data) {
+        videoData = data.data;
+        tableHeaders = data.headers;
+        maxTotalViews = data.maxTotalViews;
+
+        // Header Generation
+        const thead = document.getElementById('tableHeader');
+        thead.innerHTML = '<th style="cursor:default">#</th>';
+        tableHeaders.forEach(h => {
+            const th = document.createElement('th');
+            th.innerHTML = h.text;
+            if(h.key !== 'url') {
+                th.classList.add('sortable');
+                th.onclick = () => {
+                    const dir = (currentSortColumn === h.key && currentSortDirection === 'asc') ? 'desc' :
+                                (currentSortColumn === h.key && currentSortDirection === 'desc') ? 'asc' :
+                                (h.key === 'publishedDate') ? 'asc' : 'desc';
+                    sortTable(h.key, h.type, dir);
+                };
+            }
+            thead.appendChild(th);
+        });
+
+        if(data.lastUpdateTime) {
+            document.getElementById('lastUpdateTimeDisplay').textContent = `※${data.lastUpdateTime}更新`;
+            document.getElementById('lastUpdateTimeDisplay').style.display = 'block';
         }
 
-        function closeGraphModal() { document.getElementById('graph-modal').classList.add('hidden'); }
+        // Finish Animation
+        animateCountingNumber(data.maxLoadingCount, 1000, currentCount, true);
+        
+        filterAndDisplay(true);
+    }
 
-        function renderChart(dailyData) {
-            const ctx = document.getElementById('dailyViewsChart').getContext('2d');
-            const labels = dailyData.map(d => d.date.substring(5));
-            const values = dailyData.map(d => d.views);
+    function filterAndDisplay(isInit = false) {
+        const checked = Array.from(document.querySelectorAll('.category-checkbox-hidden:checked')).map(c => c.dataset.category);
+        
+        if (checked.length === 0) {
+            filteredVideoData = [];
+        } else {
+            filteredVideoData = videoData.filter(v => checked.some(c => v[c] === '1' || v[c] === 1));
+        }
 
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '視聴回数',
-                        data: values,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHitRadius: 10,
-                        fill: true,
-                        tension: 0.2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { ticks: { font: {size:10} } },
-                        x: { grid: { display: false }, ticks: { font: {size:10}, maxTicksLimit: 6 } }
+        if (isInit) {
+            const h = tableHeaders.find(h => h.key === currentSortColumn);
+            if(h) sortTable(currentSortColumn, h.type, currentSortDirection);
+            else updateTableBody(filteredVideoData);
+        } else {
+            updateTableBody(filteredVideoData);
+        }
+    }
+
+    function sortTable(key, type, dir) {
+        currentSortColumn = key;
+        currentSortDirection = dir;
+        
+        // Update Icons
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.classList.remove('asc', 'desc');
+            // Simplified check based on innerHTML content match is risky, 
+            // but for now relying on index order is safer or data attr
+        });
+        // Re-render headers to update sort class (lazy way) or iterate
+        const ths = document.getElementById('tableHeader').children;
+        for(let i=1; i<ths.length; i++) { // skip #
+            if(tableHeaders[i-1].key === key) ths[i].classList.add(dir);
+        }
+
+        const sorted = [...filteredVideoData].sort((a, b) => {
+            let va = a[key], vb = b[key];
+            if(type === 'number') return dir === 'asc' ? (parseFloat(va)||0)-(parseFloat(vb)||0) : (parseFloat(vb)||0)-(parseFloat(va)||0);
+            if(type === 'date') {
+                const da = new Date(va).getTime() || (dir==='asc'?-Infinity:Infinity);
+                const db = new Date(vb).getTime() || (dir==='asc'?-Infinity:Infinity);
+                return dir === 'asc' ? da - db : db - da;
+            }
+            return dir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+        });
+        updateTableBody(sorted);
+    }
+
+    function updateTableBody(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${tableHeaders.length+1}" style="text-align:center; padding:20px; color:#94a3b8;">データがありません</td></tr>`;
+            return;
+        }
+
+        // Calculate Max for Emojis
+        const maxDaily = Math.max(...data.map(d => parseFloat(d.avgDailyViews)||0));
+        const max7Days = Math.max(...data.map(d => parseFloat(d.avgViews7Days)||0));
+
+        data.forEach((row, i) => {
+            const tr = document.createElement('tr');
+            
+            // #
+            tr.innerHTML += `<td style="text-align:center; font-weight:bold; color:#94a3b8;">${i+1}</td>`;
+            
+            // Cells
+            tableHeaders.forEach(h => {
+                let td = document.createElement('td');
+                const val = row[h.key];
+                
+                if (h.key === 'title') {
+                    td.innerHTML = `<a href="${row.url}" target="_blank">${formatTitle(val)}</a>`;
+                } else if (h.key === 'totalViews') {
+                    const num = parseFloat(val)||0;
+                    const pct = (maxTotalViews > 0) ? (num / maxTotalViews * 100) : 0;
+                    td.innerHTML = `
+                        <span class="views-number" onclick="openGraph('${row.url}', '${row.title.replace(/'/g,"\\'")}')">${num.toLocaleString()}</span>
+                        <div class="views-graph-container"><div class="views-graph-bar" style="width:${pct}%"></div></div>
+                    `;
+                } else if (h.key === 'publishedDate') {
+                    const d = new Date(val);
+                    td.innerHTML = !isNaN(d.getTime()) ? `<strong>${d.getFullYear()}年</strong><br><small>${d.getMonth()+1}月${d.getDate()}日</small>` : '';
+                    td.style.textAlign = 'center';
+                } else if (h.key.includes('avg')) {
+                    const num = parseFloat(val)||0;
+                    let emoji = '';
+                    if (h.key === 'avgDailyViews' && num === maxDaily && num > 0) emoji = '👑';
+                    if (h.key === 'avgViews7Days' && num === max7Days && num > 0) emoji = '🔥';
+                    if (val === "(集計中)") {
+                        td.innerHTML = `<span style="font-size:0.8em; color:#94a3b8;">(集計中)</span>`;
+                    } else {
+                        td.innerHTML = `<div class="emoji-number-container">${emoji ? `<div class="emoji">${emoji}</div>` : ''}<span class="number-value">${Math.round(num).toLocaleString()}</span></div>`;
                     }
+                    td.style.textAlign = 'right';
                 }
+                tr.appendChild(td);
             });
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ==========================================
+    // 4. GRAPH & FOLLOWERS
+    // ==========================================
+    async function openGraph(url, title) {
+        document.getElementById('graphModal').classList.add('open');
+        document.getElementById('graphTitle').textContent = title;
+        document.getElementById('graphLoading').style.display = 'block';
+        document.getElementById('dailyViewsChart').style.display = 'none';
+        
+        if(dailyViewsChartInstance) { dailyViewsChartInstance.destroy(); dailyViewsChartInstance = null; }
+
+        try {
+            const res = await fetch(`${GAS_API_URL}?action=getTrendGraph&url=${encodeURIComponent(url)}`);
+            const json = await res.json();
+            
+            document.getElementById('graphLoading').style.display = 'none';
+            
+            if(json.status === 'success' && json.data.length > 0) {
+                document.getElementById('dailyViewsChart').style.display = 'block';
+                renderGraph(json.data);
+            } else {
+                document.getElementById('noGraphData').style.display = 'block';
+            }
+        } catch(e) {
+            document.getElementById('graphLoading').textContent = "エラーが発生しました";
         }
-    </script>
+    }
+
+    function renderGraph(data) {
+        const ctx = document.getElementById('dailyViewsChart').getContext('2d');
+        dailyViewsChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.date.substring(5)),
+                datasets: [{
+                    label: '視聴回数',
+                    data: data.map(d => d.views),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true, tension: 0.2, pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { ticks: { maxTicksLimit: 6 } } }
+            }
+        });
+    }
+
+    async function fetchFollowersData() {
+        try {
+            const res = await fetch(`${GAS_API_URL}?action=getFollowersHistory`);
+            const json = await res.json();
+            if (json.status === 'success') {
+                renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
+                renderFollowerChart('chart-twitter', json.data, 'twitter', '#0ea5e9');
+                followersDataLoaded = true;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    function renderFollowerChart(id, data, key, color) {
+        const ctx = document.getElementById(id).getContext('2d');
+        const valid = data.filter(d => d[key] !== null);
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: valid.map(d => d.date.substring(5)),
+                datasets: [{
+                    data: valid.map(d => d[key]),
+                    borderColor: color, backgroundColor: color+'10',
+                    borderWidth: 2, fill: true, pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { ticks: { maxTicksLimit: 6 } } }
+            }
+        });
+    }
+
+    // ==========================================
+    // 5. UTILS
+    // ==========================================
+    function animateCountingNumber(target, duration, start, isFinal) {
+        const startTime = performance.now();
+        const initial = start;
+        
+        function update(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            if (!isDataLoaded && elapsed < 3000) {
+                currentCount = Math.floor(initial + (target - initial) * progress);
+                countingNumberElement.textContent = currentCount.toLocaleString();
+                animationFrameId = requestAnimationFrame(update);
+            } else if (!isDataLoaded) {
+                // Random walk while waiting
+                currentCount = Math.floor(Math.random() * 50000) + 1800000;
+                countingNumberElement.textContent = currentCount.toLocaleString();
+                animationFrameId = requestAnimationFrame(update);
+            } else if (progress < 1) {
+                currentCount = Math.floor(initial + (target - initial) * progress);
+                countingNumberElement.textContent = currentCount.toLocaleString();
+                animationFrameId = requestAnimationFrame(update);
+            } else {
+                currentCount = target;
+                countingNumberElement.textContent = currentCount.toLocaleString();
+                loadingAnimationDiv.style.display = 'none';
+            }
+        }
+        if(animationFrameId) cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(update);
+    }
+
+    function closeGraphModal() {
+        document.getElementById('graphModal').classList.remove('open');
+        document.getElementById('noGraphData').style.display = 'none';
+    }
+
+    function formatTitle(title) {
+        // Original logic for 『』 brackets formatting
+        const match = title.match(/[「『]/);
+        if (match) {
+            const idx = match.index;
+            const pre = title.substring(0, idx);
+            const post = title.substring(idx);
+            const fmtPost = post.replace(/([「『][^」』]+[」』])/g, '<strong>$1</strong>');
+            return `<small>${pre}</small><br>${fmtPost}`;
+        }
+        return `<small>${title}</small>`;
+    }
+</script>
 </body>
 </html>
