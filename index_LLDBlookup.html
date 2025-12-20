@@ -20,9 +20,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 親フレーム(index.html)のヘッダーがあるため、こちらのヘッダーは隠す */
-        header { display: none !important; }
-        
         /* 以下、既存のスタイル */
         body { font-family: 'Noto Sans JP', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -107,7 +104,6 @@
             background-color: #0f172a; /* Slate-900 */
             color: #e2e8f0; /* Slate-200 */
         }
-        body.dark-mode header,
         body.dark-mode footer {
             background-color: #1e293b; /* Slate-800 */
             border-color: #334155; /* Slate-700 */
@@ -170,18 +166,7 @@
 </head>
 <body id="app-body" class="bg-orange-50 text-gray-800 h-screen flex flex-col theme-lyrics transition-colors duration-300">
 
-    <header class="bg-white/95 backdrop-blur-sm shadow-sm flex flex-col items-center justify-center sticky top-0 z-20 border-b border-theme relative transition-colors duration-300 h-14">
-        <div class="w-full flex items-center justify-center relative">
-            <h1 id="app-title" class="text-lg font-bold text-theme tracking-wider flex items-baseline transition-colors duration-300">
-                LLDB lookup
-                <span id="version-display" class="ml-2 text-[10px] text-gray-400 font-normal opacity-50"></span>
-            </h1>
-            
-            <button onclick="toggleModal(true)" class="absolute right-4 transition p-1 rounded-full hover:bg-orange-50">
-                <span class="text-xl">🌷</span>
-            </button>
-        </div>
-    </header>
+    <!-- Header Removed for Hub Integration -->
 
     <!-- 1. 歌詞チャット -->
     <main id="chat-container-lyrics" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-64"> 
@@ -257,7 +242,7 @@
         コピーしました！
     </div>
 
-    <!-- Readme Modal -->
+    <!-- Readme Modal (Hidden but kept for structure) -->
     <div id="readme-modal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onclick="toggleModal(false)"></div>
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white w-[90%] max-w-sm rounded-2xl shadow-xl p-6 transition-all scale-100">
@@ -272,60 +257,38 @@
             </div>
             
             <div class="space-y-6 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[60vh] px-1 pb-2 scrollbar-hide">
-                <!-- Intro -->
                 <div class="text-center mb-2">
                     <p class="text-[10px] font-bold text-orange-400 tracking-widest mb-1">WELCOME</p>
                     <p class="text-gray-700 font-medium">お花ちゃんのための<br>ポケット辞書です🌷</p>
                 </div>
-
-                <!-- Sections -->
                 <div class="space-y-4">
                     <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
-                        <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2">
-                            <i data-lucide="music" class="w-4 h-4"></i> 歌詞から探す
-                        </h3>
-                        <p class="text-xs leading-5">
-                            調べたいフレーズを入力すると、その歌詞が含まれる曲を探します。<br>
-                            <span class="text-orange-400/80 mt-1.5 block text-[10px]">💡「甘い匂いに」「あれは」など、ピンポイントでもOK！</span>
-                        </p>
+                        <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="music" class="w-4 h-4"></i> 歌詞から探す</h3>
+                        <p class="text-xs leading-5">調べたいフレーズを入力すると、その歌詞が含まれる曲を探します。<br><span class="text-orange-400/80 mt-1.5 block text-[10px]">💡「甘い匂いに」「あれは」など、ピンポイントでもOK！</span></p>
                     </div>
-
                     <div class="bg-sky-50/50 p-4 rounded-xl border border-sky-100">
-                        <h3 class="font-bold text-sky-600 flex items-center gap-2 mb-2">
-                            <i data-lucide="disc" class="w-4 h-4"></i> 楽曲データを見る
-                        </h3>
-                        <p class="text-xs leading-5">
-                            曲名やアルバム名から、発売日・収録順・当時のaikoの年齢などを教えます。<br>
-                            <span class="text-sky-400/80 mt-1.5 block text-[10px]">💡「ポニーテール」や「時のシルエット」などで検索してみて！</span>
-                        </p>
+                        <h3 class="font-bold text-sky-600 flex items-center gap-2 mb-2"><i data-lucide="disc" class="w-4 h-4"></i> 楽曲データを見る</h3>
+                        <p class="text-xs leading-5">曲名やアルバム名から、発売日・収録順・当時のaikoの年齢などを教えます。<br><span class="text-sky-400/80 mt-1.5 block text-[10px]">💡「ポニーテール」や「時のシルエット」などで検索してみて！</span></p>
                     </div>
-
                     <div class="bg-gray-800 text-gray-300 p-4 rounded-xl border border-gray-700 relative overflow-hidden group shadow-md">
                         <div class="absolute -right-6 -top-6 bg-pink-500/20 w-20 h-20 rounded-full blur-xl group-hover:bg-pink-500/30 transition duration-500"></div>
-                        <h3 class="font-bold text-pink-400 flex items-center gap-2 mb-2 relative z-10">
-                            <i data-lucide="gamepad-2" class="w-4 h-4"></i> Secret Mode
-                        </h3>
-                        <p class="text-xs leading-5 relative z-10">
-                            <span class="text-pink-300 font-bold">チャットアイコン</span>をタップすると...
-                        </p>
+                        <h3 class="font-bold text-pink-400 flex items-center gap-2 mb-2 relative z-10"><i data-lucide="gamepad-2" class="w-4 h-4"></i> Secret Mode</h3>
+                        <p class="text-xs leading-5 relative z-10"><span class="text-pink-300 font-bold">チャットアイコン</span>をタップすると...</p>
                     </div>
                 </div>
-                
-                <!-- Footer -->
                 <div class="text-center pt-6 border-t border-gray-100">
                     <p class="text-[10px] text-gray-400 mb-2">Developed by</p>
                     <a href="https://twitter.com/noki_dochibi" target="_blank" class="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-orange-500 transition bg-gray-50 px-4 py-2 rounded-full border border-gray-100 hover:border-orange-200 hover:bg-orange-50">
-                        <img src="https://unavatar.io/twitter/noki_dochibi" class="w-5 h-5 rounded-full shadow-sm">
-                        @noki_dochibi
+                        <img src="https://unavatar.io/twitter/noki_dochibi" class="w-5 h-5 rounded-full shadow-sm"> @noki_dochibi
                     </a>
-                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v1.2.3</p>
+                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v1.2.5</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const APP_VERSION = 'v1.2.3';
+        const APP_VERSION = 'v1.2.5';
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycby49eACsPr_lGblpklhK13gt4TroRwNyKwnQcKQ3GPhACQ8zV96YZ9_CDXfFn5wOj85/exec"; 
         const TWITTER_ID = "noki_dochibi";
         const ICON_URL = `https://unavatar.io/twitter/${TWITTER_ID}?v=${APP_VERSION}`;
@@ -349,7 +312,7 @@
             searchForm: document.getElementById('search-form'),
             searchInput: document.getElementById('search-input'),
             toast: document.getElementById('toast'),
-            version: document.getElementById('version-display'),
+            version: document.getElementById('version-display'), // ヘッダー削除で不在だがエラーにはならない(チェック済み)
             modal: document.getElementById('readme-modal'),
             tabBtns: document.querySelectorAll('.tab-btn'),
             botIcons: document.querySelectorAll('.bot-icon')
