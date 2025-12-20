@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.5.1.0</title>
+<title>Love Like DataBase vol.5.4.0</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- アイコン変更 -->
@@ -395,13 +395,13 @@ button { font-size: 14px !important; }
 </style>
 </head>
 <body>
-<!-- 紙吹雪用のキャンバス -->
+<!-- 銀テープ用のキャンバス -->
 <canvas id="confetti-canvas"></canvas>
 
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.5.1.0</h1>
+  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.5.4.0</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -410,7 +410,9 @@ button { font-size: 14px !important; }
 
   <!-- 公演タブ -->
   <div id="tab-search" class="tab-content" style="display:block">
-    <p class="text-gray-500 mb-4 text-sm text-right">※<span id="last-update-date">-</span>までの情報を掲載</p>
+    <!-- 注釈削除 -->
+    <div class="h-4"></div>
+    
     <div class="card-base bg-gray-50 border border-gray-200">
       <div class="flex gap-1 mb-2 items-center">
         <input type="text" id="search-input" placeholder="フリーワードで検索" class="flex-1 min-w-0">
@@ -599,9 +601,9 @@ button { font-size: 14px !important; }
       </ul>
       
       <!-- 最新のお知らせエリア（ここだけ表示する運用） -->
-      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (vol.3.0)</h3>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v5.4.0)</h3>
       <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-6 text-sm text-gray-600">
-        <p>「軌跡」タブ追加、「楽曲」タブでメドレーを含むか選択できるように。</p>
+        <p>タイトルを大きく、エフェクトを銀テープ仕様に変更しました。</p>
       </div>
 
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
@@ -813,8 +815,11 @@ function initializeApp(data) {
           return d > latest ? d : latest;
         }, new Date(0));
         
-        if (!isNaN(latestDate.getTime())) {
-            document.getElementById('last-update-date').textContent = `${latestDate.getFullYear()}/${('0' + (latestDate.getMonth() + 1)).slice(-2)}/${('0' + latestDate.getDate()).slice(-2)}`;
+        // 注釈削除に伴い、last-update-date の更新処理は不要ですが、
+        // 念のためJSのエラーを防ぐために要素があるか確認してから実行
+        const dateEl = document.getElementById('last-update-date');
+        if (dateEl && !isNaN(latestDate.getTime())) {
+            dateEl.textContent = `${latestDate.getFullYear()}/${('0' + (latestDate.getMonth() + 1)).slice(-2)}/${('0' + latestDate.getDate()).slice(-2)}`;
         }
     } catch(e) { console.error(e); }
   }
@@ -1262,55 +1267,77 @@ function startConfetti() {
   canvas.height = height;
 
   const particles = [];
-  const particleCount = 400;
-  const colors = ['#FFD700', '#C0C0C0', '#FF69B4', '#ef4444', '#FFA500'];
-
+  const particleCount = 100; // 銀テープなので数は少なめに
+  
   class Particle {
     constructor() {
-      this.x = width / 2;
-      this.y = height / 2;
+      // 画面上部からランダムに
+      this.x = Math.random() * width;
+      this.y = -Math.random() * height * 0.5 - 50; 
+      
+      // 銀テープ色（キラキラ）
+      const colors = ['#C0C0C0', '#FFD700', '#FF69B4', '#e5e7eb', '#00BFFF']; 
       this.color = colors[Math.floor(Math.random() * colors.length)];
-      this.w = Math.random() * 10 + 5;
-      this.h = Math.random() * 4 + 2;
-      const angle = Math.random() * Math.PI * 2;
-      const velocity = Math.random() * 15 + 8;
-      this.vx = Math.cos(angle) * velocity;
-      this.vy = Math.sin(angle) * velocity - 5;
-      this.gravity = 0.35;
-      this.friction = 0.95;
-      this.rotation = Math.random() * 360;
-      this.rotationSpeed = (Math.random() - 0.5) * 15;
-      this.alpha = 1;
+      
+      // テープの形状（細長い）
+      this.w = Math.random() * 8 + 4; // 幅
+      this.h = Math.random() * 60 + 30; // 長さ
+      
+      // 速度（上から降ってくる）
+      this.vy = Math.random() * 8 + 5; 
+      this.vx = (Math.random() - 0.5) * 4; // 左右に揺れる
+      
+      // ひらひら回転
+      this.angle = Math.random() * 360;
+      this.angleSpeed = (Math.random() - 0.5) * 15;
+      
+      // 奥行きの回転（裏返る動き）
+      this.flip = 0;
+      this.flipSpeed = Math.random() * 0.2 + 0.05;
     }
+    
     update() {
-      this.vx *= this.friction;
-      this.vy *= this.friction;
-      this.vy += this.gravity;
-      this.x += this.vx;
       this.y += this.vy;
-      this.rotation += this.rotationSpeed;
-      if (this.y > height + 20) this.alpha = 0;
+      this.x += this.vx;
+      
+      // 空気抵抗的な減速（終端速度）
+      if (this.vy > 3) this.vy *= 0.98;
+      
+      this.angle += this.angleSpeed;
+      this.flip += this.flipSpeed;
     }
+    
     draw(ctx) {
-      if (this.alpha <= 0) return;
+      // 画面外（下）に行ったら描画しない
+      if (this.y > height + 100) return;
+
       ctx.save();
       ctx.translate(this.x, this.y);
-      ctx.rotate((this.rotation * Math.PI) / 180);
+      ctx.rotate(this.angle * Math.PI / 180);
+      
+      // 奥行き回転（ひらひら）
+      const scaleY = Math.cos(this.flip);
+      ctx.scale(1, scaleY);
+      
       ctx.fillStyle = this.color;
-      ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+      // テープを描画
+      ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+      
       ctx.restore();
     }
   }
+
   for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle());
   }
+
   function animate() {
     ctx.clearRect(0, 0, width, height);
     let activeParticles = 0;
     particles.forEach(p => {
       p.update();
       p.draw(ctx);
-      if (p.y < height + 50) activeParticles++;
+      if (p.y < height + 100) activeParticles++;
     });
     if (activeParticles > 0) {
       requestAnimationFrame(animate);
@@ -1318,7 +1345,9 @@ function startConfetti() {
       ctx.clearRect(0, 0, width, height);
     }
   }
+  
   animate();
+  
   window.addEventListener('resize', () => {
     width = window.innerWidth;
     height = window.innerHeight;
