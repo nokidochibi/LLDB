@@ -50,7 +50,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v5.2.0";
+        const APP_VERSION = "v5.3.0";
     </script>
 </head>
 <body class="bg-gray-100">
@@ -157,7 +157,7 @@
             <div class="text-center mb-4">
                 <span class="text-4xl">🌸</span>
                 <h2 class="font-bold text-xl mt-2 text-gray-800">Love Like DataBase</h2>
-                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.2.0</p>
+                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.3.0</p>
             </div>
             
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
@@ -212,10 +212,10 @@
     </div>
 
     <!-- ==========================================================================
-         【5. APP: Others】 その他アプリ (Placeholder)
+         【5. APP: LLDB history】 軌跡アプリ (Iframe Container) - Fixed v5.3.0
          ========================================================================== -->
-    <div id="app-history" class="app-screen items-center justify-center p-6">
-        <div class="bg-pink-50 p-6 rounded-2xl shadow-sm max-w-xs border border-pink-100 text-center"><div class="text-4xl mb-4">🤝</div><h2 class="font-bold text-pink-500 text-lg mb-2">LLDB history</h2><p class="text-sm text-gray-500 leading-relaxed"> あなたとaikoの年表を作れる機能を <br>準備中です🌷</p></div>
+    <div id="app-history" class="app-screen">
+        <iframe src="./index_LLDBhistory.html" class="w-full h-full border-none"></iframe>
     </div>
 
 
@@ -225,7 +225,7 @@
     <script>
         // アプリ定義
         const apps = {
-            'live': { title: 'Love Like DataBase vol.5.2.0', color: 'bg-red-500' },
+            'live': { title: 'Love Like DataBase vol.5.3.0', color: 'bg-red-500' },
             'phrase': { title: 'LLDB phrase', color: 'bg-orange-500' },
             'history': { title: 'LLDB history', color: 'bg-pink-500' },
             'trends': { title: 'LLDB trends', color: 'bg-blue-600' }
