@@ -23,6 +23,7 @@
             --bar-color: #3b82f6;
             --text-main: #334155;
             --nav-height: 65px; /* タブバーの高さ調整 */
+            --sticky-offset: 0px; /* JSで動的に設定されるヘッダー位置 */
         }
 
         body {
@@ -41,22 +42,34 @@
            2. Layout & Table
            ========================================= */
         
+        /* 固定ヘッダーエリア（フィルタ＋サブタイトル） */
+        .sticky-header-area {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: var(--bg-color);
+            padding-bottom: 5px;
+            /* 下に影をつけて境界をわかりやすく */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); 
+        }
+
         .subtitle {
-            text-align: center;
+            text-align: left; /* ★修正: 左寄せ */
             font-size: 0.75em;
             color: #94a3b8;
-            margin: 10px 0;
+            margin: 5px 0 5px 15px; /* 余白調整 */
             display: block;
         }
 
         /* フィルタボタン */
         .filter-controls {
             text-align: center;
-            margin: 10px;
+            margin: 0 10px; /* 上マージン削除（sticky内包のため） */
             padding: 10px;
             background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-radius: 12px;
+            /* box-shadowはエリア全体にかけるのでここは削除または弱める */
+            border: 1px solid #e2e8f0;
+            border-radius: 0 0 12px 12px; /* 上部は画面端に接するため角丸なし */
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -113,9 +126,10 @@
         }
         
         thead {
+            /* ★修正: JSで計算した高さ分ずらして固定 */
             position: sticky;
-            top: 0;
-            z-index: 40; /* 高めに設定 */
+            top: var(--sticky-offset); 
+            z-index: 40; 
             background-color: var(--header-bg);
         }
         
@@ -132,7 +146,7 @@
             border-bottom: 2px solid #e2e8f0;
             /* Sticky時の背景透過防止 */
             position: sticky;
-            top: 0;
+            top: var(--sticky-offset); /* ★修正 */
             z-index: 40;
         }
         th small { font-size: 0.8em; opacity: 0.8; }
@@ -164,10 +178,16 @@
            ★ 列幅設定 (User's Favorite Layout)
            ========================================= */
         
+        /* ★修正: #カラムの改行防止設定 */
+        th:nth-child(1), td:nth-child(1) {
+            white-space: nowrap; /* 改行禁止 */
+            min-width: 30px;     /* 最低幅確保 */
+        }
+
         /* PC (>= 769px) */
         @media (min-width: 769px) {
-            th:nth-child(1), td:nth-child(1) { width: 4%; text-align: center; font-weight: bold; color: #94a3b8; }
-            th:nth-child(2), td:nth-child(2) { width: 41%; text-align: left; padding-right: 15px; }
+            th:nth-child(1), td:nth-child(1) { width: 5%; text-align: center; font-weight: bold; color: #94a3b8; }
+            th:nth-child(2), td:nth-child(2) { width: 40%; text-align: left; padding-right: 15px; }
             th:nth-child(3), td:nth-child(3) { width: 15%; text-align: right; font-weight: bold; padding: 0 10px; font-size: 1.1em; }
             th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; }
             th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; }
@@ -179,8 +199,8 @@
             .table-container { margin: 10px 2px 0 2px; }
             th { font-size: 0.8em; padding: 8px 1px; }
             
-            th:nth-child(1), td:nth-child(1) { width: 6%; text-align: center; font-weight: bold; color: #94a3b8; font-size: 0.8em; }
-            th:nth-child(2), td:nth-child(2) { width: 34%; text-align: left; padding-right: 4px; line-height: 1.4; font-size: 0.9em; }
+            th:nth-child(1), td:nth-child(1) { width: 7%; text-align: center; font-weight: bold; color: #94a3b8; font-size: 0.8em; }
+            th:nth-child(2), td:nth-child(2) { width: 33%; text-align: left; padding-right: 4px; line-height: 1.4; font-size: 0.9em; }
             th:nth-child(3), td:nth-child(3) { width: 20%; text-align: right; font-weight: bold; padding: 0 4px; font-size: 1em; white-space: nowrap; }
             th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; font-size: 0.8em; }
             th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; font-size: 0.85em; padding-right: 2px; }
@@ -189,8 +209,8 @@
 
         /* Mobile (max 480px) */
         @media (max-width: 480px) {
-            th:nth-child(1), td:nth-child(1) { width: 8%; }
-            th:nth-child(2), td:nth-child(2) { width: 30%; }
+            th:nth-child(1), td:nth-child(1) { width: 9%; }
+            th:nth-child(2), td:nth-child(2) { width: 29%; }
             th:nth-child(3), td:nth-child(3) { width: 22%; }
             th:nth-child(4), td:nth-child(4) { width: 14%; }
             th:nth-child(5), td:nth-child(5) { width: 13%; }
@@ -210,6 +230,9 @@
             cursor: pointer;
             text-decoration: underline;
             text-decoration-color: rgba(59, 130, 246, 0.3);
+            /* ★修正: フォントサイズを公開日と合わせる（少し控えめに） */
+            font-size: 0.9em; 
+            font-weight: bold;
         }
         .views-graph-container {
             width: 100%; height: 4px; background-color: #f1f5f9; border-radius: 2px; margin-top: 2px; overflow: hidden;
@@ -309,22 +332,26 @@
     <!-- Tab 1: ランキング -->
     <div id="tab-views" class="tab-content active">
         
-        <!-- Filter -->
-        <div class="filter-controls">
-            <span class="filter-option" data-category="isMV" data-checkbox-id="filterMV">MV</span>
-            <input type="checkbox" class="category-checkbox-hidden" id="filterMV" data-category="isMV" checked>
-            
-            <span class="filter-option" data-category="isFullOther" data-checkbox-id="filterFullOther">Live</span>
-            <input type="checkbox" class="category-checkbox-hidden" id="filterFullOther" data-category="isFullOther" checked>
-            
-            <span class="filter-option" data-category="isNYMovie" data-checkbox-id="filterNYMovie">new year</span>
-            <input type="checkbox" class="category-checkbox-hidden" id="filterNYMovie" data-category="isNYMovie" checked>
-            
-            <span class="filter-option" data-category="isOther" data-checkbox-id="filterOther">他(ショート等)</span>
-            <input type="checkbox" class="category-checkbox-hidden" id="filterOther" data-category="isOther" checked>
-        </div>
+        <!-- ★修正: 固定ヘッダーエリア -->
+        <div id="stickyHeader" class="sticky-header-area">
+            <!-- Filter -->
+            <div class="filter-controls">
+                <span class="filter-option" data-category="isMV" data-checkbox-id="filterMV">MV</span>
+                <input type="checkbox" class="category-checkbox-hidden" id="filterMV" data-category="isMV" checked>
+                
+                <span class="filter-option" data-category="isFullOther" data-checkbox-id="filterFullOther">Live</span>
+                <input type="checkbox" class="category-checkbox-hidden" id="filterFullOther" data-category="isFullOther" checked>
+                
+                <span class="filter-option" data-category="isNYMovie" data-checkbox-id="filterNYMovie">new year</span>
+                <input type="checkbox" class="category-checkbox-hidden" id="filterNYMovie" data-category="isNYMovie" checked>
+                
+                <span class="filter-option" data-category="isOther" data-checkbox-id="filterOther">他(ショート等)</span>
+                <input type="checkbox" class="category-checkbox-hidden" id="filterOther" data-category="isOther" checked>
+            </div>
 
-        <span class="subtitle">「視聴回数」などをタップすると並び替えできます</span>
+            <!-- ★修正: 左寄せ -->
+            <span class="subtitle">「視聴回数」などをタップすると並び替えできるで</span>
+        </div>
         
         <div id="loading">
             <div class="spinner"></div>
@@ -396,7 +423,6 @@
     // ==========================================
     // 0. CONFIG & STATE
     // ==========================================
-    // v1.0.1 - Backendのシート名修正に対応
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
     
     let videoData = [];
@@ -407,14 +433,20 @@
     let currentSortDirection = 'desc';
     let followersDataLoaded = false;
     let dailyViewsChartInstance = null;
+    let chartInstances = { youtube: null, twitter: null }; // ★修正: チャート管理
 
     // ==========================================
     // 1. INIT
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
-        fetchData(); // Get data immediately
+        fetchData(); // ランキングデータ取得
+        fetchFollowersData(); // ★修正: アプリ起動時にフォロワーグラフも描画開始
         
+        // ★修正: 固定ヘッダーの高さを計算してテーブルヘッダーのoffsetにセット
+        updateStickyOffset();
+        window.addEventListener('resize', updateStickyOffset);
+
         // Filter Click Events
         document.querySelectorAll('.filter-option').forEach(span => {
             const checkboxId = span.dataset.checkboxId;
@@ -425,6 +457,7 @@
                 checkbox.checked = !checkbox.checked;
                 span.classList.toggle('selected', checkbox.checked);
                 filterAndDisplay();
+                setTimeout(updateStickyOffset, 50); // ボタンの段組が変わる可能性があるので再計算
             });
         });
 
@@ -433,6 +466,14 @@
             if(e.target === document.getElementById('graphModal')) closeGraphModal();
         });
     });
+
+    function updateStickyOffset() {
+        const header = document.getElementById('stickyHeader');
+        if(header) {
+            const height = header.offsetHeight;
+            document.documentElement.style.setProperty('--sticky-offset', height + 'px');
+        }
+    }
 
     // ==========================================
     // 2. TAB CONTROL
@@ -444,9 +485,12 @@
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('nav-' + tabName).classList.add('active');
         
-        if (tabName === 'followers' && !followersDataLoaded) {
-            fetchFollowersData();
+        // ★修正: タブ切り替え時にグラフサイズがおかしい場合の対策 (Resize)
+        if (tabName === 'followers') {
+            if (chartInstances.youtube) chartInstances.youtube.resize();
+            if (chartInstances.twitter) chartInstances.twitter.resize();
         }
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -521,6 +565,7 @@
         document.getElementById('tableContainer').style.display = 'block';
         
         filterAndDisplay(true);
+        setTimeout(updateStickyOffset, 100); // テーブル表示後にオフセット微調整
     }
 
     function filterAndDisplay(isInit = false) {
@@ -669,12 +714,13 @@
     }
 
     async function fetchFollowersData() {
+        if (followersDataLoaded) return; // 既にロード済みならスキップ
         try {
             const res = await fetch(`${GAS_API_URL}?action=getFollowersHistory`);
             const json = await res.json();
             if (json.status === 'success') {
-                renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
-                renderFollowerChart('chart-twitter', json.data, 'twitter', '#0ea5e9');
+                chartInstances.youtube = renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
+                chartInstances.twitter = renderFollowerChart('chart-twitter', json.data, 'twitter', '#0ea5e9');
                 followersDataLoaded = true;
             }
         } catch (e) { console.error(e); }
@@ -683,7 +729,7 @@
     function renderFollowerChart(id, data, key, color) {
         const ctx = document.getElementById(id).getContext('2d');
         const valid = data.filter(d => d[key] !== null);
-        new Chart(ctx, {
+        return new Chart(ctx, {
             type: 'line',
             data: {
                 labels: valid.map(d => d.date.substring(5)),
