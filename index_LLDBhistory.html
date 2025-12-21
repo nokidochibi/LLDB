@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LLDB history v0.4.0</title>
+    <title>LLDB history v0.4.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -13,15 +13,12 @@
             background-color: #fdf2f8; /* Pink-50 */
             color: #374151;
             padding-top: 0px;
-            /* フッタータブの分だけ下を空ける */
             padding-bottom: calc(64px + env(safe-area-inset-bottom));
         }
 
-        /* カスタムスクロールバー非表示 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* 入力フォームのスタイル */
         .card-base {
             background-color: white;
             border-radius: 12px;
@@ -31,7 +28,6 @@
             border: 1px solid #fce7f3; /* Pink-100 */
         }
 
-        /* セレクトボックス */
         select {
             font-size: 15px !important;
             padding: 10px 12px !important;
@@ -43,7 +39,6 @@
             font-weight: bold;
         }
 
-        /* テーブルスタイル */
         .history-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .history-table th {
             position: sticky;
@@ -52,7 +47,7 @@
             color: white;
             font-size: 11px;
             padding: 8px 2px;
-            z-index: 20; /* ヘッダーより手前に */
+            z-index: 20;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             white-space: nowrap;
             text-align: center;
@@ -62,12 +57,11 @@
             border-bottom: 1px solid #fbcfe8; /* Pink-200 */
             vertical-align: middle;
             font-size: 11px;
-            height: 40px; /* 行の高さを確保 */
+            height: 40px;
             word-wrap: break-word;
         }
-        .history-table tr:nth-child(even) { background-color: #fff1f2; } /* Pink-50 */
+        .history-table tr:nth-child(even) { background-color: #fff1f2; } 
         
-        /* ライフステージのセル (繰り返し表示用) */
         .lifestage-text {
             font-size: 10px;
             color: #9d174d; /* Pink-800 */
@@ -84,7 +78,6 @@
             opacity: 1;
         }
 
-        /* イベントチップ */
         .event-chip {
             display: inline-block;
             padding: 2px 6px;
@@ -100,7 +93,6 @@
         .chip-single { background-color: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
         .chip-album { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
 
-        /* フッタータブ */
         nav {
             padding-bottom: env(safe-area-inset-bottom);
             position: fixed !important;
@@ -121,12 +113,12 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
-            color: #9ca3af; /* Gray-400 */
+            color: #9ca3af;
             cursor: pointer;
             transition: all 0.2s;
         }
         .tab-item.active {
-            color: #ec4899; /* Pink-500 */
+            color: #ec4899;
             background-color: #fdf2f8;
         }
         
@@ -138,7 +130,6 @@
 
     <main class="w-full max-w-lg mx-auto">
         
-        <!-- 入力エリア (常に表示) -->
         <div id="input-area" class="card-base m-4">
             <div class="flex items-end gap-2">
                 <div class="flex-1">
@@ -155,10 +146,7 @@
             </div>
         </div>
 
-        <!-- コンテンツエリア -->
         <div id="content-area" class="hidden fade-in">
-            
-            <!-- Tab: 年表 -->
             <div id="view-history" class="bg-white shadow-sm border-t border-b border-pink-100 min-h-screen">
                 <table class="history-table">
                     <thead>
@@ -170,17 +158,12 @@
                             <th style="width: 30%;">CD</th>
                         </tr>
                     </thead>
-                    <tbody id="timeline-body">
-                        <!-- JS Generated -->
-                    </tbody>
+                    <tbody id="timeline-body"></tbody>
                 </table>
-                <!-- 最後の余白 -->
                 <div class="h-20"></div>
             </div>
 
-            <!-- Tab: 今日の自分 (既存機能) -->
             <div id="view-today" class="hidden p-4">
-                 <!-- aiko Days -->
                  <div class="bg-white rounded-2xl shadow-sm p-6 mb-4 border border-pink-100 text-center relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10">
                         <i data-lucide="clock" class="w-24 h-24 text-pink-500"></i>
@@ -193,7 +176,6 @@
                     <p class="text-xs text-gray-400" id="days-detail">あなたが生まれてから...</p>
                 </div>
 
-                <!-- aiko Ratio -->
                 <div class="bg-white rounded-2xl shadow-sm p-6 mb-4 border border-pink-100 flex items-center justify-between relative overflow-hidden">
                      <div class="absolute bottom-0 left-0 p-4 opacity-10">
                         <i data-lucide="percent" class="w-20 h-20 text-pink-500"></i>
@@ -210,7 +192,6 @@
                     </div>
                 </div>
 
-                <!-- Age Sync -->
                 <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl shadow-md p-6 text-white relative">
                     <h3 class="text-xs font-bold text-pink-100 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <i data-lucide="calendar-clock" class="w-4 h-4"></i> TIME TRAVEL
@@ -228,17 +209,14 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div id="loading" class="hidden text-center py-12">
             <div class="animate-spin text-pink-400 mb-2 text-2xl">⏳</div>
             <p class="text-sm text-gray-400 animate-pulse">データを読み込み中...</p>
         </div>
-
     </main>
 
-    <!-- フッターナビゲーション -->
     <nav>
         <div onclick="switchTab('history')" class="tab-item active" data-tab="history">
             <i data-lucide="scroll" class="w-6 h-6"></i>
@@ -299,27 +277,23 @@
             birthDate = new Date(y, m - 1, d);
             localStorage.setItem('lldb_user_birth', `${y}-${m}-${d}`);
 
-            // 入力エリアは隠さない
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('content-area').classList.add('hidden');
 
             if (!allData) {
                 try {
-                    // キャッシュ確認 (v0.6.2以降のキャッシュキー推奨だが、既存のものでも動くように)
                     const cache = localStorage.getItem('lldb_data_history_v1');
                     if (cache) {
                          allData = JSON.parse(cache);
                     } else {
-                        // 新しいアクションで全データ取得
                         const res = await fetch(`${GAS_API_URL}?action=getAllData`);
                         const json = await res.json();
                         allData = json;
-                        // キャッシュ保存
                         try { localStorage.setItem('lldb_data_history_v1', JSON.stringify(json)); } catch(e){}
                     }
                 } catch (e) {
                     console.error(e);
-                    alert('データの読み込みに失敗しました。通信環境の良い場所で再試行してください。');
+                    alert('データの読み込みに失敗しました。');
                     document.getElementById('loading').classList.add('hidden');
                     return;
                 }
@@ -332,36 +306,58 @@
         }
 
         // ==========================================
-        // ★ ロジック: 学年計算
+        // ★ ロジック: 学年計算 (4/1生まれ対応版)
         // ==========================================
         function getLifeStage(targetDate, birth) {
-            // 学年基準年度の計算 (4/1以前生まれは前年度扱いとみなす簡易ロジック)
-            // ※日本の学校教育法では4/1生まれは早生まれ（前年度）だが、
-            // ユーザー入力の簡便さのため、1月〜3月生まれを「早生まれ（年度-1）」とする
+            // 学年基準年度（School Cohort）
+            // 4月1日生まれまでは「早生まれ」として前年度扱い
+            const getSchoolCohort = (d) => {
+                const y = d.getFullYear();
+                const m = d.getMonth() + 1;
+                const date = d.getDate();
+                // 1月, 2月, 3月 は前年度
+                if (m <= 3) return y - 1;
+                // 4月1日 も前年度（法律上の早生まれ）
+                if (m === 4 && date === 1) return y - 1;
+                // 4月2日以降は当年度
+                return y;
+            };
+
+            // 現在時点の年度（学校生活は4/1から新学年）
+            // ※ターゲット日は4/1から新年度が始まっているとみなす
+            const getFiscalYear = (d) => {
+                const y = d.getFullYear();
+                const m = d.getMonth() + 1;
+                // 1~3月なら前年度
+                return (m <= 3) ? y - 1 : y;
+            }
             
-            const birthYearFiscal = (birth.getMonth() + 1) <= 3 ? birth.getFullYear() - 1 : birth.getFullYear();
-            const targetYearFiscal = (targetDate.getMonth() + 1) <= 3 ? targetDate.getFullYear() - 1 : targetDate.getFullYear();
+            const birthYearCohort = getSchoolCohort(birth);
+            const targetYearFiscal = getFiscalYear(targetDate);
             
-            const grade = targetYearFiscal - birthYearFiscal;
+            // 年度差 7 で小学1年生 (入学年度)
+            // 例: 2000年度生まれ(2000/4/2〜2001/4/1) → 2007/4/1 入学
+            // 2007(target) - 2000(birth) = 7
+            const grade = targetYearFiscal - birthYearCohort;
             
-            if (grade < 6) return '未就学';
-            if (grade === 6) return '小学1年';
-            if (grade === 7) return '小学2年';
-            if (grade === 8) return '小学3年';
-            if (grade === 9) return '小学4年';
-            if (grade === 10) return '小学5年';
-            if (grade === 11) return '小学6年';
-            if (grade === 12) return '中学1年';
-            if (grade === 13) return '中学2年';
-            if (grade === 14) return '中学3年';
-            if (grade === 15) return '高校1年';
-            if (grade === 16) return '高校2年';
-            if (grade === 17) return '高校3年';
-            if (grade === 18) return '大学1年';
-            if (grade === 19) return '大学2年';
-            if (grade === 20) return '大学3年';
-            if (grade === 21) return '大学4年';
-            if (grade > 21) return '社会人?';
+            if (grade < 7) return '未就学';
+            if (grade === 7) return '小学1年';
+            if (grade === 8) return '小学2年';
+            if (grade === 9) return '小学3年';
+            if (grade === 10) return '小学4年';
+            if (grade === 11) return '小学5年';
+            if (grade === 12) return '小学6年';
+            if (grade === 13) return '中学1年';
+            if (grade === 14) return '中学2年';
+            if (grade === 15) return '中学3年';
+            if (grade === 16) return '高校1年';
+            if (grade === 17) return '高校2年';
+            if (grade === 18) return '高校3年';
+            if (grade === 19) return '大学1年';
+            if (grade === 20) return '大学2年';
+            if (grade === 21) return '大学3年';
+            if (grade === 22) return '大学4年';
+            if (grade > 22) return '社会人?';
             return '';
         }
 
@@ -378,8 +374,7 @@
             const endYear = now.getFullYear();
             const endMonth = now.getMonth();
 
-            // 1. データを年月でグルーピング
-            const eventsMap = {}; // Key: "YYYY-MM"
+            const eventsMap = {}; 
             
             if (allData.historyData && Array.isArray(allData.historyData)) {
                 allData.historyData.forEach(row => {
@@ -389,13 +384,12 @@
                     
                     if (!eventsMap[key]) eventsMap[key] = { lives: new Set(), singles: [], albums: [] };
                     
-                    if (row.live) eventsMap[key].lives.add(row.live); // Setで重複排除
+                    if (row.live) eventsMap[key].lives.add(row.live);
                     if (row.single) eventsMap[key].singles.push(row.single);
                     if (row.album) eventsMap[key].albums.push(row.album);
                 });
             }
 
-            // 2. 月ごとの行生成
             let current = new Date(startYear, startMonth, 1);
             const end = new Date(endYear, endMonth, 1);
             let prevYear = -1;
@@ -405,28 +399,24 @@
                 const m = current.getMonth() + 1;
                 const key = `${y}-${m}`;
                 
-                // 年齢計算 (厳密な誕生日ベース)
+                // 年齢計算 (厳密な誕生日ベースは複雑なので月単位で簡易計算)
+                // 誕生月を迎えたら歳をとる
                 let age = y - birthDate.getFullYear();
-                if (m < (birthDate.getMonth() + 1)) age--; // 誕生月前なら-1歳
-                // ※同月内でも誕生日前なら-1歳だが、月単位の表示なので簡易的に「その月になったら歳をとる」とする
+                if (m < (birthDate.getMonth() + 1)) age--;
 
-                // ライフステージ計算
+                // ライフステージ計算 (修正版)
                 const stageText = getLifeStage(current, birthDate);
-                // 入学・卒業などの節目を目立たせる（今回は簡易的に全て表示）
                 const isHighlight = (m === 4 && (stageText.includes('1年') || stageText === '社会人?'));
                 const stageHtml = `<span class="lifestage-text ${isHighlight ? 'lifestage-highlight' : ''}">${stageText}</span>`;
 
-                // イベントHTML生成
                 let liveHtml = '';
                 let cdHtml = '';
                 
                 if (eventsMap[key]) {
-                    // Live: Setから配列にして表示
                     eventsMap[key].lives.forEach(liveName => {
                         liveHtml += `<div class="event-chip chip-live">${liveName}</div>`;
                     });
                     
-                    // CD: SingleとAlbumを結合
                     eventsMap[key].singles.forEach(s => {
                          cdHtml += `<div class="event-chip chip-single">S: ${s}</div>`;
                     });
@@ -435,7 +425,6 @@
                     });
                 }
 
-                // 年の表示制御 (1月だけ表示、または最初だけ表示)
                 const yearDisplay = (y !== prevYear) ? `<span class="text-xs font-bold block">${y}</span>` : '';
                 prevYear = y;
 
@@ -456,9 +445,6 @@
             }
         }
 
-        // ==========================================
-        // ★ 今日の自分 (既存ロジック微調整)
-        // ==========================================
         function renderTodayStats() {
             if (!birthDate) return;
             const today = new Date();
@@ -468,14 +454,11 @@
             document.getElementById('days-with-aiko').innerText = aikoDays.toLocaleString();
             document.getElementById('aiko-ratio').innerText = Math.min((aikoDays / diffDays) * 100, 100).toFixed(1);
 
-            // シンクロ年齢計算
             let currentAge = today.getFullYear() - birthDate.getFullYear();
             if (today.getMonth() < birthDate.getMonth() || (today.getMonth() == birthDate.getMonth() && today.getDate() < birthDate.getDate())) currentAge--;
             document.getElementById('sync-age-highlight').innerText = `${currentAge}歳`;
             
-            // シンクロリリース検索
             const syncYear = AIKO_BIRTH.getFullYear() + currentAge;
-            // 簡易的にその年のリリースを探す
             let found = null;
             if (allData.historyData) {
                 const candidates = allData.historyData.filter(h => {
