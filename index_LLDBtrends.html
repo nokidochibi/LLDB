@@ -23,7 +23,7 @@
             --bar-color: #3b82f6;
             --text-main: #334155;
             --nav-height: 65px; /* タブバーの高さ調整 */
-            --sticky-offset: 0px; /* JSで動的に設定されるヘッダー位置 */
+            --sticky-offset: 0px; /* ★修正: 初期値を0pxに変更 */
         }
 
         body {
@@ -54,7 +54,7 @@
         }
 
         .subtitle {
-            text-align: left; /* ★修正: 左寄せ */
+            text-align: left; /* 左寄せ */
             font-size: 0.75em;
             color: #94a3b8;
             margin: 5px 0 5px 15px; /* 余白調整 */
@@ -126,7 +126,7 @@
         }
         
         thead {
-            /* ★修正: JSで計算した高さ分ずらして固定 */
+            /* JSで計算した高さ分ずらして固定 */
             position: sticky;
             top: var(--sticky-offset); 
             z-index: 40; 
@@ -146,7 +146,7 @@
             border-bottom: 2px solid #e2e8f0;
             /* Sticky時の背景透過防止 */
             position: sticky;
-            top: var(--sticky-offset); /* ★修正 */
+            top: var(--sticky-offset);
             z-index: 40;
         }
         th small { font-size: 0.8em; opacity: 0.8; }
@@ -178,7 +178,7 @@
            ★ 列幅設定 (User's Favorite Layout)
            ========================================= */
         
-        /* ★修正: #カラムの改行防止設定 */
+        /* #カラムの改行防止設定 */
         th:nth-child(1), td:nth-child(1) {
             white-space: nowrap; /* 改行禁止 */
             min-width: 30px;     /* 最低幅確保 */
@@ -230,7 +230,7 @@
             cursor: pointer;
             text-decoration: underline;
             text-decoration-color: rgba(59, 130, 246, 0.3);
-            /* ★修正: フォントサイズを公開日と合わせる（少し控えめに） */
+            /* フォントサイズを公開日と合わせる（少し控えめに） */
             font-size: 0.9em; 
             font-weight: bold;
         }
@@ -332,7 +332,7 @@
     <!-- Tab 1: ランキング -->
     <div id="tab-views" class="tab-content active">
         
-        <!-- ★修正: 固定ヘッダーエリア -->
+        <!-- 固定ヘッダーエリア -->
         <div id="stickyHeader" class="sticky-header-area">
             <!-- Filter -->
             <div class="filter-controls">
@@ -349,8 +349,8 @@
                 <input type="checkbox" class="category-checkbox-hidden" id="filterOther" data-category="isOther" checked>
             </div>
 
-            <!-- ★修正: 左寄せ -->
-            <span class="subtitle">「視聴回数」などをタップすると並び替えできるで</span>
+            <!-- 左寄せ -->
+            <span class="subtitle">「視聴回数」などをタップすると並び替えできます</span>
         </div>
         
         <div id="loading">
@@ -433,7 +433,7 @@
     let currentSortDirection = 'desc';
     let followersDataLoaded = false;
     let dailyViewsChartInstance = null;
-    let chartInstances = { youtube: null, twitter: null }; // ★修正: チャート管理
+    let chartInstances = { youtube: null, twitter: null };
 
     // ==========================================
     // 1. INIT
@@ -441,11 +441,18 @@
     document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
         fetchData(); // ランキングデータ取得
-        fetchFollowersData(); // ★修正: アプリ起動時にフォロワーグラフも描画開始
+        fetchFollowersData(); // アプリ起動時にフォロワーグラフも描画開始
         
-        // ★修正: 固定ヘッダーの高さを計算してテーブルヘッダーのoffsetにセット
-        updateStickyOffset();
-        window.addEventListener('resize', updateStickyOffset);
+        // ★修正: 固定ヘッダーの高さを監視して適用
+        const header = document.getElementById('stickyHeader');
+        if(header) {
+            updateStickyOffset(); // 初期実行
+            // ResizeObserverでサイズ変更を常に監視
+            const observer = new ResizeObserver(() => updateStickyOffset());
+            observer.observe(header);
+            // ★追加: 画像やフォント読み込み完了後にも再計算
+            window.addEventListener('load', updateStickyOffset);
+        }
 
         // Filter Click Events
         document.querySelectorAll('.filter-option').forEach(span => {
@@ -457,7 +464,8 @@
                 checkbox.checked = !checkbox.checked;
                 span.classList.toggle('selected', checkbox.checked);
                 filterAndDisplay();
-                setTimeout(updateStickyOffset, 50); // ボタンの段組が変わる可能性があるので再計算
+                // ResizeObserverが感知するはずだが、念のため微遅延で更新
+                setTimeout(updateStickyOffset, 50); 
             });
         });
 
@@ -470,7 +478,8 @@
     function updateStickyOffset() {
         const header = document.getElementById('stickyHeader');
         if(header) {
-            const height = header.offsetHeight;
+            // ★修正: getBoundingClientRectで正確な高さを取得
+            const height = header.getBoundingClientRect().height;
             document.documentElement.style.setProperty('--sticky-offset', height + 'px');
         }
     }
@@ -485,7 +494,7 @@
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('nav-' + tabName).classList.add('active');
         
-        // ★修正: タブ切り替え時にグラフサイズがおかしい場合の対策 (Resize)
+        // タブ切り替え時にグラフサイズがおかしい場合の対策 (Resize)
         if (tabName === 'followers') {
             if (chartInstances.youtube) chartInstances.youtube.resize();
             if (chartInstances.twitter) chartInstances.twitter.resize();
@@ -726,22 +735,55 @@
         } catch (e) { console.error(e); }
     }
 
+    // ★修正: フォロワーグラフ描画ロジック更新
     function renderFollowerChart(id, data, key, color) {
         const ctx = document.getElementById(id).getContext('2d');
+        
+        // nullでない日付データをフィルタリング (データ自体は0でも残す)
         const valid = data.filter(d => d[key] !== null);
+        
+        // 0をnullに変換してチャートデータを作成
+        const chartData = valid.map(d => {
+            const val = Number(d[key]);
+            return val === 0 ? null : val;
+        });
+
         return new Chart(ctx, {
             type: 'line',
             data: {
-                labels: valid.map(d => d.date.substring(5)),
+                // 日付ラベルをそのまま使用 (yyyy/MM/dd形式 = 西暦あり)
+                labels: valid.map(d => d.date),
                 datasets: [{
-                    data: valid.map(d => d[key]),
-                    borderColor: color, backgroundColor: color+'10',
-                    borderWidth: 2, fill: true, pointRadius: 2
+                    data: chartData,
+                    borderColor: color, 
+                    backgroundColor: color+'10',
+                    borderWidth: 2, 
+                    fill: true, 
+                    pointRadius: 2,
+                    spanGaps: false // null (0だった場所) で線を途切れさせる
                 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            // ツールチップで0/nullの場合に「データ未取得」と表示
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y === null || context.raw === null) {
+                                    return 'データ未取得';
+                                }
+                                return context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
                 scales: { x: { ticks: { maxTicksLimit: 6 } } }
             }
         });
@@ -756,15 +798,24 @@
     }
 
     function formatTitle(title) {
-        const match = title.match(/[「『]/);
+        if (!title) return '';
+        // ★修正: タイトルの整形処理追加
+        // 1. "aiko - ", "aiko" を削除 (case insensitive)
+        // 2. "music video" を "MV" に置換 (case insensitive)
+        let formatted = title
+            .replace(/aiko\s*-\s*/gi, '')
+            .replace(/aiko/gi, '')
+            .replace(/music video/gi, 'MV');
+
+        const match = formatted.match(/[「『]/);
         if (match) {
             const idx = match.index;
-            const pre = title.substring(0, idx);
-            const post = title.substring(idx);
+            const pre = formatted.substring(0, idx);
+            const post = formatted.substring(idx);
             const fmtPost = post.replace(/([「『][^」』]+[」』])/g, '<strong>$1</strong>');
             return `<small>${pre}</small><br>${fmtPost}`;
         }
-        return `<small>${title}</small>`;
+        return `<small>${formatted}</small>`;
     }
 </script>
 </body>
