@@ -21,12 +21,12 @@
            1. Base & Theme Colors
            ========================================= */
         :root {
-            --bg-color: #F8F9FA;      /* Off-White */
-            --main-orange: #F4A261;   /* Song Helper Theme */
-            --main-sky: #0ea5e9;      /* Title Search Theme */
-            --main-pink: #ec4899;     /* Shiritori Theme */
+            --bg-color: #F8F9FA;       /* Off-White */
+            --main-orange: #F4A261;    /* Song Helper Theme */
+            --main-sky: #0ea5e9;       /* Title Search Theme */
+            --main-pink: #ec4899;      /* Shiritori Theme */
             --bubble-color: #F4A261;
-            /* ★修正: ナビゲーションの高さを85pxに統一 */
+            /* ナビゲーションの高さを85pxに統一 */
             --nav-height: 85px;
         }
 
@@ -112,7 +112,7 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ★修正: タブボタンのスタイル変更 */
+        /* タブボタンのスタイル変更: 上寄せ配置 */
         .tab-btn {
             flex: 1;
             display: flex;
@@ -140,6 +140,7 @@
             background-color: transparent !important; /* 背景色はつけない */
         }
         
+        /* 選択時は線の太さを2.5pxに */
         .tab-btn.active i {
             stroke-width: 2.5px;
         }
@@ -208,7 +209,7 @@
 </head>
 <body id="app-body" class="theme-lyrics h-screen flex flex-col transition-colors duration-300">
 
-    <!-- 1. 歌詞チャット -->
+    <!-- 1. 歌詞(フレーズ)チャット -->
     <main id="chat-container-lyrics" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-48"> 
         <div class="flex items-start space-x-2">
             <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()" alt="icon">
@@ -266,7 +267,7 @@
         <div id="footer-tab-area">
             <button id="tab-lyrics" data-tab="lyrics" onclick="switchTab('lyrics')" class="tab-btn active">
                 <i data-lucide="music" class="w-6 h-6"></i>
-                <span class="text-[10px] font-bold">歌詞</span>
+                <span class="text-[10px] font-bold">フレーズ</span>
             </button>
             <div class="w-[1px] bg-gray-100 my-3"></div>
             <button id="tab-title" data-tab="title" onclick="switchTab('title')" class="tab-btn">
@@ -301,7 +302,7 @@
                 </div>
                 <div class="space-y-4">
                     <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
-                        <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="music" class="w-4 h-4"></i> 歌詞から探す</h3>
+                        <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="music" class="w-4 h-4"></i> フレーズから探す</h3>
                         <p class="text-xs leading-5">調べたいフレーズを入力すると、その歌詞が含まれる曲を探します。<br><span class="text-orange-400/80 mt-1.5 block text-[10px]">💡「甘い匂いに」「あれは」など、ピンポイントでもOK！</span></p>
                     </div>
                     <div class="bg-sky-50/50 p-4 rounded-xl border border-sky-100">
@@ -319,14 +320,14 @@
                     <a href="https://twitter.com/noki_dochibi" target="_blank" class="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-orange-500 transition bg-gray-50 px-4 py-2 rounded-full border border-gray-100 hover:border-orange-200 hover:bg-orange-50">
                         <img src="https://unavatar.io/twitter/noki_dochibi" class="w-5 h-5 rounded-full shadow-sm"> @noki_dochibi
                     </a>
-                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.0.0</p>
+                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.1.0</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const APP_VERSION = 'v2.0.0';
+        const APP_VERSION = 'v2.1.0';
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycby49eACsPr_lGblpklhK13gt4TroRwNyKwnQcKQ3GPhACQ8zV96YZ9_CDXfFn5wOj85/exec"; 
         const TWITTER_ID = "noki_dochibi";
         const ICON_URL = `https://unavatar.io/twitter/${TWITTER_ID}?v=${APP_VERSION}`;
