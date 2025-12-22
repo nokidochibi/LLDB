@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LLDB Trends</title>
+    
+    <!-- Chart.js & Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind (Utility用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           1. Base & Theme Colors (Navy Theme)
+           ========================================= */
+        :root {
+            --bg-color: #F8F9FA;      /* New Background Color (Off-White) */
+            --header-bg: #F8F9FA;
+            --accent-color: #1D3557;  /* New Theme Color (Navy) */
+            --bar-color: #1D3557;
+            --text-main: #334155;
+            --nav-height: 52px;       /* Tab Bar Base Height (Updated) */
+            --sticky-offset: 0px;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            /* フッターの高さ + Safe Area 分の余白 */
+            padding-bottom: calc(var(--nav-height) + 20px + env(safe-area-inset-bottom));
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* =========================================
+           2. Layout & Table
+           ========================================= */
+        
+        /* 固定ヘッダーエリア（フィルタ＋サブタイトル） */
+        .sticky-header-area {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: var(--header-bg); /* 背景色を透過させない */
+            padding-bottom: 5px;
+            padding-top: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03); 
+        }
+
+        .subtitle {
+            text-align: left;
+            font-size: 0.75em;
+            color: #94a3b8;
+            margin: 5px 0 5px 15px;
+            display: block;
+        }
+
+        /* フィルタボタン */
+        .filter-controls {
+            text-align: center;
+            margin: 0 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .filter-option {
+            display: inline-block;
+            padding: 6px 14px;
+            border: 1px solid var(--accent-color);
+            border-radius: 20px;
+            background-color: white;
+            color: var(--accent-color);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85em;
+        }
+        .filter-option.selected {
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(29, 53, 87, 0.3);
+        }
+        .category-checkbox-hidden { display: none; }
+
+        /* テーブルコンテナ */
+        .table-container {
+            position: relative;
+            margin: 0 5px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+        .update-time {
+            position: absolute;
+            top: -20px;
+            right: 8px;
+            font-size: 0.7em;
+            color: #64748b;
+            z-index: 2;
+            font-family: monospace;
+        }
+
+        /* テーブルスタイル */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            box-shadow: var(--card-shadow);
+            background-color: #fff;
+            box-sizing: border-box;
+            font-size: 1em;
+            table-layout: fixed;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        
+        thead {
+            position: sticky;
+            top: var(--sticky-offset);
+            z-index: 40;
+            background-color: var(--header-bg);
+        }
+        
+        /* ヘッダーセルのスタイル調整 */
+        th {
+            background-color: var(--header-bg);
+            color: #475569;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            line-height: 1.3;
+            font-size: 0.85em;
+            padding: 12px 2px;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: var(--sticky-offset);
+            z-index: 40;
+        }
+        th small { font-size: 0.8em; opacity: 0.8; }
+
+        td {
+            padding: 10px 4px;
+            border-bottom: 1px solid #f1f5f9;
+            word-break: break-word;
+            white-space: normal;
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ソートアイコン */
+        .sortable th::after {
+            content: ''; display: inline-block; vertical-align: middle; margin-left: 2px;
+            width: 0; height: 0;
+            border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 4px solid #cbd5e1;
+        }
+        .sortable th.asc::after {
+            border-bottom: 4px solid var(--accent-color); border-top: none;
+        }
+        .sortable th.desc::after {
+            border-top: 4px solid var(--accent-color); border-bottom: none;
+        }
+
+        /* =========================================
+           ★ 列幅設定 (User's Favorite Layout)
+           ========================================= */
+        
+        th:nth-child(1), td:nth-child(1) { white-space: nowrap; min-width: 30px; }
+
+        /* PC (>= 769px) */
+        @media (min-width: 769px) {
+            th:nth-child(1), td:nth-child(1) { width: 5%; text-align: center; font-weight: bold; color: #94a3b8; }
+            th:nth-child(2), td:nth-child(2) { width: 40%; text-align: left; padding-right: 15px; }
+            th:nth-child(3), td:nth-child(3) { width: 15%; text-align: right; font-weight: bold; padding: 0 10px; font-size: 1.1em; }
+            th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; }
+            th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; }
+            th:nth-child(6), td:nth-child(6) { width: 12.5%; text-align: right; }
+        }
+
+        /* Tablet (max 768px) */
+        @media (max-width: 768px) {
+            .table-container { margin: 10px 2px 0 2px; }
+            th { font-size: 0.8em; padding: 8px 1px; }
+            
+            th:nth-child(1), td:nth-child(1) { width: 7%; text-align: center; font-weight: bold; color: #94a3b8; font-size: 0.8em; }
+            th:nth-child(2), td:nth-child(2) { width: 33%; text-align: left; padding-right: 4px; line-height: 1.4; font-size: 0.9em; }
+            th:nth-child(3), td:nth-child(3) { width: 20%; text-align: right; font-weight: bold; padding: 0 4px; font-size: 1em; white-space: nowrap; }
+            th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; font-size: 0.8em; }
+            th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; font-size: 0.85em; padding-right: 2px; }
+            th:nth-child(6), td:nth-child(6) { width: 12.5%; text-align: right; font-size: 0.85em; padding-right: 2px; }
+        }
+
+        /* Mobile (max 480px) */
+        @media (max-width: 480px) {
+            th:nth-child(1), td:nth-child(1) { width: 9%; }
+            th:nth-child(2), td:nth-child(2) { width: 29%; }
+            th:nth-child(3), td:nth-child(3) { width: 22%; }
+            th:nth-child(4), td:nth-child(4) { width: 14%; }
+            th:nth-child(5), td:nth-child(5) { width: 13%; }
+            th:nth-child(6), td:nth-child(6) { width: 13%; }
+            
+            td { padding: 8px 1px; font-size: 0.85em; }
+            th { padding: 12px 1px; font-size: 0.75em; }
+        }
+
+        /* セル内装飾 */
+        a { color: var(--text-main); text-decoration: none; display: block; }
+        a small { color: #64748b; font-size: 0.85em; display: block; margin-top: 1px; }
+        
+        .views-number {
+            display: block;
+            color: var(--accent-color);
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: rgba(29, 53, 87, 0.3);
+            font-size: 0.9em; 
+            font-weight: bold;
+        }
+        .views-graph-container {
+            width: 100%; height: 4px; background-color: #f1f5f9; border-radius: 2px; margin-top: 2px; overflow: hidden;
+        }
+        .views-graph-bar {
+            height: 100%; background-color: var(--bar-color); width: 0; transition: width 0.5s ease-out;
+        }
+        .emoji-number-container {
+            display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+        }
+        .emoji { font-size: 1.2em; margin-bottom: 1px; }
+
+        /* =========================================
+           3. UI Components (Modal, Footer, Tabs)
+           ========================================= */
+        
+        /* ★ ナビゲーションバー (YouTube/LINE風 高さ調整版) */
+        nav {
+            position: fixed !important;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex !important;
+            border-top: 1px solid #e5e7eb;
+            z-index: 50;
+            width: 100%;
+            background-color: white;
+            /* 高さ調整: ベース52px + Safe Area */
+            height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+        nav > div {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            height: 100%;
+        }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; 
+            justify-content: center; /* 垂直方向中央揃え */
+            gap: 3px; 
+            color: #94a3b8; 
+            background-color: transparent;
+            padding: 0;
+            cursor: pointer; 
+            transition: all 0.2s;
+            position: relative;
+            height: 100%;
+        }
+        /* アクティブ時: 背景色#1D3557, アイコン白 */
+        .nav-item.active {
+            color: white;
+            background-color: var(--accent-color);
+        }
+        .nav-item.active i {
+            color: white;
+            stroke-width: 2.5px;
+        }
+        
+        /* タブコンテンツ制御 */
+        .tab-content { display: none; padding-bottom: 20px; }
+        .tab-content.active { display: block; }
+
+        /* モーダル */
+        .modal {
+            display: none; position: fixed; z-index: 100; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto;
+            background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+            padding-top: 60px;
+            align-items: center; justify-content: center;
+        }
+        .modal.open { display: flex; }
+        .modal-content {
+            background-color: #fff; margin: auto; padding: 20px;
+            border: 1px solid #e2e8f0; width: 90%; max-width: 600px;
+            border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .close {
+            position: absolute; top: 10px; right: 15px;
+            color: #94a3b8; font-size: 28px; font-weight: bold; cursor: pointer;
+        }
+        .graph-title {
+            text-align: center; font-size: 1.1em; color: var(--text-main);
+            margin-bottom: 20px; font-weight: bold; padding-right: 20px;
+        }
+        #loading, #error { text-align: center; padding: 40px; color: #64748b; font-size: 0.9em; }
+        #error { color: #ef4444; }
+
+        /* フォロワーグラフ用スタイル */
+        .follower-card {
+            background: white; border-radius: 16px; padding: 20px;
+            margin: 16px 10px; box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        
+        /* スピナー */
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%; width: 24px; height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Tab 1: ランキング -->
+    <div id="tab-views" class="tab-content active">
+        
+        <!-- 固定ヘッダーエリア -->
+        <div id="stickyHeader" class="sticky-header-area">
+            <!-- Filter -->
+            <div class="filter-controls">
+                <span class="filter-option" data-category="isMV" data-checkbox-id="filterMV">MV</span>
+                <input type="checkbox" class="category-checkbox-hidden" id="filterMV" data-category="isMV" checked>
+                
+                <span class="filter-option" data-category="isFullOther" data-checkbox-id="filterFullOther">Live</span>
+                <input type="checkbox" class="category-checkbox-hidden" id="filterFullOther" data-category="isFullOther" checked>
+                
+                <span class="filter-option" data-category="isNYMovie" data-checkbox-id="filterNYMovie">new year</span>
+                <input type="checkbox" class="category-checkbox-hidden" id="filterNYMovie" data-category="isNYMovie" checked>
+                
+                <span class="filter-option" data-category="isOther" data-checkbox-id="filterOther">他(ショート等)</span>
+                <input type="checkbox" class="category-checkbox-hidden" id="filterOther" data-category="isOther" checked>
+            </div>
+
+            <!-- 左寄せ -->
+            <span class="subtitle">「視聴回数」などをタップすると並び替えできます</span>
+        </div>
+        
+        <div id="loading">
+            <div class="spinner"></div>
+            <div>データを読み込んでいます...</div>
+        </div>
+        <div id="error" style="display:none;"></div>
+
+        <!-- Table -->
+        <div class="table-container" id="tableContainer" style="display:none;">
+            <span id="lastUpdateTimeDisplay" class="update-time"></span>
+            <table id="dataTable">
+                <thead><tr id="tableHeader"></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab 2: フォロワー -->
+    <div id="tab-followers" class="tab-content">
+        <h1 style="font-size: 1.5em; padding: 20px 20px 10px; text-align: center; font-weight: bold; color: var(--text-main);">SNSフォロワー推移</h1>
+        
+        <div class="follower-card">
+            <h3 class="font-bold text-red-600 flex items-center gap-2 mb-4 text-base">
+                <i data-lucide="youtube" class="w-5 h-5"></i> Youtube登録者数
+            </h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="chart-youtube"></canvas>
+            </div>
+        </div>
+
+        <div class="follower-card">
+            <h3 class="font-bold text-sky-500 flex items-center gap-2 mb-4 text-base">
+                <i data-lucide="twitter" class="w-5 h-5"></i> Twitterフォロワー数
+            </h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="chart-twitter"></canvas>
+            </div>
+        </div>
+        
+        <p class="text-center text-xs text-slate-400 mt-4 mb-4">※ データは毎日自動更新されます</p>
+    </div>
+
+    <!-- Footer Nav -->
+    <nav>
+        <!-- Navアイテムをdivで囲んで横並びにする -->
+        <div style="display: flex; width: 100%; height: 100%;">
+            <div onclick="switchTab('views')" class="nav-item active" id="nav-views">
+                <i data-lucide="trending-up" style="width:24px;height:24px"></i>
+                <span class="text-[10px] font-bold">YT視聴回数</span>
+            </div>
+            <div onclick="switchTab('followers')" class="nav-item" id="nav-followers">
+                <i data-lucide="users" style="width:24px;height:24px"></i>
+                <span class="text-[10px] font-bold">フォロワー</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modal -->
+    <div id="graphModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeGraphModal()">&times;</span>
+            <h2 id="graphTitle" class="graph-title"></h2>
+            <div id="graphLoading" style="text-align:center; padding:20px; color:#64748b;">グラフ作成中...🌱🌿🌳</div>
+            <div style="position: relative; height: 300px; width:100%;">
+                <canvas id="dailyViewsChart" style="display: none;"></canvas>
+            </div>
+            <div id="noGraphData" style="text-align:center; display: none; padding:20px; color:#94a3b8;">データがありません</div>
+        </div>
+    </div>
+
+<script>
+    // ==========================================
+    // 0. CONFIG & STATE
+    // ==========================================
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+    
+    let videoData = [];
+    let filteredVideoData = [];
+    let tableHeaders = [];
+    let maxTotalViews = 0;
+    let currentSortColumn = 'totalViews';
+    let currentSortDirection = 'desc';
+    let followersDataLoaded = false;
+    let dailyViewsChartInstance = null;
+    let chartInstances = { youtube: null, twitter: null };
+
+    // ==========================================
+    // 1. INIT
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        fetchData(); // ランキングデータ取得
+        fetchFollowersData(); // アプリ起動時にフォロワーグラフも描画開始
+        
+        // 固定ヘッダーの高さを監視して適用
+        const header = document.getElementById('stickyHeader');
+        if(header) {
+            updateStickyOffset(); // 初期実行
+            // ResizeObserverでサイズ変更を常に監視
+            const observer = new ResizeObserver(() => updateStickyOffset());
+            observer.observe(header);
+            // 画像やフォント読み込み完了後にも再計算
+            window.addEventListener('load', updateStickyOffset);
+        }
+
+        // Filter Click Events
+        document.querySelectorAll('.filter-option').forEach(span => {
+            const checkboxId = span.dataset.checkboxId;
+            const checkbox = document.getElementById(checkboxId);
+            if(checkbox.checked) span.classList.add('selected');
+            
+            span.addEventListener('click', () => {
+                checkbox.checked = !checkbox.checked;
+                span.classList.toggle('selected', checkbox.checked);
+                filterAndDisplay();
+                // ResizeObserverが感知するはずだが、念のため微遅延で更新
+                setTimeout(updateStickyOffset, 50); 
+            });
+        });
+
+        // Modal Outside Click
+        window.addEventListener('click', (e) => {
+            if(e.target === document.getElementById('graphModal')) closeGraphModal();
+        });
+    });
+
+    function updateStickyOffset() {
+        const header = document.getElementById('stickyHeader');
+        if(header) {
+            const height = header.getBoundingClientRect().height;
+            document.documentElement.style.setProperty('--sticky-offset', height + 'px');
+        }
+    }
+
+    // ==========================================
+    // 2. TAB CONTROL
+    // ==========================================
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabName).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('nav-' + tabName).classList.add('active');
+        
+        // タブ切り替え時にグラフサイズがおかしい場合の対策 (Resize)
+        if (tabName === 'followers') {
+            if (chartInstances.youtube) chartInstances.youtube.resize();
+            if (chartInstances.twitter) chartInstances.twitter.resize();
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ==========================================
+    // 3. RANKING LOGIC
+    // ==========================================
+    async function fetchData() {
+        try {
+            const res = await fetch(`${GAS_API_URL}?action=getTrendsData`);
+            const json = await res.json();
+            
+            if (json.status === 'error') throw new Error(json.message);
+
+            // Data Adapter for GAS logic
+            const adaptedData = {
+                headers: [
+                    { text: 'YouTube<br>動画タイトル', key: 'title', type: 'string' },
+                    { text: '視聴回数', key: 'totalViews', type: 'number' },
+                    { text: '公開日', key: 'publishedDate', type: 'date' },
+                    { text: '平均/日<br><small>(全期間)</small>', key: 'avgDailyViews', type: 'number' },
+                    { text: '平均/日<br><small>(過去7日)</small>', key: 'avgViews7Days', type: 'number' }
+                ],
+                data: json.data.map(item => ({
+                    ...item,
+                    totalViews: parseFloat(item.totalViews) || 0,
+                    avgDailyViews: parseFloat(item.avgDailyViews) || 0,
+                    avgViews7Days: (item.avgViews7Days === "(集計中)" ? item.avgViews7Days : parseFloat(item.avgViews7Days) || 0)
+                })),
+                maxTotalViews: json.maxTotalViews || 0,
+                lastUpdateTime: json.lastUpdateTime || ''
+            };
+
+            displayData(adaptedData);
+
+        } catch (e) {
+            document.getElementById('error').textContent = "通信エラーが発生しました: " + e.message;
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    function displayData(data) {
+        videoData = data.data;
+        tableHeaders = data.headers;
+        maxTotalViews = data.maxTotalViews;
+
+        // Render Header
+        const thead = document.getElementById('tableHeader');
+        thead.innerHTML = '<th style="cursor:default; width:4%;">#</th>';
+        tableHeaders.forEach(h => {
+            const th = document.createElement('th');
+            th.innerHTML = h.text;
+            if(h.key !== 'url') {
+                th.classList.add('sortable');
+                th.onclick = () => {
+                    const dir = (currentSortColumn === h.key && currentSortDirection === 'asc') ? 'desc' :
+                                (currentSortColumn === h.key && currentSortDirection === 'desc') ? 'asc' :
+                                (h.key === 'publishedDate') ? 'asc' : 'desc';
+                    sortTable(h.key, h.type, dir);
+                };
+            }
+            thead.appendChild(th);
+        });
+
+        if(data.lastUpdateTime) {
+            document.getElementById('lastUpdateTimeDisplay').textContent = `※${data.lastUpdateTime}更新`;
+            document.getElementById('lastUpdateTimeDisplay').style.display = 'block';
+        }
+
+        // Show Table
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('tableContainer').style.display = 'block';
+        
+        filterAndDisplay(true);
+        setTimeout(updateStickyOffset, 100); // テーブル表示後にオフセット微調整
+    }
+
+    function filterAndDisplay(isInit = false) {
+        const checked = Array.from(document.querySelectorAll('.category-checkbox-hidden:checked')).map(c => c.dataset.category);
+        
+        if (checked.length === 0) {
+            filteredVideoData = [];
+        } else {
+            filteredVideoData = videoData.filter(v => checked.some(c => v[c] === '1' || v[c] === 1));
+        }
+
+        if (isInit) {
+            const h = tableHeaders.find(h => h.key === currentSortColumn);
+            if(h) sortTable(currentSortColumn, h.type, currentSortDirection);
+            else updateTableBody(filteredVideoData);
+        } else {
+            updateTableBody(filteredVideoData);
+        }
+    }
+
+    function sortTable(key, type, dir) {
+        currentSortColumn = key;
+        currentSortDirection = dir;
+        
+        document.querySelectorAll('th.sortable').forEach(th => th.classList.remove('asc', 'desc'));
+        
+        const ths = document.getElementById('tableHeader').children;
+        for(let i=1; i<ths.length; i++) { // skip #
+            if(tableHeaders[i-1].key === key) ths[i].classList.add(dir);
+        }
+
+        const sorted = [...filteredVideoData].sort((a, b) => {
+            let va = a[key], vb = b[key];
+            if(type === 'number') return dir === 'asc' ? (parseFloat(va)||0)-(parseFloat(vb)||0) : (parseFloat(vb)||0)-(parseFloat(va)||0);
+            if(type === 'date') {
+                const da = new Date(va).getTime() || (dir==='asc'?-Infinity:Infinity);
+                const db = new Date(vb).getTime() || (dir==='asc'?-Infinity:Infinity);
+                return dir === 'asc' ? da - db : db - da;
+            }
+            return dir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+        });
+        updateTableBody(sorted);
+    }
+
+    function updateTableBody(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${tableHeaders.length+1}" style="text-align:center; padding:20px; color:#94a3b8;">データがありません</td></tr>`;
+            return;
+        }
+
+        const maxDaily = Math.max(...data.map(d => parseFloat(d.avgDailyViews)||0));
+        const max7Days = Math.max(...data.map(d => parseFloat(d.avgViews7Days)||0));
+
+        data.forEach((row, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML += `<td style="text-align:center; font-weight:bold; color:#94a3b8;">${i+1}</td>`;
+            
+            tableHeaders.forEach(h => {
+                let td = document.createElement('td');
+                const val = row[h.key];
+                
+                if (h.key === 'title') {
+                    td.innerHTML = `<a href="${row.url}" target="_blank">${formatTitle(val)}</a>`;
+                } else if (h.key === 'totalViews') {
+                    const num = parseFloat(val)||0;
+                    const pct = (maxTotalViews > 0) ? (num / maxTotalViews * 100) : 0;
+                    td.innerHTML = `
+                        <div class="views-cell-container">
+                            <span class="views-number" onclick="openGraph('${row.url}', '${row.title.replace(/'/g,"\\'")}')">${num.toLocaleString()}</span>
+                            <div class="views-graph-container"><div class="views-graph-bar" style="width:${pct}%"></div></div>
+                        </div>
+                    `;
+                } else if (h.key === 'publishedDate') {
+                    const d = new Date(val);
+                    td.innerHTML = !isNaN(d.getTime()) ? `<strong>${d.getFullYear()}年</strong><br><small>${d.getMonth()+1}月${d.getDate()}日</small>` : '';
+                    td.style.textAlign = 'center';
+                } else if (h.key.includes('avg')) {
+                    const num = parseFloat(val)||0;
+                    let emoji = '';
+                    if (h.key === 'avgDailyViews' && num === maxDaily && num > 0) emoji = '👑';
+                    if (h.key === 'avgViews7Days' && num === max7Days && num > 0) emoji = '🔥';
+                    if (val === "(集計中)") {
+                        td.innerHTML = `<span style="font-size:0.8em; color:#94a3b8;">(集計中)</span>`;
+                    } else {
+                        td.innerHTML = `<div class="emoji-number-container">${emoji ? `<div class="emoji">${emoji}</div>` : ''}<span class="number-value">${Math.round(num).toLocaleString()}</span></div>`;
+                    }
+                    td.style.textAlign = 'right';
+                }
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ==========================================
+    // 4. GRAPH & FOLLOWERS
+    // ==========================================
+    async function openGraph(url, title) {
+        document.getElementById('graphModal').classList.add('open');
+        document.getElementById('graphTitle').textContent = title;
+        document.getElementById('graphLoading').style.display = 'block';
+        document.getElementById('dailyViewsChart').style.display = 'none';
+        
+        if(dailyViewsChartInstance) { dailyViewsChartInstance.destroy(); dailyViewsChartInstance = null; }
+
+        try {
+            const res = await fetch(`${GAS_API_URL}?action=getTrendGraph&url=${encodeURIComponent(url)}`);
+            const json = await res.json();
+            
+            document.getElementById('graphLoading').style.display = 'none';
+            
+            if(json.status === 'success' && json.data.length > 0) {
+                document.getElementById('dailyViewsChart').style.display = 'block';
+                renderGraph(json.data);
+            } else {
+                document.getElementById('noGraphData').style.display = 'block';
+            }
+        } catch(e) {
+            document.getElementById('graphLoading').textContent = "エラーが発生しました";
+        }
+    }
+
+    function renderGraph(data) {
+        const ctx = document.getElementById('dailyViewsChart').getContext('2d');
+        dailyViewsChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.date.substring(5)),
+                datasets: [{
+                    label: '視聴回数',
+                    data: data.map(d => d.views),
+                    borderColor: '#1D3557', /* Navy */
+                    backgroundColor: 'rgba(29, 53, 87, 0.1)',
+                    fill: true, tension: 0.2, pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { ticks: { maxTicksLimit: 6 } } }
+            }
+        });
+    }
+
+    async function fetchFollowersData() {
+        if (followersDataLoaded) return; // 既にロード済みならスキップ
+        try {
+            const res = await fetch(`${GAS_API_URL}?action=getFollowersHistory`);
+            const json = await res.json();
+            if (json.status === 'success') {
+                chartInstances.youtube = renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
+                chartInstances.twitter = renderFollowerChart('chart-twitter', json.data, 'twitter', '#0ea5e9');
+                followersDataLoaded = true;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    // フォロワーグラフ描画ロジック
+    function renderFollowerChart(id, data, key, color) {
+        const ctx = document.getElementById(id).getContext('2d');
+        const valid = data.filter(d => d[key] !== null);
+        const chartData = valid.map(d => {
+            const val = Number(d[key]);
+            return val === 0 ? null : val;
+        });
+
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: valid.map(d => d.date),
+                datasets: [{
+                    data: chartData,
+                    borderColor: color, 
+                    backgroundColor: color+'10',
+                    borderWidth: 2, 
+                    fill: true, 
+                    pointRadius: 2,
+                    spanGaps: false
+                }]
+            },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y === null || context.raw === null) return 'データ未取得';
+                                return context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: { x: { ticks: { maxTicksLimit: 6 } } }
+            }
+        });
+    }
+
+    // ==========================================
+    // 5. UTILS
+    // ==========================================
+    function closeGraphModal() {
+        document.getElementById('graphModal').classList.remove('open');
+        document.getElementById('noGraphData').style.display = 'none';
+    }
+
+    function formatTitle(title) {
+        if (!title) return '';
+        // 1. "aiko - ", "aiko" を削除 (case insensitive)
+        // 2. "music video" を "MV" に置換 (case insensitive)
+        let formatted = title
+            .replace(/aiko\s*-\s*/gi, '')
+            .replace(/aiko/gi, '')
+            .replace(/music video/gi, 'MV');
+
+        const match = formatted.match(/[「『]/);
+        if (match) {
+            const idx = match.index;
+            const pre = formatted.substring(0, idx);
+            const post = formatted.substring(idx);
+            const fmtPost = post.replace(/([「『][^」』]+[」』])/g, '<strong>$1</strong>');
+            return `<small>${pre}</small><br>${fmtPost}`;
+        }
+        return `<small>${formatted}</small>`;
+    }
+</script>
+</body>
+</html>
