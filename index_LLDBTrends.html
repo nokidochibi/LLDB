@@ -17,13 +17,13 @@
            1. Base & Theme Colors (Navy Theme)
            ========================================= */
         :root {
-            --bg-color: #F8F9FA;      /* New Background Color (Off-White) */
+            --bg-color: #F8F9FA;       /* New Background Color (Off-White) */
             --header-bg: #F8F9FA;
-            --accent-color: #1D3557;  /* New Theme Color (Navy) */
+            --accent-color: #1D3557;   /* New Theme Color (Navy) */
             --bar-color: #1D3557;
             --text-main: #334155;
-            /* ★修正: ナビゲーションの高さを85pxに統一 */
-            --nav-height: 85px;       
+            /* ナビゲーションの高さを85pxに統一 */
+            --nav-height: 85px;        
             --sticky-offset: 0px;
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
@@ -128,9 +128,10 @@
             border: 1px solid rgba(0,0,0,0.03);
         }
         
+        /* 【修正】theadのsticky指定を削除（thと重複してバグるため） */
         thead {
-            position: sticky;
-            top: var(--sticky-offset);
+            /* position: sticky; 削除 */
+            /* top: var(--sticky-offset); 削除 */
             z-index: 40;
             background-color: var(--header-bg);
         }
@@ -146,6 +147,7 @@
             font-size: 0.85em;
             padding: 12px 2px;
             border-bottom: 2px solid #e2e8f0;
+            /* ここでStickyさせる */
             position: sticky;
             top: var(--sticky-offset);
             z-index: 40;
@@ -245,7 +247,7 @@
            3. UI Components (Modal, Footer, Tabs)
            ========================================= */
         
-        /* ★ ナビゲーションバー (YouTube/LINE風 高さ調整版) */
+        /* ナビゲーションバー (YouTube/LINE風 高さ調整版) */
         nav {
             position: fixed !important;
             bottom: 0;
@@ -268,7 +270,7 @@
             height: 100%;
         }
         
-        /* ★修正: ナビアイテムのスタイル変更 */
+        /* ナビアイテムのスタイル変更 */
         .nav-item {
             flex: 1; display: flex; flex-direction: column;
             align-items: center; 
@@ -286,12 +288,13 @@
             height: 100%;
         }
         
-        /* ★修正: アクティブ時のスタイル (背景色なし・アイコン色変更) */
+        /* アクティブ時のスタイル (背景色なし・アイコン色変更) */
         .nav-item.active {
             color: var(--accent-color);
             background-color: transparent;
         }
-        .nav-item.active i {
+        /* 【修正】 lucideは<i>を<svg>に変換するため、セレクタをsvgに変更して太さ指定 */
+        .nav-item.active svg {
             color: var(--accent-color);
             stroke-width: 2.5px;
         }
