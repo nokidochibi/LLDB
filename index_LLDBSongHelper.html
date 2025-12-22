@@ -94,11 +94,14 @@
             display: flex;
             flex-direction: column;
             padding-bottom: 0;
+            transition: padding-bottom 0.3s ease; /* アニメーション追加 */
         }
 
         /* 入力フォームエリア */
         #search-form {
             padding: 12px;
+            /* 【修正】右側のパディングを増やしてボタンのはみ出し防止 */
+            padding-right: 16px; 
             background-color: rgba(255,255,255,0.98);
             border-bottom: 1px solid #f3f4f6;
         }
@@ -173,6 +176,8 @@
         body.dark-mode footer {
             background-color: #1e293b;
             border-color: #334155;
+            /* 【修正】しりとりモード時はタブが消えるので、ナビゲーション分の高さをpaddingで確保して上に寄せる */
+            padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); 
         }
         body.dark-mode #search-form {
             background-color: #1e293b;
@@ -240,8 +245,8 @@
     <footer>
         <!-- 入力フォーム -->
         <form id="search-form" class="flex items-center gap-2">
-            <!-- 【修正】LINE風に丸く(rounded-full)、縦幅を細く(py-2) -->
-            <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300">
+            <!-- 【修正】入力欄の横幅を調整。LINE風に丸く(rounded-full)、縦幅を細く(py-2) -->
+            <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300 mr-1">
                 <input type="text" id="search-input" 
                     class="flex-1 bg-transparent border-none focus:outline-none text-base placeholder-gray-400"
                     placeholder="例：甘い匂いに" required autocomplete="off">
@@ -539,7 +544,8 @@
             });
             contentHtml += '</div>';
             const uniqueSongs = new Set(data.results.map(item => item.title)).size;
-            const allText = data.results.map(item => item.display_text).join('\\n').replace(/'/g, "\\'");
+            // 【修正】まとめてコピー時も、個別同様にフレーズとタイトルの間のスペース等をなくす
+            const allText = data.results.map(item => item.phrase + '（' + item.title + '）').join('\\n').replace(/'/g, "\\'");
             contentHtml += `<div class="animate-fade-in mt-3 pt-2 border-t border-dashed border-theme"><div class="flex flex-wrap items-center justify-between gap-2"><p class="text-[10px] text-gray-400"><span class="font-bold">${uniqueSongs}曲</span>の中で、<span class="font-bold">計${data.results.length}箇所</span>見つかったよ♪</p><button onclick="copyToClipboard('${allText}')" class="text-[10px] text-theme hover:text-opacity-80 flex items-center gap-1 bg-theme-soft px-3 py-1.5 rounded-full transition shadow-sm border border-theme"><i data-lucide="copy" class="w-3 h-3"></i> まとめてコピー</button></div></div>`;
             contentHtml += `<div class="flex justify-center mt-3 pt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-[10px] text-orange-300 hover:text-orange-500 flex items-center gap-1 transition px-2 py-1 rounded-full hover:bg-white"><i data-lucide="arrow-up" class="w-3 h-3"></i> この回答のトップへ移動</button></div>`;
             addMessage(contentHtml, 'bot', true);
