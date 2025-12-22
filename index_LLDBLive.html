@@ -112,6 +112,7 @@ nav > div {
   gap: 3px;
   color: #94a3b8; /* 非アクティブ時のグレー */
   background-color: transparent;
+  padding: 0;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
@@ -672,6 +673,17 @@ let animationFinishedResolver;
 const animationFinishedPromise = new Promise(resolve => {
   animationFinishedResolver = resolve;
 });
+
+// ★ 追加: チャート共通オプションの定義
+const chartCommonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { font: { size: 10 } } },
+    y: { ticks: { font: { size: 10 } } }
+  }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
