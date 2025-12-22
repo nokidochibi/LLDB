@@ -65,11 +65,15 @@
 
         /* 吹き出し (Default) */
         .bubble { position: relative; border-radius: 1.2rem; transition: background-color 0.3s, color 0.3s; }
+        
+        /* 右（ユーザー）側のしっぽ */
         .bubble-right::before {
             content: ""; position: absolute; top: 10px; right: -8px; width: 0; height: 0;
             border-style: solid; border-width: 6px 0 6px 10px;
             border-color: transparent transparent transparent var(--bubble-color);
         }
+        
+        /* 左（Bot）側のしっぽ */
         .bubble-left::before {
             content: ""; position: absolute; top: 10px; left: -8px; width: 0; height: 0;
             border-style: solid; border-width: 6px 10px 6px 0;
@@ -138,9 +142,7 @@
             stroke-width: 2.5px;
         }
 
-        /* 【修正】テーマ統一：Lyrics(Phrase)もTitleも同じオレンジ色にする 
-           theme-lyricsクラスが適用されている間は、どちらのタブもオレンジになるように設定
-        */
+        /* テーマ統一：Lyrics(Phrase)もTitleも同じオレンジ色にする */
         .theme-lyrics .tab-btn.active {
             color: var(--main-orange);
         }
@@ -238,7 +240,8 @@
     <footer>
         <!-- 入力フォーム -->
         <form id="search-form" class="flex items-center gap-2">
-            <div class="flex-1 bg-gray-100 rounded-xl flex items-center px-4 py-3 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300">
+            <!-- 【修正】LINE風に丸く(rounded-full)、縦幅を細く(py-2) -->
+            <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300">
                 <input type="text" id="search-input" 
                     class="flex-1 bg-transparent border-none focus:outline-none text-base placeholder-gray-400"
                     placeholder="例：甘い匂いに" required autocomplete="off">
@@ -292,7 +295,6 @@
                         <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="music" class="w-4 h-4"></i> フレーズから探す</h3>
                         <p class="text-xs leading-5">調べたいフレーズを入力すると、その歌詞が含まれる曲を探します。<br><span class="text-orange-400/80 mt-1.5 block text-[10px]">💡「甘い匂いに」「あれは」など、ピンポイントでもOK！</span></p>
                     </div>
-                    <!-- 【修正】色をOrangeに統一 -->
                     <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
                         <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="disc" class="w-4 h-4"></i> 楽曲データを見る</h3>
                         <p class="text-xs leading-5">曲名やアルバム名から、発売日・収録順・当時のaikoの年齢などを教えます。<br><span class="text-orange-400/80 mt-1.5 block text-[10px]">💡「ポニーテール」や「時のシルエット」などで検索してみて！</span></p>
@@ -308,7 +310,7 @@
                     <a href="https://twitter.com/noki_dochibi" target="_blank" class="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-orange-500 transition bg-gray-50 px-4 py-2 rounded-full border border-gray-100 hover:border-orange-200 hover:bg-orange-50">
                         <img src="https://unavatar.io/twitter/noki_dochibi" class="w-5 h-5 rounded-full shadow-sm"> @noki_dochibi
                     </a>
-                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.2.0</p>
+                    <p class="text--[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.2.0</p>
                 </div>
             </div>
         </div>
@@ -395,9 +397,6 @@
             dom.containerLyrics.classList.add('hidden');
             dom.containerTitle.classList.add('hidden');
             dom.containerShiritori.classList.add('hidden');
-
-            // 【修正】LyricsもTitleも同じテーマ（theme-lyrics = Orange）を使う
-            // Bubble ColorもOrange固定にするため、JSでの切り替えは削除
 
             if (mode === 'lyrics') {
                 dom.containerLyrics.classList.remove('hidden');
@@ -531,7 +530,12 @@
             data.results.forEach((item, index) => {
                 const borderClass = index < data.results.length - 1 ? 'border-b border-dashed border-theme' : '';
                 const highlightedPhrase = item.phrase.replace(new RegExp(`(${highlightWord})`, 'gi'), '<span class="highlight-text">$1</span>');
-                contentHtml += `<div onclick="copyToClipboard('${item.display_text.replace(/'/g, "\\'")}')" class="${borderClass} py-3 cursor-pointer hover:bg-theme-soft transition relative group select-none"><p class="text-sm font-medium text-gray-700 leading-relaxed pl-1">${highlightedPhrase} <span class="text-xs text-gray-400 ml-1">（${item.title}）</span></p></div>`;
+                
+                // 【修正】コピー用テキストを作成（スペースなし）
+                const copyText = (item.phrase + '（' + item.title + '）').replace(/'/g, "\\'");
+                
+                // 【修正】HTML表示上のスペースを削除
+                contentHtml += `<div onclick="copyToClipboard('${copyText}')" class="${borderClass} py-3 cursor-pointer hover:bg-theme-soft transition relative group select-none"><p class="text-sm font-medium text-gray-700 leading-relaxed pl-1">${highlightedPhrase}<span class="text-xs text-gray-400 ml-1">（${item.title}）</span></p></div>`;
             });
             contentHtml += '</div>';
             const uniqueSongs = new Set(data.results.map(item => item.title)).size;
@@ -549,7 +553,6 @@
             }
             let contentHtml = '<div class="flex flex-col gap-6 animate-fade-in">';
             if (data.songs && data.songs.length > 0) {
-                // 【修正】Sky(Blue)クラスをOrangeクラスに統一
                 let songSection = '<div class="flex flex-col gap-4">';
                 if (data.albums && data.albums.length > 0) songSection += '<div class="text-xs font-bold text-orange-500 border-b border-orange-100 pb-1">🎵 曲の検索結果</div>';
                 data.songs.forEach((song, idx) => {
@@ -580,16 +583,21 @@
         function addMessage(htmlOrText, type, shouldScroll = true) {
             const div = document.createElement('div');
             div.className = `flex items-start space-x-2 message-row ${type === 'user' ? 'justify-end' : ''}`;
+            
+            // 【修正】User側の吹き出しはJSで背景色を指定し、CSSの三角(var(--bubble-color))と同期させる
             const bubbleClass = type === 'user' ? 'bubble bubble-right text-white' : 'bubble bubble-left bg-white text-gray-800';
             
-            let userBgClass = 'bg-gray-500';
-            // 【修正】Modeに関わらずShiritori以外はOrange
-            if (currentMode === 'shiritori') userBgClass = 'bg-pink-500';
-            else userBgClass = 'bg-orange-500';
+            let userStyle = '';
+            if (type === 'user') {
+                // var(--bubble-color) は JSの switchTab() で正しくセットされているので、それをそのまま背景色に使う
+                userStyle = 'style="background-color: var(--bubble-color);"';
+            }
 
-            const finalBubbleClass = type === 'user' ? `${bubbleClass} ${userBgClass}` : bubbleClass;
             const iconHtml = type === 'bot' ? `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()">` : '';
-            div.innerHTML = type === 'bot' ? iconHtml + `<div class="${finalBubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm break-words leading-relaxed">${htmlOrText}</div>` : `<div class="${finalBubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm break-words leading-relaxed">${htmlOrText}</div>`;
+            div.innerHTML = type === 'bot' 
+                ? iconHtml + `<div class="${bubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm break-words leading-relaxed">${htmlOrText}</div>` 
+                : `<div class="${bubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm break-words leading-relaxed" ${userStyle}>${htmlOrText}</div>`;
+            
             getActiveContainer().appendChild(div);
             if (shouldScroll) scrollToBottom();
         }
