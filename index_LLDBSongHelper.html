@@ -99,9 +99,8 @@
 
         /* 入力フォームエリア */
         #search-form {
-            padding: 12px;
-            /* 【修正】右側のパディングを増やしてボタンのはみ出し防止 */
-            padding-right: 16px; 
+            /* 【修正】右側のパディングを大きく(24px)してボタンのはみ出しを防止 */
+            padding: 12px 24px 12px 16px;
             background-color: rgba(255,255,255,0.98);
             border-bottom: 1px solid #f3f4f6;
         }
@@ -244,9 +243,10 @@
     <!-- フッター -->
     <footer>
         <!-- 入力フォーム -->
-        <form id="search-form" class="flex items-center gap-2">
+        <!-- 【修正】gapを3に増やし、ボタンとの間隔を確保 -->
+        <form id="search-form" class="flex items-center gap-3">
             <!-- 【修正】入力欄の横幅を調整。LINE風に丸く(rounded-full)、縦幅を細く(py-2) -->
-            <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300 mr-1">
+            <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300">
                 <input type="text" id="search-input" 
                     class="flex-1 bg-transparent border-none focus:outline-none text-base placeholder-gray-400"
                     placeholder="例：甘い匂いに" required autocomplete="off">
