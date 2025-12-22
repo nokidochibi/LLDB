@@ -107,17 +107,22 @@
         .table-container {
             position: relative;
             margin: 0 5px;
-            margin-top: 10px;
+            margin-top: 25px; /* 更新日時表示用に少し広げる */
             box-sizing: border-box;
         }
+        
+        /* 更新日時のスタイル */
         .update-time {
             position: absolute;
-            top: -20px;
+            top: -22px;
             right: 8px;
             font-size: 0.7em;
             color: #64748b;
             z-index: 2;
             font-family: monospace;
+            background-color: rgba(248, 249, 250, 0.8);
+            padding: 0 4px;
+            border-radius: 4px;
         }
 
         /* テーブルスタイル */
@@ -131,19 +136,16 @@
             font-size: 1em;
             table-layout: fixed;
             border-radius: 16px;
-            /* overflow: hidden; Stickyを効かせるため削除 */
             border: 1px solid rgba(0,0,0,0.03);
         }
         
         thead {
             z-index: 40;
-            /* 背景色はthで指定するため透明に */
             background-color: transparent; 
         }
         
         /* ヘッダーセルのスタイル調整 - すりガラス化 */
         th {
-            /* ★変更点: すりガラス風デザイン */
             background-color: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -156,17 +158,14 @@
             font-size: 0.85em;
             padding: 12px 2px;
             
-            /* アクセントカラー(Navy)の薄いライン */
             border-bottom: 2px solid rgba(29, 53, 87, 0.15); 
             
-            /* ここでStickyさせる */
             position: sticky;
             top: var(--sticky-offset);
             z-index: 40;
         }
         th small { font-size: 0.8em; opacity: 0.8; }
         
-        /* 角丸の処理: 背景色が透過なのでborder-radiusが重要 */
         th:first-child { border-top-left-radius: 12px; }
         th:last-child { border-top-right-radius: 12px; }
 
@@ -181,9 +180,7 @@
             background-color: white;
         }
 
-        /* 偶数行の色を薄く調整 */
         tr:nth-child(even) td { background-color: #fcfcfc; }
-        /* 最終行の角丸 */
         tr:last-child td:first-child { border-bottom-left-radius: 12px; }
         tr:last-child td:last-child { border-bottom-right-radius: 12px; }
 
@@ -210,7 +207,6 @@
         @media (min-width: 769px) {
             th:nth-child(1), td:nth-child(1) { width: 5%; text-align: center; font-weight: bold; color: #94a3b8; }
             th:nth-child(2), td:nth-child(2) { width: 40%; text-align: left; padding-right: 15px; }
-            /* 修正: フォントサイズ拡大を削除し他と統一 */
             th:nth-child(3), td:nth-child(3) { width: 15%; text-align: right; font-weight: bold; padding: 0 10px; }
             th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; }
             th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; }
@@ -219,12 +215,15 @@
 
         /* Tablet (max 768px) */
         @media (max-width: 768px) {
-            .table-container { margin: 10px 2px 0 2px; }
+            .table-container { margin: 25px 2px 0 2px; }
             th { font-size: 0.8em; padding: 8px 1px; }
             
             th:nth-child(1), td:nth-child(1) { width: 7%; text-align: center; font-weight: bold; color: #94a3b8; font-size: 0.8em; }
             th:nth-child(2), td:nth-child(2) { width: 33%; text-align: left; padding-right: 4px; line-height: 1.4; font-size: 0.9em; }
-            th:nth-child(3), td:nth-child(3) { width: 20%; text-align: right; font-weight: bold; padding: 0 4px; font-size: 1em; white-space: nowrap; }
+            
+            /* 【修正】フォントサイズを削除し、他と統一 */
+            th:nth-child(3), td:nth-child(3) { width: 20%; text-align: right; font-weight: bold; padding: 0 4px; white-space: nowrap; }
+            
             th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; font-size: 0.8em; }
             th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; font-size: 0.85em; padding-right: 2px; }
             th:nth-child(6), td:nth-child(6) { width: 12.5%; text-align: right; font-size: 0.85em; padding-right: 2px; }
@@ -281,13 +280,9 @@
             border-top: 1px solid #e5e7eb;
             z-index: 50;
             width: 100%;
-            
-            /* ★変更点: すりガラス */
             background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            
-            /* 高さ調整: ベース85px + Safe Area */
             height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
@@ -303,11 +298,9 @@
         .nav-item {
             flex: 1; display: flex; flex-direction: column;
             align-items: center; 
-            /* 上寄せ配置 */
             justify-content: flex-start; 
             padding-top: 12px;
             gap: 4px; 
-            
             color: #94a3b8; 
             background-color: transparent;
             padding-bottom: 0;
@@ -317,7 +310,6 @@
             height: 100%;
         }
         
-        /* アクティブ時のスタイル (背景色なし・アイコン色変更) */
         .nav-item.active {
             color: var(--accent-color);
             background-color: transparent;
@@ -327,7 +319,6 @@
             stroke-width: 2.5px;
         }
         
-        /* タブコンテンツ制御 */
         .tab-content { display: none; padding-bottom: 20px; }
         .tab-content.active { display: block; }
 
@@ -357,14 +348,12 @@
         #loading, #error { text-align: center; padding: 40px; color: #64748b; font-size: 0.9em; }
         #error { color: #ef4444; }
 
-        /* フォロワーグラフ用スタイル */
         .follower-card {
             background: white; border-radius: 16px; padding: 20px;
             margin: 16px 10px; box-shadow: var(--card-shadow);
             border: 1px solid rgba(0,0,0,0.03);
         }
         
-        /* スピナー */
         .spinner {
             border: 3px solid #e2e8f0;
             border-top: 3px solid var(--accent-color);
@@ -409,7 +398,9 @@
 
         <!-- Table -->
         <div class="table-container" id="tableContainer" style="display:none;">
-            <span id="lastUpdateTimeDisplay" class="update-time"></span>
+            <!-- 更新日時表示エリア -->
+            <span id="lastUpdateTimeDisplay" class="update-time" style="display:none;"></span>
+            
             <table id="dataTable">
                 <thead><tr id="tableHeader"></tr></thead>
                 <tbody id="tableBody"></tbody>
@@ -444,7 +435,6 @@
 
     <!-- Footer Nav -->
     <nav>
-        <!-- Navアイテムをdivで囲んで横並びにする -->
         <div style="display: flex; width: 100%; height: 100%;">
             <div onclick="switchTab('views')" class="nav-item active" id="nav-views">
                 <i data-lucide="trending-up" style="width:24px;height:24px"></i>
@@ -471,9 +461,6 @@
     </div>
 
 <script>
-    // ==========================================
-    // 0. CONFIG & STATE
-    // ==========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
     
     let videoData = [];
@@ -486,26 +473,19 @@
     let dailyViewsChartInstance = null;
     let chartInstances = { youtube: null, twitter: null };
 
-    // ==========================================
-    // 1. INIT
-    // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
-        fetchData(); // ランキングデータ取得
-        fetchFollowersData(); // アプリ起動時にフォロワーグラフも描画開始
+        fetchData();
+        fetchFollowersData();
         
-        // 固定ヘッダーの高さを監視して適用
         const header = document.getElementById('stickyHeader');
         if(header) {
-            updateStickyOffset(); // 初期実行
-            // ResizeObserverでサイズ変更を常に監視
+            updateStickyOffset();
             const observer = new ResizeObserver(() => updateStickyOffset());
             observer.observe(header);
-            // 画像やフォント読み込み完了後にも再計算
             window.addEventListener('load', updateStickyOffset);
         }
 
-        // Filter Click Events
         document.querySelectorAll('.filter-option').forEach(span => {
             const checkboxId = span.dataset.checkboxId;
             const checkbox = document.getElementById(checkboxId);
@@ -515,12 +495,10 @@
                 checkbox.checked = !checkbox.checked;
                 span.classList.toggle('selected', checkbox.checked);
                 filterAndDisplay();
-                // ResizeObserverが感知するはずだが、念のため微遅延で更新
                 setTimeout(updateStickyOffset, 50); 
             });
         });
 
-        // Modal Outside Click
         window.addEventListener('click', (e) => {
             if(e.target === document.getElementById('graphModal')) closeGraphModal();
         });
@@ -534,9 +512,6 @@
         }
     }
 
-    // ==========================================
-    // 2. TAB CONTROL
-    // ==========================================
     function switchTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tabName).classList.add('active');
@@ -544,7 +519,6 @@
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById('nav-' + tabName).classList.add('active');
         
-        // タブ切り替え時にグラフサイズがおかしい場合の対策 (Resize)
         if (tabName === 'followers') {
             if (chartInstances.youtube) chartInstances.youtube.resize();
             if (chartInstances.twitter) chartInstances.twitter.resize();
@@ -553,9 +527,6 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ==========================================
-    // 3. RANKING LOGIC
-    // ==========================================
     async function fetchData() {
         try {
             const res = await fetch(`${GAS_API_URL}?action=getTrendsData`);
@@ -563,7 +534,6 @@
             
             if (json.status === 'error') throw new Error(json.message);
 
-            // Data Adapter for GAS logic
             const adaptedData = {
                 headers: [
                     { text: 'YouTube<br>動画タイトル', key: 'title', type: 'string' },
@@ -579,6 +549,7 @@
                     avgViews7Days: (item.avgViews7Days === "(集計中)" ? item.avgViews7Days : parseFloat(item.avgViews7Days) || 0)
                 })),
                 maxTotalViews: json.maxTotalViews || 0,
+                // APIが lastUpdateTime を返しているか確認し、あればセット
                 lastUpdateTime: json.lastUpdateTime || ''
             };
 
@@ -596,7 +567,6 @@
         tableHeaders = data.headers;
         maxTotalViews = data.maxTotalViews;
 
-        // Render Header
         const thead = document.getElementById('tableHeader');
         thead.innerHTML = '<th style="cursor:default; width:4%;">#</th>';
         tableHeaders.forEach(h => {
@@ -614,17 +584,20 @@
             thead.appendChild(th);
         });
 
+        // 更新日時の表示処理
+        const timeDisplay = document.getElementById('lastUpdateTimeDisplay');
         if(data.lastUpdateTime) {
-            document.getElementById('lastUpdateTimeDisplay').textContent = `※${data.lastUpdateTime}更新`;
-            document.getElementById('lastUpdateTimeDisplay').style.display = 'block';
+            timeDisplay.textContent = `※${data.lastUpdateTime}更新`;
+            timeDisplay.style.display = 'block';
+        } else {
+            timeDisplay.style.display = 'none';
         }
 
-        // Show Table
         document.getElementById('loading').style.display = 'none';
         document.getElementById('tableContainer').style.display = 'block';
         
         filterAndDisplay(true);
-        setTimeout(updateStickyOffset, 100); // テーブル表示後にオフセット微調整
+        setTimeout(updateStickyOffset, 100);
     }
 
     function filterAndDisplay(isInit = false) {
@@ -652,7 +625,7 @@
         document.querySelectorAll('th.sortable').forEach(th => th.classList.remove('asc', 'desc'));
         
         const ths = document.getElementById('tableHeader').children;
-        for(let i=1; i<ths.length; i++) { // skip #
+        for(let i=1; i<ths.length; i++) {
             if(tableHeaders[i-1].key === key) ths[i].classList.add(dir);
         }
 
@@ -722,9 +695,6 @@
         });
     }
 
-    // ==========================================
-    // 4. GRAPH & FOLLOWERS
-    // ==========================================
     async function openGraph(url, title) {
         document.getElementById('graphModal').classList.add('open');
         document.getElementById('graphTitle').textContent = title;
@@ -759,7 +729,7 @@
                 datasets: [{
                     label: '視聴回数',
                     data: data.map(d => d.views),
-                    borderColor: '#1D3557', /* Navy */
+                    borderColor: '#1D3557',
                     backgroundColor: 'rgba(29, 53, 87, 0.1)',
                     fill: true, tension: 0.2, pointRadius: 2
                 }]
@@ -773,7 +743,7 @@
     }
 
     async function fetchFollowersData() {
-        if (followersDataLoaded) return; // 既にロード済みならスキップ
+        if (followersDataLoaded) return;
         try {
             const res = await fetch(`${GAS_API_URL}?action=getFollowersHistory`);
             const json = await res.json();
@@ -785,7 +755,6 @@
         } catch (e) { console.error(e); }
     }
 
-    // フォロワーグラフ描画ロジック
     function renderFollowerChart(id, data, key, color) {
         const ctx = document.getElementById(id).getContext('2d');
         const valid = data.filter(d => d[key] !== null);
@@ -829,9 +798,6 @@
         });
     }
 
-    // ==========================================
-    // 5. UTILS
-    // ==========================================
     function closeGraphModal() {
         document.getElementById('graphModal').classList.remove('open');
         document.getElementById('noGraphData').style.display = 'none';
@@ -839,24 +805,16 @@
 
     function formatTitle(title) {
         if (!title) return '';
-        // ★修正手順強化: 
-        // 1. 改行コード(\r\n)を全て削除
-        // 2. 連続するスペースを1つに統合
         let cleanText = title.replace(/[\r\n]+/g, ' ').replace(/[\s\u3000]+/g, ' ').trim();
 
-        // 3. "aiko" 関連の文字列を削除
-        // ケース: "aiko - ", "aiko-", "aiko ", " aiko" など
-        // 先頭にある "aiko" を特に狙い撃ちする
         let formatted = cleanText
-            .replace(/^aiko\s*-\s*/gi, '') // 先頭の "aiko - "
-            .replace(/^aiko\s+/gi, '')     // 先頭の "aiko "
-            .replace(/aiko\s*-\s*/gi, '')  // 文中の "aiko - "
-            .replace(/aiko/gi, '')         // 残りの "aiko"
-            .replace(/music video/gi, 'MV');
+            .replace(/^aiko\s*-\s*/gi, '')
+            .replace(/^aiko\s+/gi, '')
+            .replace(/aiko\s*-\s*/gi, '')
+            .replace(/aiko/gi, '')
+            .replace(/music video/gi, 'MV')
+            .trim();
 
-        // 3. 再度トリムして、先頭の記号（ハイフン等）も消す
-        formatted = formatted.trim();
-        // もし先頭にハイフンが残っていたら消す
         if (formatted.startsWith('-')) {
             formatted = formatted.substring(1).trim();
         }
@@ -866,17 +824,14 @@
             const idx = match.index;
             const pre = formatted.substring(0, idx).trim();
             const post = formatted.substring(idx);
-            // カギカッコの中身を太字にする
             const fmtPost = post.replace(/([「『][^」』]+[」』])/g, '<strong>$1</strong>');
             
-            // pre（カギカッコ前の文字）がある場合は改行して表示、なければ太字部分のみ
             if (pre) {
                 return `<small>${pre}</small><br>${fmtPost}`;
             } else {
                 return fmtPost;
             }
         }
-        
         return `<small>${formatted}</small>`;
     }
 </script>
