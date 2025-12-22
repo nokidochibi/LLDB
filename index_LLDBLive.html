@@ -31,8 +31,8 @@ body { padding-top: 0 !important; }
   --aiko-blue: #00BFFF;
   --aiko-bg: #F8F9FA;      /* New Background Color (Off-White) */
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  /* ★修正: タブバーの高さを85pxに設定 */
-  --nav-height: 85px;      /* Tab Bar Base Height */
+  /* タブバーの高さ */
+  --nav-height: 85px;
 }
 
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
@@ -107,8 +107,8 @@ nav > div {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* ★修正: 垂直方向上揃え */
-  padding-top: 12px; /* ★追加: 上部パディングでアイコン位置調整 */
+  justify-content: flex-start; /* 垂直方向上揃え */
+  padding-top: 12px; /* 上部パディングでアイコン位置調整 */
   gap: 4px;
   color: #94a3b8; /* 非アクティブ時のグレー */
   background-color: transparent;
@@ -121,16 +121,17 @@ nav > div {
   height: 100%;
 }
 
-/* ★変更: 選択時のスタイル (アイコン反転・塗りつぶし) */
+/* ★変更: 選択時のスタイル (白抜きネガポジ反転) */
 .tab-item.active { 
-  color: var(--aiko-red); /* 文字色を赤に */
+  color: var(--aiko-red); /* 文字色 */
 }
 .tab-item.active svg { 
-  fill: var(--aiko-red);   /* 中身を赤で塗りつぶす */
-  stroke: white;           /* 線を白抜きにする */
-  stroke-width: 2px;       /* 線の太さ調整 */
-  filter: drop-shadow(0 2px 3px rgba(230, 57, 70, 0.3)); /* ほんのり影をつけて立体感を出す */
-  transform: scale(1.1);   /* 少し大きくする */
+  fill: var(--aiko-red);   /* 中身をテーマカラーで塗りつぶす */
+  stroke: #ffffff;         /* 線を「白」にする！これで絵柄が浮き出る */
+  stroke-width: 2.5px;     /* 線を少し太くして、白抜きをはっきりさせる */
+  
+  filter: drop-shadow(0 2px 3px rgba(230, 57, 70, 0.25)); /* ほんのり影 */
+  transform: scale(1.1);   /* 少し大きく */
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -647,7 +648,6 @@ button { font-size: 14px !important; }
       <i data-lucide="map-pin" style="width:24px;height:24px"></i>
       <span class="text-[10px] font-bold">場所</span>
     </a>
-    <!-- ★変更: アイコンを shuffle から pie-chart に変更 (塗りつぶし対応のため) -->
     <a href="#" class="tab-item" data-tab="pattern">
       <i data-lucide="pie-chart" style="width:24px;height:24px"></i>
       <span class="text-[10px] font-bold">傾向</span>
