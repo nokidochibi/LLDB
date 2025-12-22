@@ -210,7 +210,8 @@
         @media (min-width: 769px) {
             th:nth-child(1), td:nth-child(1) { width: 5%; text-align: center; font-weight: bold; color: #94a3b8; }
             th:nth-child(2), td:nth-child(2) { width: 40%; text-align: left; padding-right: 15px; }
-            th:nth-child(3), td:nth-child(3) { width: 15%; text-align: right; font-weight: bold; padding: 0 10px; font-size: 1.1em; }
+            /* 修正: フォントサイズ拡大を削除し他と統一 */
+            th:nth-child(3), td:nth-child(3) { width: 15%; text-align: right; font-weight: bold; padding: 0 10px; }
             th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; }
             th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; }
             th:nth-child(6), td:nth-child(6) { width: 12.5%; text-align: right; }
@@ -838,21 +839,44 @@
 
     function formatTitle(title) {
         if (!title) return '';
-        // 1. "aiko - ", "aiko" を削除 (case insensitive)
-        // 2. "music video" を "MV" に置換 (case insensitive)
-        let formatted = title
-            .replace(/aiko\s*-\s*/gi, '')
-            .replace(/aiko/gi, '')
+        // ★修正手順強化: 
+        // 1. 改行コード(\r\n)を全て削除
+        // 2. 連続するスペースを1つに統合
+        let cleanText = title.replace(/[\r\n]+/g, ' ').replace(/[\s\u3000]+/g, ' ').trim();
+
+        // 3. "aiko" 関連の文字列を削除
+        // ケース: "aiko - ", "aiko-", "aiko ", " aiko" など
+        // 先頭にある "aiko" を特に狙い撃ちする
+        let formatted = cleanText
+            .replace(/^aiko\s*-\s*/gi, '') // 先頭の "aiko - "
+            .replace(/^aiko\s+/gi, '')     // 先頭の "aiko "
+            .replace(/aiko\s*-\s*/gi, '')  // 文中の "aiko - "
+            .replace(/aiko/gi, '')         // 残りの "aiko"
             .replace(/music video/gi, 'MV');
+
+        // 3. 再度トリムして、先頭の記号（ハイフン等）も消す
+        formatted = formatted.trim();
+        // もし先頭にハイフンが残っていたら消す
+        if (formatted.startsWith('-')) {
+            formatted = formatted.substring(1).trim();
+        }
 
         const match = formatted.match(/[「『]/);
         if (match) {
             const idx = match.index;
-            const pre = formatted.substring(0, idx);
+            const pre = formatted.substring(0, idx).trim();
             const post = formatted.substring(idx);
+            // カギカッコの中身を太字にする
             const fmtPost = post.replace(/([「『][^」』]+[」』])/g, '<strong>$1</strong>');
-            return `<small>${pre}</small><br>${fmtPost}`;
+            
+            // pre（カギカッコ前の文字）がある場合は改行して表示、なければ太字部分のみ
+            if (pre) {
+                return `<small>${pre}</small><br>${fmtPost}`;
+            } else {
+                return fmtPost;
+            }
         }
+        
         return `<small>${formatted}</small>`;
     }
 </script>
