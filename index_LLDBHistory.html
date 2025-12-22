@@ -12,12 +12,13 @@
            1. Base & Theme Colors (Teal Theme)
            ========================================= */
         :root {
-            --bg-color: #F8F9FA;      /* Off-White */
+            --bg-color: #F8F9FA;       /* Off-White */
             --header-bg: #F8F9FA;
-            --accent-color: #2A9D8F;  /* New Theme Color (Teal) */
-            --accent-light: #e0f2f1;  /* Light Teal for backgrounds */
+            --accent-color: #2A9D8F;   /* New Theme Color (Teal) */
+            --accent-light: #e0f2f1;   /* Light Teal for backgrounds */
             --text-main: #334155;
-            --nav-height: 52px;       /* Tab Bar Base Height */
+            /* ナビゲーションの高さを85pxに統一 */
+            --nav-height: 85px;        
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
@@ -64,6 +65,7 @@
         /* 年表テーブルスタイル */
         .history-table { width: 100%; border-collapse: separate; border-spacing: 0; }
         .history-table th {
+            /* Sticky設定: 親要素のoverflow-hiddenを解除することで機能します */
             position: sticky;
             top: 0;
             background-color: var(--accent-color);
@@ -137,7 +139,7 @@
             z-index: 50;
             width: 100%;
             background-color: white;
-            /* 高さ調整: ベース52px + Safe Area */
+            /* 高さ調整: ベース85px + Safe Area */
             height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
@@ -150,25 +152,32 @@
             height: 100%;
         }
 
+        /* ★修正: ナビアイテムのスタイル変更 */
         .tab-item {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 3px;
+            /* 上寄せ配置 */
+            justify-content: flex-start;
+            padding-top: 12px;
+            gap: 4px;
+            
             color: #94a3b8;
             cursor: pointer;
             transition: all 0.2s;
             background-color: transparent;
             height: 100%;
+            position: relative;
         }
-        /* アクティブ時: テーマカラー背景 + 白アイコン */
+        
+        /* ★修正: アクティブ時のスタイル (背景色なし・アイコン色変更) */
         .tab-item.active {
-            color: white;
-            background-color: var(--accent-color);
+            color: var(--accent-color);
+            background-color: transparent !important;
         }
-        .tab-item.active i {
+        /* アイコンの線を太く */
+        .tab-item.active svg {
             stroke-width: 2.5px;
         }
         
@@ -204,7 +213,8 @@
 
         <div id="content-area" class="hidden fade-in px-2">
             <div id="view-history" class="hidden">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <!-- Stickyを効かせるため overflow-hidden を削除 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
                     <table class="history-table">
                         <thead>
                             <tr>
@@ -344,7 +354,7 @@
                 try {
                     const cache = localStorage.getItem('lldb_data_history_v1');
                     if (cache) {
-                         allData = JSON.parse(cache);
+                          allData = JSON.parse(cache);
                     } else {
                         const res = await fetch(`${GAS_API_URL}?action=getAllData`);
                         const json = await res.json();
@@ -405,7 +415,7 @@
             if (grade === 20) return '大学2年';
             if (grade === 21) return '大学3年';
             if (grade === 22) return '大学4年';
-            if (grade > 22) return '社会人?';
+            if (grade > 22) return '立派な大人'; // 【修正】文言変更
             return '';
         }
 
@@ -451,7 +461,7 @@
                 if (m < (birthDate.getMonth() + 1)) age--;
 
                 const stageText = getLifeStage(current, birthDate);
-                const isHighlight = (m === 4 && (stageText.includes('1年') || stageText === '社会人?'));
+                const isHighlight = (m === 4 && (stageText.includes('1年') || stageText === '立派な大人')); // 【修正】文言変更対応
                 const stageHtml = `<span class="lifestage-text ${isHighlight ? 'lifestage-highlight' : ''}">${stageText}</span>`;
 
                 let liveHtml = '';
@@ -507,8 +517,8 @@
             let found = null;
             if (allData.historyData) {
                 const candidates = allData.historyData.filter(h => {
-                     const d = new Date(h.date);
-                     return d.getFullYear() === syncYear && (h.single || h.album);
+                      const d = new Date(h.date);
+                      return d.getFullYear() === syncYear && (h.single || h.album);
                 });
                 if (candidates.length > 0) found = candidates[0];
             }
