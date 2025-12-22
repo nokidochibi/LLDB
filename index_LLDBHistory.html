@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LLDB History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           1. Base & Theme Colors (Teal Theme)
+           ========================================= */
+        :root {
+            --bg-color: #F8F9FA;      /* Off-White */
+            --header-bg: #F8F9FA;
+            --accent-color: #2A9D8F;  /* New Theme Color (Teal) */
+            --accent-light: #e0f2f1;  /* Light Teal for backgrounds */
+            --text-main: #334155;
+            --nav-height: 52px;       /* Tab Bar Base Height */
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-top: 0px;
+            /* フッターの高さ + Safe Area 分の余白 */
+            padding-bottom: calc(var(--nav-height) + 20px + env(safe-area-inset-bottom));
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .card-base {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        /* セレクトボックスのデザイン調整 */
+        select {
+            font-size: 15px !important;
+            padding: 12px 14px !important;
+            border-radius: 12px !important;
+            border: 1px solid #cbd5e1 !important;
+            background-color: #fff !important;
+            width: 100%;
+            color: var(--text-main);
+            font-weight: bold;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+
+        /* 年表テーブルスタイル */
+        .history-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .history-table th {
+            position: sticky;
+            top: 0;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 11px;
+            padding: 10px 2px;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            white-space: nowrap;
+            text-align: center;
+        }
+        /* 角丸ヘッダー */
+        .history-table th:first-child { border-top-left-radius: 12px; }
+        .history-table th:last-child { border-top-right-radius: 12px; }
+
+        .history-table td {
+            padding: 8px 4px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+            font-size: 11px;
+            height: 40px;
+            word-wrap: break-word;
+            background-color: white;
+        }
+        .history-table tr:last-child td:first-child { border-bottom-left-radius: 12px; }
+        .history-table tr:last-child td:last-child { border-bottom-right-radius: 12px; }
+        
+        .history-table tr:nth-child(even) td { background-color: #f8fafc; } 
+        
+        .lifestage-text {
+            font-size: 10px;
+            color: #475569;
+            font-weight: bold;
+            opacity: 0.8;
+            text-align: center;
+            display: block;
+        }
+        .lifestage-highlight {
+            background-color: var(--accent-light);
+            border-radius: 4px;
+            padding: 2px 4px;
+            color: var(--accent-color);
+            opacity: 1;
+        }
+
+        .event-chip {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            line-height: 1.3;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            max-width: 100%;
+        }
+        .chip-live { background-color: white; color: #ef4444; border: 1px solid #fca5a5; }
+        .chip-single { background-color: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+        .chip-album { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+
+        /* =========================================
+           2. Footer & Tabs (YouTube Style)
+           ========================================= */
+        nav {
+            position: fixed !important;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex !important;
+            border-top: 1px solid #e5e7eb;
+            z-index: 50;
+            width: 100%;
+            background-color: white;
+            /* 高さ調整: ベース52px + Safe Area */
+            height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+        
+        /* Navアイテムを横並びにするためのコンテナ */
+        nav > div {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: transparent;
+            height: 100%;
+        }
+        /* アクティブ時: テーマカラー背景 + 白アイコン */
+        .tab-item.active {
+            color: white;
+            background-color: var(--accent-color);
+        }
+        .tab-item.active i {
+            stroke-width: 2.5px;
+        }
+        
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* JITカラークラス置換用 (Tailwind configなしで使うためstyleタグで補完) */
+        .text-theme { color: var(--accent-color); }
+        .bg-theme { background-color: var(--accent-color); }
+        .border-theme { border-color: var(--accent-color); }
+        .hover-bg-theme:hover { background-color: #248a7d; } /* slightly darker */
+    </style>
+</head>
+<body>
+
+    <main class="w-full max-w-lg mx-auto">
+        
+        <div id="input-area" class="card-base m-4 bg-white">
+            <div class="flex items-end gap-3">
+                <div class="flex-1">
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5 ml-1">生年月日を選択</label>
+                    <div class="flex gap-2">
+                        <select id="year" class="flex-[3]"></select>
+                        <select id="month" class="flex-[2]"></select>
+                        <select id="day" class="flex-[2]"></select>
+                    </div>
+                </div>
+                <button onclick="generateHistory()" class="bg-theme hover-bg-theme text-white font-bold p-3.5 rounded-xl shadow-md transition-transform active:scale-95 flex-shrink-0">
+                    <i data-lucide="check" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="content-area" class="hidden fade-in px-2">
+            <div id="view-history" class="hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%;">年月</th>
+                                <th style="width: 8%;">年齢</th>
+                                <th style="width: 15%;">ライフ<br>ステージ</th>
+                                <th style="width: 35%;">LIVE</th>
+                                <th style="width: 30%;">CD</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timeline-body"></tbody>
+                    </table>
+                </div>
+                <div class="h-8"></div>
+            </div>
+
+            <div id="view-today" class="hidden p-2">
+                 <div class="bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100 text-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <i data-lucide="clock" class="w-24 h-24 text-theme"></i>
+                    </div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">aikoと過ごした時間</h3>
+                    <div class="text-4xl font-extrabold text-theme mb-1">
+                        <span id="days-with-aiko">0</span>
+                        <span class="text-base font-normal text-gray-400 ml-1">Days</span>
+                    </div>
+                    <p class="text-xs text-gray-400" id="days-detail">あなたが生まれてから...</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                     <div class="absolute bottom-0 left-0 p-4 opacity-10">
+                        <i data-lucide="percent" class="w-20 h-20 text-theme"></i>
+                    </div>
+                    <div class="z-10 text-left">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">人生におけるaiko率</h3>
+                        <div class="text-5xl font-extrabold text-theme">
+                            <span id="aiko-ratio">0</span><span class="text-2xl">%</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">人生のほとんどがaikoと共に！</p>
+                    </div>
+                    <div class="w-24 h-24 rounded-full bg-[#e0f2f1] border-4 border-white shadow-inner flex items-center justify-center relative z-10">
+                        <i data-lucide="heart" class="w-10 h-10 text-theme fill-current animate-pulse"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-[#2A9D8F] to-[#264653] rounded-2xl shadow-lg p-6 text-white relative">
+                    <h3 class="text-xs font-bold text-white/70 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="calendar-clock" class="w-4 h-4"></i> TIME TRAVEL
+                    </h3>
+                    <div class="text-center mb-4">
+                        <p class="text-sm text-white/90">もし、あなたがaikoだったら...</p>
+                        <p class="text-lg font-bold mt-1">今のあなたと同じ<span id="sync-age-highlight" class="text-[#E9C46A] text-xl mx-1">--歳</span>の頃</p>
+                        <p class="text-xs text-white/80 mt-1">aikoは <span id="sync-date-display">----年--月</span> にこの曲をリリースしていました</p>
+                    </div>
+                    <div id="pickup-container" class="text-center mt-6">
+                        <div id="pickup-image-area" class="bg-white/10 w-32 h-32 mx-auto rounded-xl mb-4 flex items-center justify-center backdrop-blur-sm overflow-hidden shadow-inner border border-white/20">
+                            <i data-lucide="disc" class="w-16 h-16 text-white/80"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2 leading-tight text-white" id="pickup-title">Loading...</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden text-center py-20">
+            <div class="animate-spin text-theme mb-3 mx-auto w-10 h-10"><i data-lucide="loader-2" class="w-10 h-10"></i></div>
+            <p class="text-sm text-gray-400 animate-pulse">データを読み込み中...</p>
+        </div>
+    </main>
+
+    <nav>
+        <div>
+            <div onclick="switchTab('history')" class="tab-item active" data-tab="history">
+                <i data-lucide="scroll" class="w-6 h-6"></i>
+                <span class="text-[10px] font-bold">年表</span>
+            </div>
+            <div onclick="switchTab('today')" class="tab-item" data-tab="today">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span class="text-[10px] font-bold">今日の自分</span>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+        const AIKO_DEBUT = new Date(1998, 6, 17);
+        const AIKO_BIRTH = new Date(1975, 10, 22);
+
+        let allData = null;
+        let birthDate = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            populateDates();
+            
+            const savedBirth = localStorage.getItem('lldb_user_birth');
+            if (savedBirth) {
+                const [y, m, d] = savedBirth.split('-');
+                document.getElementById('year').value = y;
+                document.getElementById('month').value = parseInt(m);
+                document.getElementById('day').value = parseInt(d);
+            }
+        });
+
+        function populateDates() {
+            const yEl = document.getElementById('year'), mEl = document.getElementById('month'), dEl = document.getElementById('day');
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= 1950; i--) yEl.add(new Option(i, i, false, i === 1998));
+            for (let i = 1; i <= 12; i++) mEl.add(new Option(i, i, false, i === 7));
+            for (let i = 1; i <= 31; i++) dEl.add(new Option(i, i, false, i === 17));
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.tab === tabName);
+            });
+            document.getElementById('view-history').classList.toggle('hidden', tabName !== 'history');
+            document.getElementById('view-today').classList.toggle('hidden', tabName !== 'today');
+            
+            if (tabName === 'today' && allData && birthDate) {
+                renderTodayStats();
+            }
+            lucide.createIcons();
+        }
+
+        async function generateHistory() {
+            const y = document.getElementById('year').value;
+            const m = document.getElementById('month').value;
+            const d = document.getElementById('day').value;
+            birthDate = new Date(y, m - 1, d);
+            localStorage.setItem('lldb_user_birth', `${y}-${m}-${d}`);
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('content-area').classList.add('hidden');
+
+            if (!allData) {
+                try {
+                    const cache = localStorage.getItem('lldb_data_history_v1');
+                    if (cache) {
+                         allData = JSON.parse(cache);
+                    } else {
+                        const res = await fetch(`${GAS_API_URL}?action=getAllData`);
+                        const json = await res.json();
+                        allData = json;
+                        try { localStorage.setItem('lldb_data_history_v1', JSON.stringify(json)); } catch(e){}
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert('データの読み込みに失敗しました。');
+                    document.getElementById('loading').classList.add('hidden');
+                    return;
+                }
+            }
+
+            renderTimeline();
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('content-area').classList.remove('hidden');
+            switchTab('history');
+        }
+
+        // ==========================================
+        // ★ ロジック: 学年計算 (4/1生まれ対応版)
+        // ==========================================
+        function getLifeStage(targetDate, birth) {
+            const getSchoolCohort = (d) => {
+                const y = d.getFullYear();
+                const m = d.getMonth() + 1;
+                const date = d.getDate();
+                if (m <= 3) return y - 1;
+                if (m === 4 && date === 1) return y - 1;
+                return y;
+            };
+
+            const getFiscalYear = (d) => {
+                const y = d.getFullYear();
+                const m = d.getMonth() + 1;
+                return (m <= 3) ? y - 1 : y;
+            }
+            
+            const birthYearCohort = getSchoolCohort(birth);
+            const targetYearFiscal = getFiscalYear(targetDate);
+            const grade = targetYearFiscal - birthYearCohort;
+            
+            if (grade < 7) return '未就学';
+            if (grade === 7) return '小学1年';
+            if (grade === 8) return '小学2年';
+            if (grade === 9) return '小学3年';
+            if (grade === 10) return '小学4年';
+            if (grade === 11) return '小学5年';
+            if (grade === 12) return '小学6年';
+            if (grade === 13) return '中学1年';
+            if (grade === 14) return '中学2年';
+            if (grade === 15) return '中学3年';
+            if (grade === 16) return '高校1年';
+            if (grade === 17) return '高校2年';
+            if (grade === 18) return '高校3年';
+            if (grade === 19) return '大学1年';
+            if (grade === 20) return '大学2年';
+            if (grade === 21) return '大学3年';
+            if (grade === 22) return '大学4年';
+            if (grade > 22) return '社会人?';
+            return '';
+        }
+
+        // ==========================================
+        // ★ ロジック: 年表描画
+        // ==========================================
+        function renderTimeline() {
+            const tbody = document.getElementById('timeline-body');
+            tbody.innerHTML = '';
+
+            const startYear = birthDate.getFullYear();
+            const startMonth = birthDate.getMonth();
+            const now = new Date();
+            const endYear = now.getFullYear();
+            const endMonth = now.getMonth();
+
+            const eventsMap = {}; 
+            
+            if (allData.historyData && Array.isArray(allData.historyData)) {
+                allData.historyData.forEach(row => {
+                    if (!row.date) return;
+                    const d = new Date(row.date);
+                    const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+                    
+                    if (!eventsMap[key]) eventsMap[key] = { lives: new Set(), singles: [], albums: [] };
+                    
+                    if (row.live) eventsMap[key].lives.add(row.live);
+                    if (row.single) eventsMap[key].singles.push(row.single);
+                    if (row.album) eventsMap[key].albums.push(row.album);
+                });
+            }
+
+            let current = new Date(startYear, startMonth, 1);
+            const end = new Date(endYear, endMonth, 1);
+            let prevYear = -1;
+
+            while (current <= end) {
+                const y = current.getFullYear();
+                const m = current.getMonth() + 1;
+                const key = `${y}-${m}`;
+                
+                let age = y - birthDate.getFullYear();
+                if (m < (birthDate.getMonth() + 1)) age--;
+
+                const stageText = getLifeStage(current, birthDate);
+                const isHighlight = (m === 4 && (stageText.includes('1年') || stageText === '社会人?'));
+                const stageHtml = `<span class="lifestage-text ${isHighlight ? 'lifestage-highlight' : ''}">${stageText}</span>`;
+
+                let liveHtml = '';
+                let cdHtml = '';
+                
+                if (eventsMap[key]) {
+                    eventsMap[key].lives.forEach(liveName => {
+                        liveHtml += `<div class="event-chip chip-live">${liveName}</div>`;
+                    });
+                    
+                    eventsMap[key].singles.forEach(s => {
+                         cdHtml += `<div class="event-chip chip-single">S: ${s}</div>`;
+                    });
+                    eventsMap[key].albums.forEach(a => {
+                         cdHtml += `<div class="event-chip chip-album">Al: ${a}</div>`;
+                    });
+                }
+
+                const yearDisplay = (y !== prevYear) ? `<span class="text-xs font-bold block text-gray-500">${y}</span>` : '';
+                prevYear = y;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center text-gray-400 font-mono border-r border-gray-100">
+                        ${yearDisplay}
+                        <span class="text-[10px] text-gray-300">${m}月</span>
+                    </td>
+                    <td class="text-center font-bold text-theme border-r border-gray-100">${age >= 0 ? age : ''}</td>
+                    <td class="text-center border-r border-gray-100">${stageHtml}</td>
+                    <td class="pl-1">${liveHtml}</td>
+                    <td class="pl-1">${cdHtml}</td>
+                `;
+                tbody.appendChild(tr);
+
+                current.setMonth(current.getMonth() + 1);
+            }
+        }
+
+        function renderTodayStats() {
+            if (!birthDate) return;
+            const today = new Date();
+            const diffDays = Math.ceil(Math.abs(today - birthDate) / (1000 * 60 * 60 * 24));
+            let aikoDays = (birthDate < AIKO_DEBUT) ? Math.ceil(Math.abs(today - AIKO_DEBUT) / (1000 * 60 * 60 * 24)) : diffDays;
+            
+            document.getElementById('days-with-aiko').innerText = aikoDays.toLocaleString();
+            document.getElementById('aiko-ratio').innerText = Math.min((aikoDays / diffDays) * 100, 100).toFixed(1);
+
+            let currentAge = today.getFullYear() - birthDate.getFullYear();
+            if (today.getMonth() < birthDate.getMonth() || (today.getMonth() == birthDate.getMonth() && today.getDate() < birthDate.getDate())) currentAge--;
+            document.getElementById('sync-age-highlight').innerText = `${currentAge}歳`;
+            
+            const syncYear = AIKO_BIRTH.getFullYear() + currentAge;
+            let found = null;
+            if (allData.historyData) {
+                const candidates = allData.historyData.filter(h => {
+                     const d = new Date(h.date);
+                     return d.getFullYear() === syncYear && (h.single || h.album);
+                });
+                if (candidates.length > 0) found = candidates[0];
+            }
+
+            if (found) {
+                const d = new Date(found.date);
+                document.getElementById('sync-date-display').innerText = `${d.getFullYear()}年${d.getMonth()+1}月`;
+                document.getElementById('pickup-title').innerText = found.single ? `S: ${found.single}` : `Al: ${found.album}`;
+            } else {
+                document.getElementById('sync-date-display').innerText = "----年--月";
+                document.getElementById('pickup-title').innerText = "リリース情報なし";
+            }
+        }
+    </script>
+</body>
+</html>
