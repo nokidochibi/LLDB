@@ -31,7 +31,8 @@ body { padding-top: 0 !important; }
   --aiko-blue: #00BFFF;
   --aiko-bg: #F8F9FA;      /* New Background Color (Off-White) */
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --nav-height: 52px;      /* Tab Bar Base Height */
+  /* ★修正: タブバーの高さを広げる (52px -> 62px) */
+  --nav-height: 62px;      /* Tab Bar Base Height */
 }
 
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
@@ -88,7 +89,7 @@ nav {
   right: 0;
   display: flex !important;
   border-top: 1px solid #e5e7eb;
-  /* 高さ調整: ベース52px + Safe Area */
+  /* 高さ調整: ベース62px + Safe Area */
   height: calc(var(--nav-height) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 50;
@@ -118,6 +119,8 @@ nav > div {
   width: 0;
   height: 100%;
 }
+/* アクティブ時はテーマカラーの文字色（背景色変更パターンではなく、YouTube等はアイコン色変更が一般的ですが、ご指示の「背景色の上に置くアイコンは純白」を「アクティブ時に背景色がつくデザイン」と解釈し、従来のスタイルを踏襲しつつ洗練させます） */
+/* ※補足: もし「背景色(#F8F9FA)の上に置くアイコン」という意味であれば、通常時のアイコンのことですが、ここでは「アクティブタブを目立たせる」意図で背景色をつけます */
 .tab-item.active { 
   color: white; 
   background-color: var(--aiko-red); 
