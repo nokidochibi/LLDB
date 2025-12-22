@@ -121,14 +121,17 @@ nav > div {
   height: 100%;
 }
 
-/* ★変更: 選択時のスタイル (背景色なし・アイコン色変更) */
+/* ★変更: 選択時のスタイル (アイコン反転・塗りつぶし) */
 .tab-item.active { 
   color: var(--aiko-red); /* 文字色を赤に */
-  background-color: transparent; /* 背景色は透明のまま */
 }
-.tab-item.active i { 
-  color: var(--aiko-red); /* アイコン色を赤に */
-  stroke-width: 2.5px; /* 少し太くして強調 */
+.tab-item.active svg { 
+  fill: var(--aiko-red);   /* 中身を赤で塗りつぶす */
+  stroke: white;           /* 線を白抜きにする */
+  stroke-width: 2px;       /* 線の太さ調整 */
+  filter: drop-shadow(0 2px 3px rgba(230, 57, 70, 0.3)); /* ほんのり影をつけて立体感を出す */
+  transform: scale(1.1);   /* 少し大きくする */
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* セトリリストのスタイル */
@@ -644,8 +647,9 @@ button { font-size: 14px !important; }
       <i data-lucide="map-pin" style="width:24px;height:24px"></i>
       <span class="text-[10px] font-bold">場所</span>
     </a>
+    <!-- ★変更: アイコンを shuffle から pie-chart に変更 (塗りつぶし対応のため) -->
     <a href="#" class="tab-item" data-tab="pattern">
-      <i data-lucide="shuffle" style="width:24px;height:24px"></i>
+      <i data-lucide="pie-chart" style="width:24px;height:24px"></i>
       <span class="text-[10px] font-bold">傾向</span>
     </a>
     <a href="#" class="tab-item" data-tab="history">
