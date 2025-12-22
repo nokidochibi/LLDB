@@ -31,7 +31,7 @@ body { padding-top: 0 !important; }
   --aiko-blue: #00BFFF;
   --aiko-bg: #F8F9FA;      /* New Background Color (Off-White) */
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  /* ★修正: タブバーの高さを調整 (90px -> 85px) */
+  /* ★修正: タブバーの高さを85pxに設定 */
   --nav-height: 85px;      /* Tab Bar Base Height */
 }
 
@@ -108,11 +108,11 @@ nav > div {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start; /* ★修正: 垂直方向上揃え */
-  padding-top: 10px; /* ★追加: 上部パディングで余白調整 */
-  gap: 3px;
+  padding-top: 12px; /* ★追加: 上部パディングでアイコン位置調整 */
+  gap: 4px;
   color: #94a3b8; /* 非アクティブ時のグレー */
   background-color: transparent;
-  padding: 0;
+  padding-bottom: 0;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
@@ -120,15 +120,15 @@ nav > div {
   width: 0;
   height: 100%;
 }
-/* アクティブ時はテーマカラーの文字色（背景色変更パターンではなく、YouTube等はアイコン色変更が一般的ですが、ご指示の「背景色の上に置くアイコンは純白」を「アクティブ時に背景色がつくデザイン」と解釈し、従来のスタイルを踏襲しつつ洗練させます） */
-/* ※補足: もし「背景色(#F8F9FA)の上に置くアイコン」という意味であれば、通常時のアイコンのことですが、ここでは「アクティブタブを目立たせる」意図で背景色をつけます */
+
+/* ★変更: 選択時のスタイル (背景色なし・アイコン色変更) */
 .tab-item.active { 
-  color: white; 
-  background-color: var(--aiko-red); 
+  color: var(--aiko-red); /* 文字色を赤に */
+  background-color: transparent; /* 背景色は透明のまま */
 }
 .tab-item.active i { 
-  color: white; 
-  stroke-width: 2.5px;
+  color: var(--aiko-red); /* アイコン色を赤に */
+  stroke-width: 2.5px; /* 少し太くして強調 */
 }
 
 /* セトリリストのスタイル */
