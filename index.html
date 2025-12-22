@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Love Like DataBase</title>
-    <meta name="theme-color" content="#ef4444">
+    <meta name="theme-color" content="#E63946">
 
     <!-- アイコン設定 -->
     <link id="app-icon" rel="icon" type="image/png" href="./icon.png">
@@ -19,12 +19,12 @@
 
     <style>
         /* ==========================================================================
-           【0. GLOBAL】 ベーススタイル (全体共通)
+           【0. GLOBAL】 ベーススタイル
            ========================================================================== */
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #F8F8F8;
-            color: #374151;
+            background-color: #F8F9FA; /* Off-White for Hub */
+            color: #334155;
             overflow: hidden;
             touch-action: pan-y pinch-zoom;
             -webkit-tap-highlight-color: transparent;
@@ -34,11 +34,11 @@
             position: fixed; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
             display: none; flex-direction: column;
             overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
-            background-color: #F8F8F8; animation: fadeIn 0.3s ease-out;
+            background-color: #F8F9FA; animation: fadeIn 0.3s ease-out;
         }
         .app-screen.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* ユーティリティ */
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
@@ -50,101 +50,118 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v5.4.3"; 
+        const APP_VERSION = "v6.0.0"; /* Major Update for Renewal */
     </script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50">
 
     <!-- ==========================================================================
-          【1. COMMON UI】 ヘッダー & 暖簾メニュー (HTML/CSS/JS)
-          ========================================================================== -->
+         【1. COMMON UI】 ヘッダー & 暖簾メニュー
+         ========================================================================== -->
     <style>
         /* 暖簾メニュー & ヘッダー用スタイル */
         #noren-menu {
             position: fixed; top: 60px; left: 0; width: 100%;
             background-color: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); z-index: 50;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1); z-index: 50;
             transform: translateY(-120%); 
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* スルッと降りてくる感 */
-            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; border-bottom: 1px solid #f3f4f6;
-            display: block; visibility: hidden; /* display:noneだとアニメーションしないためvisibility制御 */
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; border-bottom: 1px solid #f1f5f9;
+            display: block; visibility: hidden;
         }
         #noren-menu.open { transform: translateY(0); visibility: visible; }
         
-        .noren-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background-color 0.2s; }
-        .noren-item:active { background-color: #f9fafb; }
-        .noren-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .noren-item { display: flex; align-items: center; gap: 14px; padding: 18px 24px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background-color 0.2s; }
+        .noren-item:active { background-color: #f8fafc; }
+        .noren-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
         
         #noren-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 40; display: none; opacity: 0; transition: opacity 0.3s; }
         #noren-overlay.open { display: block; opacity: 1; }
 
         #main-app-header {
             height: 60px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
-            position: fixed; top: 0; z-index: 60; /* 暖簾より上に */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed; top: 0; z-index: 60;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: background-color 0.3s;
         }
 
-        /* 🌸アイコンのアニメーション */
         .flower-icon {
             font-size: 24px;
             display: inline-block;
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* 弾むような回転 */
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .flower-icon.rotate {
-            transform: rotate(180deg) scale(1.1);
-        }
+        .flower-icon.rotate { transform: rotate(180deg) scale(1.1); }
 
-        /* About Modal */
         #about-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; }
         #about-modal.open { display: flex; opacity: 1; }
-        .modal-card { bg-white; width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); transform: scale(0.95); transition: transform 0.3s; }
+        .modal-card { background: white; width: 90%; max-width: 400px; border-radius: 24px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); transform: scale(0.95); transition: transform 0.3s; }
         #about-modal.open .modal-card { transform: scale(1); }
-
     </style>
 
     <!-- 暖簾メニューHTML -->
     <div id="noren-overlay" onclick="toggleNoren()"></div>
     <div id="noren-menu">
         <div class="flex flex-col">
+            <!-- 1. LLDB Live (#E63946) -->
             <div class="noren-item" onclick="switchApp('live')">
-                <div class="noren-icon bg-red-500"><i data-lucide="mic-2" class="w-6 h-6"></i></div>
-                <div class="flex-1"><div class="font-bold text-gray-800">LLDB live</div><div class="text-xs text-gray-400"> ライブ / セトリ / ツアー </div></div>
+                <div class="noren-icon bg-[#E63946]"><i data-lucide="mic-2" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800 text-lg">LLDB Live</div>
+                    <div class="text-xs text-gray-400 mt-0.5">ライブ / セトリ / ツアー</div>
+                </div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
-            <div class="noren-item" onclick="switchApp('phrase')">
-                <div class="noren-icon bg-orange-500"><i data-lucide="music" class="w-6 h-6"></i></div>
-                <div class="flex-1"><div class="font-bold text-gray-800">LLDB lookup</div><div class="text-xs text-gray-400"> 楽曲 / 歌詞フレーズ検索 </div></div>
-                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
-            </div>
-            <div class="noren-item" onclick="switchApp('history')">
-                <div class="noren-icon bg-pink-500"><i data-lucide="heart-handshake" class="w-6 h-6"></i></div>
-                <div class="flex-1"><div class="font-bold text-gray-800">LLDB history</div><div class="text-xs text-gray-400"> aikoとわたし / 人生年表 </div></div>
-                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
-            </div>
+
+            <!-- 2. LLDB Trends (#1D3557) -->
             <div class="noren-item" onclick="switchApp('trends')">
-                <div class="noren-icon bg-blue-600"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
-                <div class="flex-1"><div class="font-bold text-gray-800">LLDB trends</div><div class="text-xs text-gray-400"> Youtube再生数 / ランキング </div></div>
+                <div class="noren-icon bg-[#1D3557]"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800 text-lg">LLDB Trends</div>
+                    <div class="text-xs text-gray-400 mt-0.5">Youtube再生数 / ランキング</div>
+                </div>
+                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+            </div>
+
+            <!-- 3. LLDB Song Helper (#F4A261) -->
+            <div class="noren-item" onclick="switchApp('songHelper')">
+                <div class="noren-icon bg-[#F4A261]"><i data-lucide="music" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800 text-lg">LLDB Song Helper</div>
+                    <div class="text-xs text-gray-400 mt-0.5">楽曲 / 歌詞フレーズ検索</div>
+                </div>
+                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+            </div>
+
+            <!-- 4. LLDB History (#2A9D8F) -->
+            <div class="noren-item" onclick="switchApp('history')">
+                <div class="noren-icon bg-[#2A9D8F]"><i data-lucide="heart-handshake" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800 text-lg">LLDB History</div>
+                    <div class="text-xs text-gray-400 mt-0.5">aikoとわたし / 人生年表</div>
+                </div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
             
             <!-- About Menu -->
             <div class="noren-item bg-gray-50/50" onclick="openAboutModal()">
                 <div class="noren-icon bg-gray-400"><i data-lucide="info" class="w-6 h-6"></i></div>
-                <div class="flex-1"><div class="font-bold text-gray-600">About</div><div class="text-xs text-gray-400"> このアプリについて </div></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-600 text-lg">About</div>
+                    <div class="text-xs text-gray-400 mt-0.5">このアプリについて</div>
+                </div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
         </div>
         
-        <div class="py-3 flex justify-center cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition rounded-b-[20px]" onclick="toggleNoren()">
+        <div class="py-4 flex justify-center cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition rounded-b-[24px]" onclick="toggleNoren()">
             <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
         </div>
     </div>
 
-    <!-- 共通ヘッダーHTML -->
-    <header id="main-app-header" class="bg-red-500 text-white transition-colors duration-300">
-        <!-- ★ タイトルフォントサイズ変更: text-[17px] -> text-[22px] -->
-        <h1 class="font-black text-[22px] tracking-wide flex-1 truncate pr-2" id="header-title">LLDB live</h1>
+    <!-- 共通ヘッダー -->
+    <header id="main-app-header" class="bg-[#E63946] text-white transition-colors duration-300">
+        <!-- Live App Header as Default -->
+        <h1 class="font-black text-[22px] tracking-wide flex-1 truncate pr-2" id="header-title">Love Like DataBase vol.5.4.5</h1>
         
         <!-- 🌸 Menu Button -->
         <button id="header-menu-btn" onclick="toggleNoren()" class="p-2 rounded-full hover:bg-white/20 transition active:scale-90 flex items-center justify-center w-10 h-10">
@@ -155,36 +172,25 @@
     <!-- About Modal -->
     <div id="about-modal" onclick="closeAboutModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <!-- Header Section -->
             <div class="text-center mb-6">
-                <!-- アイコンを削除し、タイトルのみに -->
-                <h2 class="font-bold text-xl mt-2 text-gray-800">Love Like DataBase</h2>
-                <p class="text-xs text-gray-400 font-mono mt-1">Ver 5.4.3</p>
+                <img src="https://unavatar.io/twitter/noki_dochibi" class="w-20 h-20 rounded-full mx-auto shadow-md border-2 border-white mb-3" alt="icon">
+                <h2 class="font-bold text-xl text-gray-800">Love Like DataBase</h2>
+                <p class="text-xs text-gray-400 font-mono mt-1">Ver 6.0.0</p>
             </div>
             
-            <!-- Description Section -->
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
-                <p>
-                    このアプリは、個人開発者が趣味で作った、非公式のファンアプリです。データの誤りを含んでいる可能性があります。
-                </p>
-                <p>
-                    不具合報告や、「ここ間違ってるよ！」というご指摘は、X (旧Twitter) までお寄せいただけると嬉しいです。
-                </p>
+                <p>このアプリは、個人開発者が趣味で作った、非公式のファンアプリです。データの誤りを含んでいる可能性があります。</p>
+                <p>不具合報告や、「ここ間違ってるよ！」というご指摘は、X (旧Twitter) までお寄せいただけると嬉しいです。</p>
             </div>
 
-            <!-- Developer Section -->
-            <div class="mt-8 flex flex-col items-center gap-3">
-                <!-- アイコンを下部に移動 -->
-                <img src="https://unavatar.io/twitter/noki_dochibi" class="w-16 h-16 rounded-full shadow-md border-2 border-white" alt="icon">
-                
-                <a href="https://twitter.com/noki_dochibi" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-xs font-bold hover:bg-gray-800 transition shadow-sm">
-                    <!-- X icon SVG -->
+            <div class="mt-8 flex justify-center">
+                <a href="https://twitter.com/noki_dochibi" target="_blank" class="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-full text-xs font-bold hover:bg-gray-800 transition shadow-lg active:scale-95">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     開発者 @noki_dochibi
                 </a>
             </div>
             
-            <div class="mt-4 pt-4 border-t border-gray-100 text-center">
+            <div class="mt-6 pt-4 border-t border-gray-100 text-center">
                  <button onclick="closeAboutModal()" class="text-gray-400 text-sm font-bold hover:text-gray-600 px-4 py-2">閉じる</button>
             </div>
         </div>
@@ -192,47 +198,44 @@
 
 
     <!-- ==========================================================================
-          【2. APP: LLDB live】 ライブアプリ (Iframe Container)
-          ========================================================================== -->
-    <!-- キャッシュ対策: ?v=5.4.1 -->
+         【2. APP: LLDB Live】 
+         ========================================================================== -->
     <div id="app-live" class="app-screen active">
-        <iframe src="./index_LLDBlive.html?v=5.4.1" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBLive.html?v=6.0.0" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
-          【3. APP: LLDB lookup】 歌詞アプリ (Iframe Container)
-          ========================================================================== -->
-    <div id="app-phrase" class="app-screen">
-        <iframe src="./index_LLDBlookup.html?v=1.2.3" class="w-full h-full border-none"></iframe>
-    </div>
-
-    <!-- ==========================================================================
-          【4. APP: LLDB trends】 トレンドアプリ (Updated!)
-          ========================================================================== -->
+         【3. APP: LLDB Trends】
+         ========================================================================== -->
     <div id="app-trends" class="app-screen">
-        <!-- ★ v1.0.1 に更新 -->
-        <iframe src="./index_LLDBtrends.html?v=1.0.1" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBTrends.html?v=6.0.0" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
-          【5. APP: LLDB history】 軌跡アプリ (Iframe Container)
-          ========================================================================== -->
-    <!-- キャッシュ対策: ?v=0.3.0 に更新 -->
+         【4. APP: LLDB Song Helper】
+         ========================================================================== -->
+    <div id="app-songHelper" class="app-screen">
+        <iframe src="./index_LLDBSongHelper.html?v=6.0.0" class="w-full h-full border-none"></iframe>
+    </div>
+
+    <!-- ==========================================================================
+         【5. APP: LLDB History】
+         ========================================================================== -->
     <div id="app-history" class="app-screen">
-        <iframe src="./index_LLDBhistory.html?v=0.3.0" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBHistory.html?v=6.0.0" class="w-full h-full border-none"></iframe>
     </div>
 
 
     <!-- ==========================================================================
-          【6. ROUTING】 共通ルーティング制御
-          ========================================================================== -->
+         【6. ROUTING】 共通ルーティング制御
+         ========================================================================== -->
     <script>
         // アプリ定義 (タイトル更新)
         const apps = {
-            'live': { title: 'Love Like DataBase vol.5.4.1', color: 'bg-red-500' },
-            'phrase': { title: 'LLDB lookup', color: 'bg-orange-500' },
-            'history': { title: 'LLDB history', color: 'bg-pink-500' },
-            'trends': { title: 'LLDB trends', color: 'bg-blue-600' }
+            'live': { title: 'Love Like DataBase vol.5.4.5', color: 'bg-[#E63946]' }, /* Red */
+            'trends': { title: 'LLDB Trends', color: 'bg-[#1D3557]' },      /* Navy */
+            'songHelper': { title: 'LLDB Song Helper', color: 'bg-[#F4A261]' }, /* Orange */
+            'history': { title: 'LLDB History', color: 'bg-[#2A9D8F]' }     /* Teal */
         };
 
         // アプリ切り替え
@@ -245,6 +248,7 @@
             const header = document.getElementById('main-app-header');
             const title = document.getElementById('header-title');
             if(apps[appName]) {
+                // TailwindのJITカラークラス(bg-[#...])を動的に適用するため、style属性ではなくclassNameを更新
                 header.className = `${apps[appName].color} text-white transition-colors duration-300 flex items-center justify-between px-4 fixed top-0 z-30 shadow-sm w-full h-[60px]`;
                 title.textContent = apps[appName].title;
             }
@@ -285,7 +289,6 @@
         }
 
         function openAboutModal() {
-            // 暖簾を閉じてからモーダルを開く
             toggleNoren();
             setTimeout(() => {
                 const modal = document.getElementById('about-modal');
@@ -301,7 +304,7 @@
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            // デフォルトアプリ: LLDB live
+            // デフォルトアプリ: LLDB Live
             switchApp('live');
         });
     </script>
