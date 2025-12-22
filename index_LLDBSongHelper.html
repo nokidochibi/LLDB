@@ -26,7 +26,8 @@
             --main-sky: #0ea5e9;      /* Title Search Theme */
             --main-pink: #ec4899;     /* Shiritori Theme */
             --bubble-color: #F4A261;
-            --nav-height: 52px;
+            /* ★修正: ナビゲーションの高さを85pxに統一 */
+            --nav-height: 85px;
         }
 
         body { 
@@ -106,18 +107,22 @@
             display: flex;
             width: 100%;
             background-color: white;
-            /* 高さ調整: 52px + Safe Area */
+            /* 高さ調整: 85px + Safe Area */
             height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
         }
 
+        /* ★修正: タブボタンのスタイル変更 */
         .tab-btn {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 3px;
+            /* 上寄せ配置 */
+            justify-content: flex-start;
+            padding-top: 12px;
+            gap: 4px;
+            
             color: #94a3b8;
             background-color: transparent;
             border: none;
@@ -127,27 +132,32 @@
             position: relative;
         }
 
-        /* テーマごとのアクティブスタイル（背景色+白文字） */
+        /* テーマごとのアクティブスタイル（アイコン色付け・背景透過） */
+        
+        .tab-btn.active {
+            font-weight: bold;
+            opacity: 1;
+            background-color: transparent !important; /* 背景色はつけない */
+        }
+        
+        .tab-btn.active i {
+            stroke-width: 2.5px;
+        }
+
         /* Lyrics Mode (Orange) */
         .theme-lyrics .tab-btn[data-tab="lyrics"].active {
-            background-color: var(--main-orange);
-            color: white;
+            color: var(--main-orange);
         }
         /* Title Mode (Sky) */
         .theme-title .tab-btn[data-tab="title"].active {
-            background-color: var(--main-sky);
-            color: white;
+            color: var(--main-sky);
         }
         /* Shiritori Mode (Pink) - 裏モード用 */
         .theme-shiritori .tab-btn[data-tab="lyrics"].active,
         .theme-shiritori .tab-btn[data-tab="title"].active {
-             background-color: var(--main-pink);
-             color: white;
+             color: var(--main-pink);
         }
 
-        .tab-btn.active i {
-            stroke-width: 2.5px;
-        }
 
         /* テーマ別カラー定義 */
         .theme-lyrics .text-theme { color: var(--main-orange); }
