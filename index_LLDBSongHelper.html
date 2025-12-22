@@ -94,15 +94,17 @@
             display: flex;
             flex-direction: column;
             padding-bottom: 0;
-            transition: padding-bottom 0.3s ease; /* アニメーション追加 */
+            transition: all 0.3s ease;
         }
 
         /* 入力フォームエリア */
         #search-form {
-            /* 【修正】右側のパディングを大きく(24px)してボタンのはみ出しを防止 */
-            padding: 12px 24px 12px 16px;
+            /* 【修正】左右に適度な余白(px-4=16px)を持たせ、上下(py-3=12px)も確保 */
+            padding: 12px 16px;
             background-color: rgba(255,255,255,0.98);
             border-bottom: 1px solid #f3f4f6;
+            width: 100%; /* 幅を確実に確保 */
+            box-sizing: border-box; /* パディングを含めた幅計算 */
         }
 
         /* タブエリア */
@@ -175,8 +177,8 @@
         body.dark-mode footer {
             background-color: #1e293b;
             border-color: #334155;
-            /* 【修正】しりとりモード時はタブが消えるので、ナビゲーション分の高さをpaddingで確保して上に寄せる */
-            padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); 
+            /* 【修正】タブが消える分、下部にパディングを追加して入力欄を上に押し上げる */
+            padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
         }
         body.dark-mode #search-form {
             background-color: #1e293b;
@@ -243,17 +245,18 @@
     <!-- フッター -->
     <footer>
         <!-- 入力フォーム -->
-        <!-- 【修正】gapを3に増やし、ボタンとの間隔を確保 -->
-        <form id="search-form" class="flex items-center gap-3">
-            <!-- 【修正】入力欄の横幅を調整。LINE風に丸く(rounded-full)、縦幅を細く(py-2) -->
-            <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300">
+        <!-- 【修正】gap-2 (8px) で適切な間隔。w-fullとbox-sizingで確実な収まりを実現 -->
+        <form id="search-form" class="flex items-center gap-2 w-full box-border">
+            <!-- 【修正】min-w-0 を追加し、Flexbox内で入力欄がはみ出すのを防ぐ -->
+            <div class="flex-1 min-w-0 bg-gray-100 rounded-full flex items-center px-4 py-2 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300">
                 <input type="text" id="search-input" 
-                    class="flex-1 bg-transparent border-none focus:outline-none text-base placeholder-gray-400"
+                    class="flex-1 bg-transparent border-none focus:outline-none text-base placeholder-gray-400 w-full min-w-0"
                     placeholder="例：甘い匂いに" required autocomplete="off">
             </div>
             
+            <!-- 【修正】flex-shrink-0 を追加し、ボタンが潰れるのを防ぐ -->
             <button type="submit" 
-                class="send-btn-active text-theme p-3 rounded-full hover:bg-theme-soft transition flex-shrink-0 shadow-sm border border-transparent hover:border-theme bg-white">
+                class="flex-shrink-0 send-btn-active text-theme p-3 rounded-full hover:bg-theme-soft transition shadow-sm border border-transparent hover:border-theme bg-white">
                 <i data-lucide="send" class="w-5 h-5 fill-current transition-colors duration-300"></i>
             </button>
         </form>
