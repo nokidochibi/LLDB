@@ -22,7 +22,8 @@
             --accent-color: #1D3557;  /* New Theme Color (Navy) */
             --bar-color: #1D3557;
             --text-main: #334155;
-            --nav-height: 52px;       /* Tab Bar Base Height (Updated) */
+            /* ★修正: ナビゲーションの高さを85pxに統一 */
+            --nav-height: 85px;       
             --sticky-offset: 0px;
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
@@ -255,7 +256,7 @@
             z-index: 50;
             width: 100%;
             background-color: white;
-            /* 高さ調整: ベース52px + Safe Area */
+            /* 高さ調整: ベース85px + Safe Area */
             height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
@@ -266,26 +267,32 @@
             justify-content: space-between;
             height: 100%;
         }
+        
+        /* ★修正: ナビアイテムのスタイル変更 */
         .nav-item {
             flex: 1; display: flex; flex-direction: column;
             align-items: center; 
-            justify-content: center; /* 垂直方向中央揃え */
-            gap: 3px; 
+            /* 上寄せ配置 */
+            justify-content: flex-start; 
+            padding-top: 12px;
+            gap: 4px; 
+            
             color: #94a3b8; 
             background-color: transparent;
-            padding: 0;
+            padding-bottom: 0;
             cursor: pointer; 
             transition: all 0.2s;
             position: relative;
             height: 100%;
         }
-        /* アクティブ時: 背景色#1D3557, アイコン白 */
+        
+        /* ★修正: アクティブ時のスタイル (背景色なし・アイコン色変更) */
         .nav-item.active {
-            color: white;
-            background-color: var(--accent-color);
+            color: var(--accent-color);
+            background-color: transparent;
         }
         .nav-item.active i {
-            color: white;
+            color: var(--accent-color);
             stroke-width: 2.5px;
         }
         
