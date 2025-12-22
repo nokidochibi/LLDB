@@ -118,8 +118,6 @@ nav > div {
   width: 0;
   height: 100%;
 }
-/* アクティブ時はテーマカラーの文字色（背景色変更パターンではなく、YouTube等はアイコン色変更が一般的ですが、ご指示の「背景色の上に置くアイコンは純白」を「アクティブ時に背景色がつくデザイン」と解釈し、従来のスタイルを踏襲しつつ洗練させます） */
-/* ※補足: もし「背景色(#F8F9FA)の上に置くアイコン」という意味であれば、通常時のアイコンのことですが、ここでは「アクティブタブを目立たせる」意図で背景色をつけます */
 .tab-item.active { 
   color: white; 
   background-color: var(--aiko-red); 
@@ -671,6 +669,17 @@ let animationFinishedResolver;
 const animationFinishedPromise = new Promise(resolve => {
   animationFinishedResolver = resolve;
 });
+
+// ★ 追加: チャート共通オプションの定義
+const chartCommonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { font: { size: 10 } } },
+    y: { ticks: { font: { size: 10 } } }
+  }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
