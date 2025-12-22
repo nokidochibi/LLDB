@@ -31,8 +31,8 @@ body { padding-top: 0 !important; }
   --aiko-blue: #00BFFF;
   --aiko-bg: #F8F9FA;      /* New Background Color (Off-White) */
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  /* ★修正: タブバーの高さをさらに広げる (80px -> 100px) */
-  --nav-height: 100px;      /* Tab Bar Base Height */
+  /* ★修正: タブバーの高さを調整 (100px -> 90px) */
+  --nav-height: 90px;      /* Tab Bar Base Height */
 }
 
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
@@ -89,7 +89,7 @@ nav {
   right: 0;
   display: flex !important;
   border-top: 1px solid #e5e7eb;
-  /* 高さ調整: ベース100px + Safe Area */
+  /* 高さ調整: ベース90px + Safe Area */
   height: calc(var(--nav-height) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 50;
