@@ -107,11 +107,11 @@ nav > div {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* 垂直方向中央揃え */
+  justify-content: flex-start; /* ★修正: 垂直方向上揃え */
+  padding-top: 10px; /* ★追加: 上部パディングで余白調整 */
   gap: 3px;
   color: #94a3b8; /* 非アクティブ時のグレー */
   background-color: transparent;
-  padding: 0;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
@@ -672,17 +672,6 @@ let animationFinishedResolver;
 const animationFinishedPromise = new Promise(resolve => {
   animationFinishedResolver = resolve;
 });
-
-// ★ 追加: チャート共通オプションの定義
-const chartCommonOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { ticks: { font: { size: 10 } } },
-    y: { ticks: { font: { size: 10 } } }
-  }
-};
 
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
