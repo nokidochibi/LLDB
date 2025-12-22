@@ -62,44 +62,54 @@
             background-size: 1.5em 1.5em;
         }
 
-        /* 年表テーブルスタイル */
+        /* 年表テーブルスタイル - 洗練されたすりガラスヘッダー */
         .history-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        
         .history-table th {
-            /* Sticky設定: 親要素のoverflow-hiddenを解除することで機能します */
+            /* Sticky設定 */
             position: sticky;
             top: 0;
-            background-color: var(--accent-color);
-            color: white;
+            
+            /* ★変更点: すりガラス風デザイン */
+            background-color: rgba(255, 255, 255, 0.92); /* 半透明の白 */
+            backdrop-filter: blur(8px);                 /* 背景をぼかす */
+            -webkit-backdrop-filter: blur(8px);         /* Safari対応 */
+            
+            /* 色と境界線 */
+            color: var(--text-main);                    /* 文字は濃いグレー */
+            border-bottom: 2px solid var(--accent-light); /* 下部にアクセント色のライン */
+            
             font-size: 11px;
-            padding: 10px 2px;
+            font-weight: 700;
+            padding: 12px 2px;                          /* 少し高さを出す */
             z-index: 20;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             white-space: nowrap;
             text-align: center;
         }
-        /* 角丸ヘッダー */
+        
+        /* 角丸ヘッダーの維持 */
         .history-table th:first-child { border-top-left-radius: 12px; }
         .history-table th:last-child { border-top-right-radius: 12px; }
 
         .history-table td {
-            padding: 8px 4px;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 10px 4px; /* 余白を少し広げて上品に */
+            border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
             font-size: 11px;
-            height: 40px;
+            height: 44px;      /* 行間を少し広げる */
             word-wrap: break-word;
             background-color: white;
         }
         .history-table tr:last-child td:first-child { border-bottom-left-radius: 12px; }
         .history-table tr:last-child td:last-child { border-bottom-right-radius: 12px; }
         
-        .history-table tr:nth-child(even) td { background-color: #f8fafc; } 
+        /* 偶数行の色をさらに薄くして、白背景となじませる */
+        .history-table tr:nth-child(even) td { background-color: #fcfcfc; } 
         
         .lifestage-text {
             font-size: 10px;
-            color: #475569;
+            color: #64748b;
             font-weight: bold;
-            opacity: 0.8;
             text-align: center;
             display: block;
         }
@@ -108,7 +118,6 @@
             border-radius: 4px;
             padding: 2px 4px;
             color: var(--accent-color);
-            opacity: 1;
         }
 
         .event-chip {
@@ -119,12 +128,13 @@
             font-weight: bold;
             margin-bottom: 3px;
             line-height: 1.3;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: none; /* 影を消してフラットに */
+            border: 1px solid transparent; /* ボーダーで区切る */
             max-width: 100%;
         }
-        .chip-live { background-color: white; color: #ef4444; border: 1px solid #fca5a5; }
-        .chip-single { background-color: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
-        .chip-album { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+        .chip-live { background-color: #fef2f2; color: #ef4444; border-color: #fecaca; }
+        .chip-single { background-color: #f0f9ff; color: #0284c7; border-color: #bae6fd; }
+        .chip-album { background-color: #fefce8; color: #854d0e; border-color: #fef08a; }
 
         /* =========================================
            2. Footer & Tabs (YouTube Style)
@@ -138,27 +148,26 @@
             border-top: 1px solid #e5e7eb;
             z-index: 50;
             width: 100%;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.95); /* フッターも少し透過 */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             /* 高さ調整: ベース85px + Safe Area */
             height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
         }
         
-        /* Navアイテムを横並びにするためのコンテナ */
         nav > div {
             display: flex;
             width: 100%;
             height: 100%;
         }
 
-        /* ★修正: ナビアイテムのスタイル変更 */
         .tab-item {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 上寄せ配置 */
             justify-content: flex-start;
             padding-top: 12px;
             gap: 4px;
@@ -171,12 +180,10 @@
             position: relative;
         }
         
-        /* ★修正: アクティブ時のスタイル (背景色なし・アイコン色変更) */
         .tab-item.active {
             color: var(--accent-color);
             background-color: transparent !important;
         }
-        /* アイコンの線を太く */
         .tab-item.active svg {
             stroke-width: 2.5px;
         }
@@ -184,11 +191,11 @@
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* JITカラークラス置換用 (Tailwind configなしで使うためstyleタグで補完) */
+        /* JITカラークラス置換用 */
         .text-theme { color: var(--accent-color); }
         .bg-theme { background-color: var(--accent-color); }
         .border-theme { border-color: var(--accent-color); }
-        .hover-bg-theme:hover { background-color: #248a7d; } /* slightly darker */
+        .hover-bg-theme:hover { background-color: #248a7d; }
     </style>
 </head>
 <body>
@@ -213,7 +220,6 @@
 
         <div id="content-area" class="hidden fade-in px-2">
             <div id="view-history" class="hidden">
-                <!-- Stickyを効かせるため overflow-hidden を削除 -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
                     <table class="history-table">
                         <thead>
@@ -375,9 +381,6 @@
             switchTab('history');
         }
 
-        // ==========================================
-        // ★ ロジック: 学年計算 (4/1生まれ対応版)
-        // ==========================================
         function getLifeStage(targetDate, birth) {
             const getSchoolCohort = (d) => {
                 const y = d.getFullYear();
@@ -415,13 +418,10 @@
             if (grade === 20) return '大学2年';
             if (grade === 21) return '大学3年';
             if (grade === 22) return '大学4年';
-            if (grade > 22) return '立派な大人'; // 【修正】文言変更
+            if (grade > 22) return '立派な大人';
             return '';
         }
 
-        // ==========================================
-        // ★ ロジック: 年表描画
-        // ==========================================
         function renderTimeline() {
             const tbody = document.getElementById('timeline-body');
             tbody.innerHTML = '';
@@ -461,7 +461,7 @@
                 if (m < (birthDate.getMonth() + 1)) age--;
 
                 const stageText = getLifeStage(current, birthDate);
-                const isHighlight = (m === 4 && (stageText.includes('1年') || stageText === '立派な大人')); // 【修正】文言変更対応
+                const isHighlight = (m === 4 && (stageText.includes('1年') || stageText === '立派な大人'));
                 const stageHtml = `<span class="lifestage-text ${isHighlight ? 'lifestage-highlight' : ''}">${stageText}</span>`;
 
                 let liveHtml = '';
