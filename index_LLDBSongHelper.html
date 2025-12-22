@@ -22,11 +22,9 @@
            ========================================= */
         :root {
             --bg-color: #F8F9FA;       /* Off-White */
-            --main-orange: #F4A261;    /* Song Helper Theme */
-            --main-sky: #0ea5e9;       /* Title Search Theme */
+            --main-orange: #F4A261;    /* Song Helper Theme (Unified) */
             --main-pink: #ec4899;      /* Shiritori Theme */
-            --bubble-color: #F4A261;
-            /* ナビゲーションの高さを85pxに統一 */
+            --bubble-color: #F4A261;   /* Default Bubble Color */
             --nav-height: 85px;
         }
 
@@ -91,7 +89,6 @@
             box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.02);
             display: flex;
             flex-direction: column;
-            /* Tabエリアでpadding-bottomを制御するため、footer自体のpaddingは0 */
             padding-bottom: 0;
         }
 
@@ -107,19 +104,17 @@
             display: flex;
             width: 100%;
             background-color: white;
-            /* 高さ調整: 85px + Safe Area */
             height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* タブボタンのスタイル変更: 上寄せ配置 */
+        /* タブボタン */
         .tab-btn {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 上寄せ配置 */
-            justify-content: flex-start;
+            justify-content: flex-start; /* 上寄せ */
             padding-top: 12px;
             gap: 4px;
             
@@ -132,45 +127,37 @@
             position: relative;
         }
 
-        /* テーマごとのアクティブスタイル（アイコン色付け・背景透過） */
-        
         .tab-btn.active {
             font-weight: bold;
             opacity: 1;
-            background-color: transparent !important; /* 背景色はつけない */
+            background-color: transparent !important;
         }
         
-        /* 選択時は線の太さを2.5pxに */
-        .tab-btn.active i {
+        /* 選択時のアイコンを太く */
+        .tab-btn.active svg {
             stroke-width: 2.5px;
         }
 
-        /* Lyrics Mode (Orange) */
-        .theme-lyrics .tab-btn[data-tab="lyrics"].active {
+        /* 【修正】テーマ統一：Lyrics(Phrase)もTitleも同じオレンジ色にする 
+           theme-lyricsクラスが適用されている間は、どちらのタブもオレンジになるように設定
+        */
+        .theme-lyrics .tab-btn.active {
             color: var(--main-orange);
         }
-        /* Title Mode (Sky) */
-        .theme-title .tab-btn[data-tab="title"].active {
-            color: var(--main-sky);
-        }
+
         /* Shiritori Mode (Pink) - 裏モード用 */
-        .theme-shiritori .tab-btn[data-tab="lyrics"].active,
-        .theme-shiritori .tab-btn[data-tab="title"].active {
+        .theme-shiritori .tab-btn.active {
              color: var(--main-pink);
         }
 
-
         /* テーマ別カラー定義 */
+        /* Lyrics & Title (Unified Orange) */
         .theme-lyrics .text-theme { color: var(--main-orange); }
         .theme-lyrics .bg-theme { background-color: var(--main-orange); }
         .theme-lyrics .bg-theme-soft { background-color: #fff7ed; }
         .theme-lyrics .border-theme { border-color: #ffedd5; }
 
-        .theme-title .text-theme { color: var(--main-sky); }
-        .theme-title .bg-theme { background-color: var(--main-sky); }
-        .theme-title .bg-theme-soft { background-color: #f0f9ff; }
-        .theme-title .border-theme { border-color: #e0f2fe; }
-
+        /* Shiritori (Pink) */
         .theme-shiritori .text-theme { color: var(--main-pink); }
         .theme-shiritori .bg-theme { background-color: var(--main-pink); }
         .theme-shiritori .bg-theme-soft { background-color: #fdf2f8; }
@@ -305,9 +292,10 @@
                         <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="music" class="w-4 h-4"></i> フレーズから探す</h3>
                         <p class="text-xs leading-5">調べたいフレーズを入力すると、その歌詞が含まれる曲を探します。<br><span class="text-orange-400/80 mt-1.5 block text-[10px]">💡「甘い匂いに」「あれは」など、ピンポイントでもOK！</span></p>
                     </div>
-                    <div class="bg-sky-50/50 p-4 rounded-xl border border-sky-100">
-                        <h3 class="font-bold text-sky-600 flex items-center gap-2 mb-2"><i data-lucide="disc" class="w-4 h-4"></i> 楽曲データを見る</h3>
-                        <p class="text-xs leading-5">曲名やアルバム名から、発売日・収録順・当時のaikoの年齢などを教えます。<br><span class="text-sky-400/80 mt-1.5 block text-[10px]">💡「ポニーテール」や「時のシルエット」などで検索してみて！</span></p>
+                    <!-- 【修正】色をOrangeに統一 -->
+                    <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
+                        <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="disc" class="w-4 h-4"></i> 楽曲データを見る</h3>
+                        <p class="text-xs leading-5">曲名やアルバム名から、発売日・収録順・当時のaikoの年齢などを教えます。<br><span class="text-orange-400/80 mt-1.5 block text-[10px]">💡「ポニーテール」や「時のシルエット」などで検索してみて！</span></p>
                     </div>
                     <div class="bg-gray-800 text-gray-300 p-4 rounded-xl border border-gray-700 relative overflow-hidden group shadow-md">
                         <div class="absolute -right-6 -top-6 bg-pink-500/20 w-20 h-20 rounded-full blur-xl group-hover:bg-pink-500/30 transition duration-500"></div>
@@ -320,14 +308,14 @@
                     <a href="https://twitter.com/noki_dochibi" target="_blank" class="inline-flex items-center gap-2 text-xs font-bold text-gray-600 hover:text-orange-500 transition bg-gray-50 px-4 py-2 rounded-full border border-gray-100 hover:border-orange-200 hover:bg-orange-50">
                         <img src="https://unavatar.io/twitter/noki_dochibi" class="w-5 h-5 rounded-full shadow-sm"> @noki_dochibi
                     </a>
-                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.1.0</p>
+                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.2.0</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const APP_VERSION = 'v2.1.0';
+        const APP_VERSION = 'v2.2.0';
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycby49eACsPr_lGblpklhK13gt4TroRwNyKwnQcKQ3GPhACQ8zV96YZ9_CDXfFn5wOj85/exec"; 
         const TWITTER_ID = "noki_dochibi";
         const ICON_URL = `https://unavatar.io/twitter/${TWITTER_ID}?v=${APP_VERSION}`;
@@ -377,13 +365,16 @@
             if (currentMode === 'shiritori') {
                 isDarkMode = false;
                 dom.body.classList.remove('dark-mode');
+                // 裏モード終了時は元のモード（Lyrics or Title）に戻る
                 if (!lastMode || lastMode === 'shiritori') {
                     lastMode = 'lyrics';
                 }
+                dom.body.classList.replace('theme-shiritori', 'theme-lyrics'); // 戻るときは必ずOrangeテーマ
                 switchTab(lastMode);
             } else {
                 lastMode = currentMode;
                 isDarkMode = true;
+                dom.body.classList.replace('theme-lyrics', 'theme-shiritori');
                 dom.body.classList.add('dark-mode');
                 switchTab('shiritori');
             }
@@ -405,26 +396,26 @@
             dom.containerTitle.classList.add('hidden');
             dom.containerShiritori.classList.add('hidden');
 
+            // 【修正】LyricsもTitleも同じテーマ（theme-lyrics = Orange）を使う
+            // Bubble ColorもOrange固定にするため、JSでの切り替えは削除
+
             if (mode === 'lyrics') {
-                dom.body.classList.replace('theme-title', 'theme-lyrics');
-                dom.body.classList.replace('theme-shiritori', 'theme-lyrics');
                 dom.containerLyrics.classList.remove('hidden');
                 dom.searchInput.placeholder = "例：甘い匂いに";
-                document.documentElement.style.setProperty('--bubble-color', '#F4A261');
-
+                
             } else if (mode === 'title') {
-                dom.body.classList.replace('theme-lyrics', 'theme-title');
-                dom.body.classList.replace('theme-shiritori', 'theme-title');
                 dom.containerTitle.classList.remove('hidden');
                 dom.searchInput.placeholder = "例：ポニーテール";
-                document.documentElement.style.setProperty('--bubble-color', '#0ea5e9');
 
             } else if (mode === 'shiritori') {
-                dom.body.classList.replace('theme-lyrics', 'theme-shiritori');
-                dom.body.classList.replace('theme-title', 'theme-shiritori');
                 dom.containerShiritori.classList.remove('hidden');
                 dom.searchInput.placeholder = "曲名を正しい表記で入力してね";
                 document.documentElement.style.setProperty('--bubble-color', '#ec4899');
+            }
+            
+            // 通常モードならBubble Colorをリセット
+            if (mode !== 'shiritori') {
+                document.documentElement.style.setProperty('--bubble-color', '#F4A261');
             }
         };
 
@@ -558,29 +549,30 @@
             }
             let contentHtml = '<div class="flex flex-col gap-6 animate-fade-in">';
             if (data.songs && data.songs.length > 0) {
+                // 【修正】Sky(Blue)クラスをOrangeクラスに統一
                 let songSection = '<div class="flex flex-col gap-4">';
-                if (data.albums && data.albums.length > 0) songSection += '<div class="text-xs font-bold text-sky-500 border-b border-sky-100 pb-1">🎵 曲の検索結果</div>';
+                if (data.albums && data.albums.length > 0) songSection += '<div class="text-xs font-bold text-orange-500 border-b border-orange-100 pb-1">🎵 曲の検索結果</div>';
                 data.songs.forEach((song, idx) => {
-                    const hasDivider = idx > 0 ? 'border-t border-sky-100 pt-4' : '';
-                    const ageText = song.age_at_release ? `リリース時のaikoは<span class="font-bold text-sky-600">${song.age_at_release}歳</span>だよ。` : '';
-                    const songLink = song.link_url ? `<a href="${song.link_url}" target="_blank" class="text-sky-600 underline font-bold hover:text-sky-400">${song.title}</a>` : `<span class="font-bold text-gray-800">${song.title}</span>`;
-                    songSection += `<div class="${hasDivider}"><div class="mb-2 text-base">${songLink} <span class="text-xs text-gray-400">(${song.reading || ''})</span></div><div class="text-sm text-gray-700 space-y-2 leading-relaxed bg-sky-50/50 p-3 rounded-lg border border-sky-100">${song.single_info ? `<p>💿 ${song.single_info}</p>` : ''}${song.album_info ? `<p>💿 ${song.album_info}</p>` : '<p class="text-gray-400">💿 アルバムには未収録だよ。</p>'}<div class="pt-2 border-t border-sky-100 text-xs text-gray-600"><p>🎼 編曲：${song.arranger || '不明'}</p><p>⏱ 再生時間：${song.duration || '不明'}</p><p>🥁 BPM：${song.bpm || '確認中'}</p></div><p class="pt-1 text-xs text-sky-700 font-medium">${ageText}</p></div></div>`;
+                    const hasDivider = idx > 0 ? 'border-t border-orange-100 pt-4' : '';
+                    const ageText = song.age_at_release ? `リリース時のaikoは<span class="font-bold text-orange-600">${song.age_at_release}歳</span>だよ。` : '';
+                    const songLink = song.link_url ? `<a href="${song.link_url}" target="_blank" class="text-orange-600 underline font-bold hover:text-orange-400">${song.title}</a>` : `<span class="font-bold text-gray-800">${song.title}</span>`;
+                    songSection += `<div class="${hasDivider}"><div class="mb-2 text-base">${songLink} <span class="text-xs text-gray-400">(${song.reading || ''})</span></div><div class="text-sm text-gray-700 space-y-2 leading-relaxed bg-orange-50/50 p-3 rounded-lg border border-orange-100">${song.single_info ? `<p>💿 ${song.single_info}</p>` : ''}${song.album_info ? `<p>💿 ${song.album_info}</p>` : '<p class="text-gray-400">💿 アルバムには未収録だよ。</p>'}<div class="pt-2 border-t border-orange-100 text-xs text-gray-600"><p>🎼 編曲：${song.arranger || '不明'}</p><p>⏱ 再生時間：${song.duration || '不明'}</p><p>🥁 BPM：${song.bpm || '確認中'}</p></div><p class="pt-1 text-xs text-orange-700 font-medium">${ageText}</p></div></div>`;
                 });
                 songSection += '</div>';
                 contentHtml += songSection;
             }
             if (data.albums && data.albums.length > 0) {
                 let albumSection = '<div class="flex flex-col gap-4">';
-                if (data.songs && data.songs.length > 0) albumSection += '<div class="text-xs font-bold text-sky-500 border-b border-sky-100 pb-1">💿 収録ディスク情報</div>';
+                if (data.songs && data.songs.length > 0) albumSection += '<div class="text-xs font-bold text-orange-500 border-b border-orange-100 pb-1">💿 収録ディスク情報</div>';
                 data.albums.forEach((disk) => {
-                    const songList = disk.songs.map((s, i) => `<li class="py-1 border-b border-sky-50 last:border-0 flex gap-2"><span class="text-sky-400 w-6 text-right font-mono text-xs pt-0.5">${s.order}.</span><span>${s.title}</span></li>`).join('');
-                    albumSection += `<div class="bg-sky-50/50 rounded-xl p-4 border border-sky-100"><h3 class="font-bold text-sky-700 mb-1">💿 ${disk.disk_name}</h3><p class="text-xs text-gray-500 mb-3">${disk.release_date} 発売</p><ul class="text-sm text-gray-700 list-none">${songList}</ul></div>`;
+                    const songList = disk.songs.map((s, i) => `<li class="py-1 border-b border-orange-50 last:border-0 flex gap-2"><span class="text-orange-400 w-6 text-right font-mono text-xs pt-0.5">${s.order}.</span><span>${s.title}</span></li>`).join('');
+                    albumSection += `<div class="bg-orange-50/50 rounded-xl p-4 border border-orange-100"><h3 class="font-bold text-orange-700 mb-1">💿 ${disk.disk_name}</h3><p class="text-xs text-gray-500 mb-3">${disk.release_date} 発売</p><ul class="text-sm text-gray-700 list-none">${songList}</ul></div>`;
                 });
                 albumSection += '</div>';
                 contentHtml += albumSection;
             }
             contentHtml += '</div>';
-            contentHtml += `<div class="flex justify-center mt-3 pt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-[10px] text-sky-300 hover:text-sky-500 flex items-center gap-1 transition px-2 py-1 rounded-full hover:bg-white"><i data-lucide="arrow-up" class="w-3 h-3"></i> この回答のトップへ移動</button></div>`;
+            contentHtml += `<div class="flex justify-center mt-3 pt-2"><button onclick="this.closest('.message-row').scrollIntoView({behavior:'smooth', block:'start'})" class="text-[10px] text-orange-300 hover:text-orange-500 flex items-center gap-1 transition px-2 py-1 rounded-full hover:bg-white"><i data-lucide="arrow-up" class="w-3 h-3"></i> この回答のトップへ移動</button></div>`;
             addMessage(contentHtml, 'bot', true);
             lucide.createIcons();
         }
@@ -591,9 +583,9 @@
             const bubbleClass = type === 'user' ? 'bubble bubble-right text-white' : 'bubble bubble-left bg-white text-gray-800';
             
             let userBgClass = 'bg-gray-500';
-            if (currentMode === 'lyrics') userBgClass = 'bg-orange-500';
-            else if (currentMode === 'title') userBgClass = 'bg-sky-500';
-            else if (currentMode === 'shiritori') userBgClass = 'bg-pink-500';
+            // 【修正】Modeに関わらずShiritori以外はOrange
+            if (currentMode === 'shiritori') userBgClass = 'bg-pink-500';
+            else userBgClass = 'bg-orange-500';
 
             const finalBubbleClass = type === 'user' ? `${bubbleClass} ${userBgClass}` : bubbleClass;
             const iconHtml = type === 'bot' ? `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()">` : '';
