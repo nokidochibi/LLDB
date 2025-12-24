@@ -3,13 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.5.4.5</title>
+<title>Love Like DataBase vol.5.4.6</title>
 <meta name="theme-color" content="#E63946">
 
-<!-- アイコン参照 -->
-<link rel="icon" type="image/png" href="./icon_LLDBlive.png">
-<link rel="apple-touch-icon" href="./icon_LLDBlive.png">
+<!-- ホーム画面に追加したときの設定 -->
+<meta name="apple-mobile-web-app-title" content="LLDB">
+<meta name="application-name" content="LLDB">
 
+<!-- アプリアイコン -->
+<link rel="icon" type="image/png" href="./icon.png">
+<link rel="apple-touch-icon" href="./icon.png">
+
+<!-- Web App Manifest -->
+<link rel="manifest" href='data:application/manifest+json,{"name":"Love Like DataBase","short_name":"LLDB","start_url":".","display":"standalone","background_color":"#F8F9FA","theme_color":"#E63946","icons":[{"src":"./icon.png","sizes":"192x192 512x512","type":"image/png"}]}'>
+
+<!-- Scripts and Styles -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -18,7 +26,7 @@
 <style>
 /* 親フレーム(index.html)のヘッダーがあるため、こちらのヘッダーは隠す */
 header#main-header { display: none !important; }
-/* 全体のpadding調整 */
+/* 全体のpadding調整 (Hubのヘッダー下から始まるため0でOK) */
 body { padding-top: 0 !important; }
 
 /* =========================================
@@ -26,13 +34,13 @@ body { padding-top: 0 !important; }
    ========================================= */
 :root {
   --aiko-pink: #FF69B4;
-  --aiko-red: #E63946;     /* New Theme Color */
+  --aiko-red: #E63946;      /* New Theme Color */
   --aiko-yellow: #FFD700;
   --aiko-blue: #00BFFF;
-  --aiko-bg: #F8F9FA;      /* New Background Color (Off-White) */
+  --aiko-bg: #F8F9FA;       /* New Background Color (Off-White) */
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   /* ★修正: タブバーの高さを85pxに設定 */
-  --nav-height: 85px;      /* Tab Bar Base Height */
+  --nav-height: 85px;       /* Tab Bar Base Height */
 }
 
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
@@ -51,6 +59,7 @@ body {
   -webkit-user-select: none;
 }
 
+/* 詳細画面時の制御 */
 body.detail-view header, body.detail-view nav { display: none !important; }
 body.detail-view { padding-top: 0; }
 
@@ -81,7 +90,7 @@ body.detail-view { padding-top: 0; }
   border: 1px solid rgba(0,0,0,0.03);
 }
 
-/* ★ ナビゲーションバー (YouTube/LINE風 高さ調整版) */
+/* ★ ナビゲーションバー (Hub仕様: 高さ85px) */
 nav {
   position: fixed !important;
   bottom: 0;
@@ -121,7 +130,7 @@ nav > div {
   height: 100%;
 }
 
-/* ★変更: 選択時のスタイル (線を太く・文字を太くして強調) */
+/* ★変更: 選択時のスタイル */
 .tab-item.active { 
   color: var(--aiko-red); /* 文字色を赤に */
   background-color: transparent;
@@ -130,8 +139,8 @@ nav > div {
 /* Lucideアイコンはsvgに変換されるためsvgセレクタを使用 */
 .tab-item.active svg { 
   stroke: var(--aiko-red); /* アイコンの線を赤に */
-  stroke-width: 2.5px;       /* 線を太くして強調 */
-  filter: drop-shadow(0 1px 2px rgba(230, 57, 70, 0.2)); /* ほんのり影で浮き出し */
+  stroke-width: 2.5px;        /* 線を太くして強調 */
+  filter: drop-shadow(0 1px 2px rgba(230, 57, 70, 0.2));
 }
 
 /* セトリリストのスタイル */
@@ -356,6 +365,7 @@ nav > div {
 
 .tap-trigger { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 
+/* ヘッダーはHub側で持つためここでは非表示にするが、定義は残す */
 header {
   background-color: var(--aiko-red) !important;
   color: white !important;
@@ -371,7 +381,9 @@ header {
 
 /* メインコンテンツの下部余白をNavの高さに合わせて調整 */
 main { padding: 16px; padding-bottom: calc(var(--nav-height) + 20px + env(safe-area-inset-bottom)); }
-body.detail-view main { padding-top: 80px; padding-bottom: 40px; }
+
+/* 詳細画面: Hubのヘッダーがあるためpadding-topは少なめでOKだが、戻るボタンの位置調整 */
+body.detail-view main { padding-top: 40px; padding-bottom: 40px; }
 
 input, select { font-size: 15px !important; padding: 12px 14px !important; border-radius: 12px !important; border: 1px solid #cbd5e1 !important; background-color: #fff; }
 button { font-size: 14px !important; }
@@ -426,7 +438,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.5.4.5</h1>
+  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.5.4.6</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -621,9 +633,9 @@ button { font-size: 14px !important; }
       </ul>
       
       <!-- 最新のお知らせエリア -->
-      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v5.4.5)</h3>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v5.4.6)</h3>
       <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-6 text-sm text-gray-600">
-        <p>オープニングの銀テープエフェクトを豪華にしました（ポップ＆キャノン）✨</p>
+        <p>Hub&Spoke構成への移行に伴い、デザインを調整しました。</p>
       </div>
 
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
