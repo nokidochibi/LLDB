@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LLDB History</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0D09G3X4F1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-0D09G3X4F1');
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -308,6 +319,9 @@
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const AIKO_DEBUT = new Date(1998, 6, 17);
         const AIKO_BIRTH = new Date(1975, 10, 22);
+        
+        // ★ キャッシュキーを更新
+        const CACHE_KEY = 'lldb_data_history_v6_0';
 
         let allData = null;
         let birthDate = null;
@@ -358,14 +372,15 @@
 
             if (!allData) {
                 try {
-                    const cache = localStorage.getItem('lldb_data_history_v1');
+                    const cache = localStorage.getItem(CACHE_KEY);
                     if (cache) {
                           allData = JSON.parse(cache);
                     } else {
-                        const res = await fetch(`${GAS_API_URL}?action=getAllData`);
+                        // ★ History専用のエンドポイントを呼ぶ
+                        const res = await fetch(`${GAS_API_URL}?action=getHistoryData`);
                         const json = await res.json();
                         allData = json;
-                        try { localStorage.setItem('lldb_data_history_v1', JSON.stringify(json)); } catch(e){}
+                        try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)); } catch(e){}
                     }
                 } catch (e) {
                     console.error(e);
