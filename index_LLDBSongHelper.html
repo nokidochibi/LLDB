@@ -99,6 +99,19 @@
             border-bottom: 1px solid #f3f4f6;
         }
 
+        /* 自動リサイズ用 textarea */
+        textarea#search-input {
+            resize: none; /* ユーザーによるリサイズ無効 */
+            overflow: hidden; /* スクロールバー隠す */
+            min-height: 24px; /* 1行分の高さ確保 */
+            max-height: 120px; /* 最大5行程度で止める */
+            line-height: 1.5;
+        }
+        /* テキストが増えてmax-heightを超えたらスクロール許可 */
+        textarea#search-input:focus {
+            overflow-y: auto;
+        }
+
         #footer-tab-area {
             display: flex;
             width: 100%;
@@ -225,13 +238,14 @@
     <!-- フッター -->
     <footer>
         <form id="search-form">
-            <div class="relative flex items-center w-full bg-gray-100 rounded-full px-4 py-1.5 focus-within:bg-white focus-within:ring-1 focus-within:ring-orange-200 border border-transparent focus-within:border-orange-300 transition-all shadow-inner">
-                <input type="text" id="search-input" 
-                    class="flex-1 bg-transparent border-none focus:outline-none text-[15px] py-1.5 placeholder-gray-400 min-w-0"
-                    placeholder="例：甘い匂いに" required autocomplete="off">
+            <div class="relative flex items-end w-full bg-gray-100 rounded-[20px] px-4 py-2 focus-within:bg-white focus-within:ring-1 focus-within:ring-orange-200 border border-transparent focus-within:border-orange-300 transition-all shadow-inner">
+                <!-- textareaに変更: rows=1で初期化 -->
+                <textarea id="search-input" rows="1"
+                    class="flex-1 bg-transparent border-none focus:outline-none text-[15px] placeholder-gray-400 min-w-0"
+                    placeholder="例：甘い匂いに" required autocomplete="off"></textarea>
                 
                 <button type="submit" id="submit-btn"
-                    class="send-btn-active ml-2 text-orange-500 p-1.5 rounded-full hover:bg-orange-100 transition-colors flex-shrink-0">
+                    class="send-btn-active ml-2 text-orange-500 p-1.5 rounded-full hover:bg-orange-100 transition-colors flex-shrink-0 mb-0.5">
                     <i data-lucide="send" class="w-5 h-5 fill-current"></i>
                 </button>
             </div>
@@ -336,7 +350,23 @@
             lucide.createIcons();
             dom.botIcons.forEach(img => img.src = ICON_URL);
             fetchRequests(); 
+            setupAutoResizeTextarea();
         });
+
+        // テキストエリアの自動リサイズ設定
+        function setupAutoResizeTextarea() {
+            const el = dom.searchInput;
+            el.addEventListener('input', () => {
+                el.style.height = 'auto'; // 一旦autoにして縮小に対応
+                el.style.height = (el.scrollHeight) + 'px'; // 内容に合わせて高さを設定
+            });
+        }
+
+        // テキストエリアの高さをリセットする関数
+        function resetTextareaHeight() {
+            const el = dom.searchInput;
+            el.style.height = 'auto';
+        }
 
         window.switchTab = function(mode) {
             if (currentMode === mode) return;
@@ -387,14 +417,21 @@
             const query = dom.searchInput.value.trim();
             if (!query) return;
 
+            // リクエストモード時の確認ダイアログ
             if (currentMode === 'request') {
+                if (!confirm("この内容で送信しますか？")) {
+                    return; // キャンセル時は何もしない（入力はそのまま保持）
+                }
+                
                 handleRequestPost(query);
                 dom.searchInput.value = '';
+                resetTextareaHeight(); // 高さリセット
                 return;
             }
 
             addMessage(query, 'user');
             dom.searchInput.value = '';
+            resetTextareaHeight(); // 高さリセット
             const loadingId = addLoading();
 
             try {
@@ -424,7 +461,7 @@
                         <span class="text-[10px] font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">確認中</span>
                         <span class="text-[10px] text-gray-400">ただいま</span>
                     </div>
-                    <p class="text-sm text-gray-700 leading-relaxed font-bold">${query}</p>
+                    <p class="text-sm text-gray-700 leading-relaxed font-bold">${query.replace(/\n/g, '<br>')}</p>
                     <p class="text-[10px] text-gray-400 mt-2 italic">※リクエストを送信しました。内容を確認した後に全体へ公開されます🌸</p>
                 </div>
             `;
@@ -458,7 +495,7 @@
                             <span class="text-[10px] font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">掲載中</span>
                             <span class="text-[10px] text-gray-400">${item.date}</span>
                         </div>
-                        <p class="text-sm text-gray-700 leading-relaxed font-bold">${item.question}</p>
+                        <p class="text-sm text-gray-700 leading-relaxed font-bold">${item.question.replace(/\n/g, '<br>')}</p>
                     </div>
                     <div class="letter-a">
                         <div class="flex items-start gap-3">
@@ -468,7 +505,7 @@
                                     <span class="text-[10px] font-bold text-gray-800">Song Helper</span>
                                 </div>
                                 <p class="text-sm text-gray-600 leading-relaxed">
-                                    ${item.answer || '<span class="text-gray-300 italic">回答をお待ちください...🌸</span>'}
+                                    ${item.answer ? item.answer.replace(/\n/g, '<br>') : '<span class="text-gray-300 italic">回答をお待ちください...🌸</span>'}
                                 </p>
                             </div>
                         </div>
