@@ -92,8 +92,9 @@
             padding-bottom: 0;
         }
 
+        /* カプセル型入力エリア */
         #search-form {
-            padding: 12px;
+            padding: 10px 14px;
             background-color: rgba(255,255,255,0.98);
             border-bottom: 1px solid #f3f4f6;
         }
@@ -131,7 +132,7 @@
             stroke-width: 2.5px;
         }
 
-        /* 3. Request (Q&A) UI */
+        /* 3. Request UI */
         .letter-card {
             background: white;
             border-radius: 20px;
@@ -158,6 +159,7 @@
         body.dark-mode .bubble-left::before { border-color: transparent #334155 transparent transparent; }
         body.dark-mode .letter-card { background-color: #1e293b; border-color: #334155; }
         body.dark-mode .letter-q { background-color: #334155; border-bottom-color: #475569; }
+        body.dark-mode .bg-gray-100 { background-color: #334155; }
 
         .modal-enter { opacity: 0; transform: scale(0.95); }
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.2s ease-out, transform 0.2s ease-out; }
@@ -204,7 +206,6 @@
         </div>
         
         <div id="request-list" class="space-y-4">
-            <!-- JSで動的に読み込み -->
             <div class="text-center py-10 text-gray-400 text-xs animate-pulse" id="request-loading">
                 リクエストを読み込み中...
             </div>
@@ -223,17 +224,17 @@
 
     <!-- フッター -->
     <footer>
-        <form id="search-form" class="flex items-center gap-2">
-            <div class="flex-1 bg-gray-100 rounded-xl flex items-center px-4 py-3 transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 border border-transparent focus-within:border-gray-300">
+        <form id="search-form">
+            <div class="relative flex items-center w-full bg-gray-100 rounded-full px-4 py-1.5 focus-within:bg-white focus-within:ring-1 focus-within:ring-orange-200 border border-transparent focus-within:border-orange-300 transition-all shadow-inner">
                 <input type="text" id="search-input" 
-                    class="flex-1 bg-transparent border-none focus:outline-none text-base placeholder-gray-400"
+                    class="flex-1 bg-transparent border-none focus:outline-none text-[15px] py-1.5 placeholder-gray-400 min-w-0"
                     placeholder="例：甘い匂いに" required autocomplete="off">
+                
+                <button type="submit" id="submit-btn"
+                    class="send-btn-active ml-2 text-orange-500 p-1.5 rounded-full hover:bg-orange-100 transition-colors flex-shrink-0">
+                    <i data-lucide="send" class="w-5 h-5 fill-current"></i>
+                </button>
             </div>
-            
-            <button type="submit" id="submit-btn"
-                class="send-btn-active text-orange-500 p-3 rounded-full hover:bg-orange-50 transition flex-shrink-0 shadow-sm border border-transparent hover:border-orange-200 bg-white">
-                <i data-lucide="send" class="w-5 h-5 fill-current"></i>
-            </button>
         </form>
 
         <div id="footer-tab-area">
@@ -288,7 +289,7 @@
                 </div>
                 <div class="text-center pt-6 border-t border-gray-100">
                     <p class="text-[10px] text-gray-400 mb-2">Developed by @noki_dochibi</p>
-                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.3.0</p>
+                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.3.1</p>
                 </div>
             </div>
         </div>
@@ -299,7 +300,7 @@
     </div>
 
     <script>
-        const APP_VERSION = 'v2.3.0';
+        const APP_VERSION = 'v2.3.1';
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec"; 
         const ICON_URL = `https://unavatar.io/twitter/noki_dochibi?v=${APP_VERSION}`;
 
@@ -334,7 +335,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             dom.botIcons.forEach(img => img.src = ICON_URL);
-            fetchRequests(); // 初回リクエスト取得
+            fetchRequests(); 
         });
 
         window.switchTab = function(mode) {
@@ -358,7 +359,7 @@
             } else if (mode === 'request') {
                 dom.searchInput.placeholder = "調査や改善のリクエストを書いてね📮";
                 document.documentElement.style.setProperty('--bubble-color', '#F4A261');
-                fetchRequests(); // タブ切り替え時に最新を取得
+                fetchRequests();
             } else if (mode === 'shiritori') {
                 dom.searchInput.placeholder = "曲名を入力してね";
                 document.documentElement.style.setProperty('--bubble-color', '#ec4899');
@@ -414,12 +415,7 @@
             }
         });
 
-        // ==========================================
-        // リクエスト機能 ロジック
-        // ==========================================
-
         async function handleRequestPost(query) {
-            // UI上の先行表示（本人用）
             const card = document.createElement('div');
             card.className = "letter-card animate-fade-in border-dashed bg-orange-50/20";
             card.innerHTML = `
@@ -435,12 +431,9 @@
             dom.requestList.insertBefore(card, dom.requestList.firstChild);
             showToast("リクエストを送ったよ！📮");
 
-            // GASへ送信
             try {
                 await fetch(`${GAS_API_URL}?action=postRequest&q=${encodeURIComponent(query)}`);
-            } catch(e) {
-                console.error("Post failed", e);
-            }
+            } catch(e) { console.error("Post failed", e); }
         }
 
         async function fetchRequests() {
@@ -450,9 +443,7 @@
                 if (json.status === 'success') {
                     renderRequests(json.data);
                 }
-            } catch(e) {
-                console.error("Fetch failed", e);
-            }
+            } catch(e) { console.error("Fetch failed", e); }
         }
 
         function renderRequests(data) {
@@ -485,10 +476,6 @@
                 </div>
             `).join('');
         }
-
-        // ==========================================
-        // 検索結果描画 ロジック（復元版）
-        // ==========================================
 
         function handleLyricsResults(data) {
             if (!data.results || data.results.length === 0) {
@@ -558,30 +545,18 @@
         }
 
         function handleShiritoriResults(data) {
-            if (data.result === 'unknown_song') {
-                addMessage(data.message, 'bot');
-            } else {
-                addMessage(data.message, 'bot');
-            }
+            if (data.result === 'unknown_song') addMessage(data.message, 'bot');
+            else addMessage(data.message, 'bot');
         }
-
-        // ==========================================
-        // 共通メッセージ・UI制御
-        // ==========================================
 
         function addMessage(content, type, isHtml = false) {
             const container = dom.containers[currentMode];
             const div = document.createElement('div');
             div.className = `flex items-start space-x-2 message-row ${type === 'user' ? 'justify-end' : ''}`;
-            
             const userBg = currentMode === 'shiritori' ? 'bg-pink-500' : 'bg-orange-500';
             const bubbleClass = type === 'user' ? `bubble bubble-right text-white ${userBg}` : 'bubble bubble-left bg-white text-gray-800';
-            
             const iconHtml = type === 'bot' ? `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()">` : '';
-            div.innerHTML = type === 'bot' ? 
-                `${iconHtml}<div class="${bubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm leading-relaxed">${content}</div>` : 
-                `<div class="${bubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm leading-relaxed">${content}</div>`;
-            
+            div.innerHTML = type === 'bot' ? `${iconHtml}<div class="${bubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm leading-relaxed">${content}</div>` : `<div class="${bubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm leading-relaxed">${content}</div>`;
             container.appendChild(div);
             scrollToBottom();
         }
@@ -610,22 +585,16 @@
 
         function copyToClipboard(text) {
             const cleanText = text.replace(/<br>/g, '\n');
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(cleanText).then(() => showToast("コピーしたよ！"));
-            } else {
+            if (navigator.clipboard) navigator.clipboard.writeText(cleanText).then(() => showToast("コピーしたよ！"));
+            else {
                 const ta = document.createElement('textarea');
-                ta.value = cleanText;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
+                ta.value = cleanText; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
                 showToast("コピーしたよ！");
             }
         }
 
         function showToast(msg) {
-            dom.toast.textContent = msg;
-            dom.toast.classList.remove('opacity-0');
+            dom.toast.textContent = msg; dom.toast.classList.remove('opacity-0');
             setTimeout(() => dom.toast.classList.add('opacity-0'), 2000);
         }
     </script>
