@@ -16,11 +16,7 @@
   gtag('config', 'G-0D09G3X4F1');
 </script>
 
-<!-- ホーム画面に追加したときの設定 -->
-<meta name="apple-mobile-web-app-title" content="LLDB">
-<meta name="application-name" content="LLDB">
-
-<!-- アプリアイコン -->
+<!-- アイコン -->
 <link rel="icon" type="image/png" href="./icon.png">
 <link rel="apple-touch-icon" href="./icon.png">
 
@@ -36,13 +32,6 @@
    ========================================= */
 /* 親フレーム(index.html)のヘッダーがあるため、こちらのヘッダーは隠す */
 header#main-header { display: none !important; }
-
-/* 全体のpadding調整 */
-body { padding-top: 0 !important; padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)) !important; }
-
-/* 詳細画面時はHubのヘッダーも隠れる前提 */
-body.detail-view { padding-top: 0; }
-body.detail-view main { padding-top: 60px; padding-bottom: 40px; }
 
 /* =========================================
    共通テーマ定義 (Hub Standard)
@@ -71,26 +60,24 @@ body {
   touch-action: pan-y pinch-zoom;
   user-select: none;
   -webkit-user-select: none;
+  /* 下部ナビゲーション分の余白確保 */
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)) !important;
+  padding-top: 0 !important;
 }
 
-.mobile-frame { width: 100%; max-width: 100%; height: 100vh; background-color: transparent; position: relative; overflow-y: scroll; overflow-x: hidden; }
+/* 詳細画面時はナビゲーションを隠す */
+body.detail-view nav { display: none !important; }
+body.detail-view { padding-bottom: 40px !important; }
+body.detail-view main { padding-top: 60px; }
+
+.mobile-frame { width: 100%; max-width: 100%; height: 100%; background-color: transparent; position: relative; overflow-y: auto; overflow-x: hidden; }
 
 #confetti-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
 }
 
 .card-base {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  padding: 16px;
-  margin-bottom: 16px;
+  background-color: white; border-radius: 12px; box-shadow: var(--card-shadow); padding: 16px; margin-bottom: 16px;
 }
 
 /* =========================================
@@ -108,7 +95,6 @@ nav {
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  /* 高さ調整: ベース85px + Safe Area */
   height: calc(var(--nav-height) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
@@ -129,7 +115,6 @@ nav > div {
   justify-content: flex-start; /* 上揃え */
   padding-top: 12px;
   gap: 4px;
-  
   color: #94a3b8; /* 非アクティブ時のグレー */
   cursor: pointer;
   transition: all 0.2s;
@@ -155,44 +140,19 @@ nav > div {
 
 /* セトリリスト */
 .setlist-item {
-  padding: 3px 0;
-  margin-bottom: 0;
-  background-color: transparent;
-  border-bottom: 1px solid #f3f4f6;
-  font-size: 16px;
-  line-height: 1.4;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 36px;
-  border-left: 4px solid transparent; 
-  padding-left: 8px;
+  padding: 3px 0; margin-bottom: 0; background-color: transparent; border-bottom: 1px solid #f3f4f6;
+  font-size: 16px; line-height: 1.4; display: flex; align-items: center; justify-content: space-between;
+  min-height: 36px; border-left: 4px solid transparent; padding-left: 8px;
 }
 .setlist-item:last-child { border-bottom: none; }
 
-.setlist-medley-title {
-  border-left-color: var(--aiko-yellow) !important;
-  background-color: #fffbeb !important;
-}
-.setlist-medley {
-  border-left-color: var(--aiko-yellow) !important;
-  background-color: transparent !important;
-}
+.setlist-medley-title { border-left-color: var(--aiko-yellow) !important; background-color: #fffbeb !important; }
+.setlist-medley { border-left-color: var(--aiko-yellow) !important; background-color: transparent !important; }
 .setlist-encore-header {
-  margin-top: 16px;
-  margin-bottom: 4px;
-  font-weight: 800;
-  color: var(--aiko-red);
-  font-size: 18px;
-  padding: 4px 8px;
-  background-color: #fef2f2;
-  border-left: 4px solid var(--aiko-red);
-  border-radius: 0 4px 4px 0;
+  margin-top: 16px; margin-bottom: 4px; font-weight: 800; color: var(--aiko-red); font-size: 18px;
+  padding: 4px 8px; background-color: #fef2f2; border-left: 4px solid var(--aiko-red); border-radius: 0 4px 4px 0;
 }
-.setlist-encore {
-  border-left-color: var(--aiko-red) !important;
-  background-color: transparent !important;
-}
+.setlist-encore { border-left-color: var(--aiko-red) !important; background-color: transparent !important; }
 
 .setlist-left-content { display: flex; align-items: baseline; width: 50%; flex: none; padding-right: 8px; }
 .setlist-item-number { display: inline-block; min-width: 24px; flex-shrink: 0; font-weight: normal; color: #9CA3AF; font-size: 13px; }
@@ -209,7 +169,7 @@ nav > div {
 
 .tap-trigger { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 
-/* Hubにあるので非表示だが定義は維持 */
+/* Header (Hub側にあるため非表示だが定義は維持) */
 header { background-color: var(--aiko-red) !important; color: white !important; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: sticky; top: 0; z-index: 40; }
 
 main { padding: 16px; }
@@ -479,7 +439,7 @@ button { font-size: 14px !important; }
 // GASのAPIエンドポイント (Hubと統一)
 const API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
 // ★ キャッシュキーを更新 (古いキャッシュとの競合回避)
-const CACHE_KEY = 'lldb_data_live_v6_1_fix'; 
+const CACHE_KEY = 'lldb_data_live_v6_1_fix2'; 
 
 // アプリの初期化Promise
 let appInitializedResolver;
