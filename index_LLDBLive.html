@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.6.0.0</title>
+<title>Love Like DataBase vol.6.1.0</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Google tag (gtag.js) -->
@@ -37,19 +37,15 @@
 /* 親フレーム(index.html)のヘッダーがあるため、こちらのヘッダーは隠す */
 header#main-header { display: none !important; }
 
-/* 全体のpadding調整 (Hubのヘッダー下から始まるため0でOK) */
-/* Hubヘッダー(60px) + Liveアプリ内ナビ(約60px) + Safe Area */
-body { 
-    padding-top: 0 !important; 
-    padding-bottom: calc(70px + env(safe-area-inset-bottom)) !important; 
-}
+/* 全体のpadding調整 */
+body { padding-top: 0 !important; padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)) !important; }
 
-/* 詳細画面時はHubのヘッダーも隠れる前提だが、念のため上部余白を確保 */
+/* 詳細画面時はHubのヘッダーも隠れる前提 */
 body.detail-view { padding-top: 0; }
 body.detail-view main { padding-top: 60px; padding-bottom: 40px; }
 
 /* =========================================
-   Vol.3.0 デザインスタイル (完全復元)
+   共通テーマ定義 (Hub Standard)
    ========================================= */
 :root {
   --aiko-pink: #FF69B4;
@@ -58,7 +54,9 @@ body.detail-view main { padding-top: 60px; padding-bottom: 40px; }
   --aiko-blue: #00BFFF;
   --aiko-bg: #F8F8F8;
   --card-shadow: 0 2px 5px rgba(0,0,0,0.08);
+  --nav-height: 85px; /* ナビゲーション統一高さ */
 }
+
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
 body {
@@ -95,46 +93,67 @@ body {
   margin-bottom: 16px;
 }
 
-/* ナビゲーションバー (Vol.3.0スタイルで復元) */
+/* =========================================
+   ナビゲーションバー (Hub Standard Style)
+   ========================================= */
 nav {
-  padding-bottom: env(safe-area-inset-bottom);
   position: fixed !important;
   bottom: 0;
   left: 0;
   right: 0;
   display: flex !important;
-  border-top: 2px solid #e5e7eb;
-  height: calc(64px + env(safe-area-inset-bottom));
+  border-top: 1px solid #e5e7eb;
   z-index: 50;
   width: 100%;
-  background-color: white;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  /* 高さ調整: ベース85px + Safe Area */
+  height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
 }
+
 nav > div {
   display: flex;
   width: 100%;
   justify-content: space-between;
+  height: 100%;
 }
+
 .tab-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* 上揃え */
+  padding-top: 12px;
   gap: 4px;
-  color: #9CA3AF;
-  background-color: white;
-  padding: 8px 0;
+  
+  color: #94a3b8; /* 非アクティブ時のグレー */
   cursor: pointer;
   transition: all 0.2s;
-  position: relative;
-  flex: 1 1 0px;
-  width: 0;
+  background-color: transparent;
   height: 100%;
+  position: relative;
 }
-.tab-item.active { color: white; background-color: #4B5563; }
-.tab-item.active i { color: white; }
 
-/* セトリリストのスタイル */
+.tab-item.active {
+  color: var(--aiko-red);
+  background-color: transparent !important;
+  font-weight: 800;
+}
+.tab-item.active svg {
+  stroke: var(--aiko-red);
+  stroke-width: 2.5px;
+  filter: drop-shadow(0 1px 2px rgba(239, 68, 68, 0.2));
+}
+
+/* =========================================
+   リスト・コンポーネント (Vol 3.0 Design)
+   ========================================= */
+
+/* セトリリスト */
 .setlist-item {
   padding: 3px 0;
   margin-bottom: 0;
@@ -155,12 +174,10 @@ nav > div {
   border-left-color: var(--aiko-yellow) !important;
   background-color: #fffbeb !important;
 }
-
 .setlist-medley {
   border-left-color: var(--aiko-yellow) !important;
   background-color: transparent !important;
 }
-
 .setlist-encore-header {
   margin-top: 16px;
   margin-bottom: 4px;
@@ -172,117 +189,28 @@ nav > div {
   border-left: 4px solid var(--aiko-red);
   border-radius: 0 4px 4px 0;
 }
-
 .setlist-encore {
   border-left-color: var(--aiko-red) !important;
   background-color: transparent !important;
 }
 
-.setlist-left-content {
-  display: flex;
-  align-items: baseline;
-  width: 50%;
-  flex: none;
-  padding-right: 8px;
-}
-
-.setlist-item-number {
-  display: inline-block;
-  min-width: 24px;
-  flex-shrink: 0;
-  font-weight: normal;
-  color: #9CA3AF;
-  font-size: 13px;
-}
-.setlist-item-title {
-  font-weight: 500;
-  color: #1f2937;
-  overflow-wrap: break-word;
-}
+.setlist-left-content { display: flex; align-items: baseline; width: 50%; flex: none; padding-right: 8px; }
+.setlist-item-number { display: inline-block; min-width: 24px; flex-shrink: 0; font-weight: normal; color: #9CA3AF; font-size: 13px; }
+.setlist-item-title { font-weight: 500; color: #1f2937; overflow-wrap: break-word; }
 
 /* タイムラインバー */
-.timeline-container {
-  flex: 1;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  position: relative;
-  padding-left: 4px;
-  cursor: pointer;
-}
-.timeline-bar {
-  width: 100%;
-  height: 2px;
-  background-color: #e5e7eb;
-  border-radius: 2px;
-  position: relative;
-}
-.timeline-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  background-color: var(--aiko-pink);
-  z-index: 10;
-  transition: transform 0.1s;
-}
-.year-tooltip {
-  position: absolute;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #374151;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: bold;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s;
-  z-index: 20;
-}
-.year-tooltip::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -4px;
-  border-width: 4px;
-  border-style: solid;
-  border-color: #374151 transparent transparent transparent;
-}
-.timeline-dot.active {
-  transform: translate(-50%, -50%) scale(1.2);
-}
-.timeline-dot.active .year-tooltip {
-  opacity: 1;
-}
+.timeline-container { flex: 1; height: 30px; display: flex; align-items: center; position: relative; padding-left: 4px; cursor: pointer; }
+.timeline-bar { width: 100%; height: 2px; background-color: #e5e7eb; border-radius: 2px; position: relative; }
+.timeline-dot { width: 14px; height: 14px; border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.15); background-color: var(--aiko-pink); z-index: 10; transition: transform 0.1s; }
+.year-tooltip { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); background-color: #374151; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 20; }
+.year-tooltip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -4px; border-width: 4px; border-style: solid; border-color: #374151 transparent transparent transparent; }
+.timeline-dot.active { transform: translate(-50%, -50%) scale(1.2); }
+.timeline-dot.active .year-tooltip { opacity: 1; }
 
-.tap-trigger {
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
-}
+.tap-trigger { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 
-/* Header (Hub側にあるため非表示だがスタイルは保持) */
-header {
-  background-color: var(--aiko-red) !important;
-  color: white !important;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  position: sticky;
-  top: 0;
-  z-index: 40;
-}
+/* Hubにあるので非表示だが定義は維持 */
+header { background-color: var(--aiko-red) !important; color: white !important; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: sticky; top: 0; z-index: 40; }
 
 main { padding: 16px; }
 
@@ -292,24 +220,12 @@ button { font-size: 14px !important; }
 .clickable-item { cursor: pointer; transition: background-color 0.2s; }
 .clickable-item:hover { background-color: #f3f4f6; }
 
-.action-btn {
-  padding: 10px 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: bold;
-  cursor: pointer;
-  border: none;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
+.action-btn { padding: 10px 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; white-space: nowrap; flex-shrink: 0; }
 .clear-btn { background-color: #ef4444; color: white; }
 .setlist-btn { background-color: var(--aiko-blue); color: white; }
 
-.venue-tabs { display: flex; border-bottom: 3px solid #e5e7eb; margin-bottom: 20px; gap: 0; position: sticky; top: 0px; background: white; z-index: 40;
-}
-.venue-tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 600; font-size: 15px; color: #6b7280; border-bottom: 3px solid transparent;
-  margin-bottom: -3px; transition: all 0.2s; background: white; }
+.venue-tabs { display: flex; border-bottom: 3px solid #e5e7eb; margin-bottom: 20px; gap: 0; position: sticky; top: 0px; background: white; z-index: 40; }
+.venue-tab { flex: 1; padding: 14px; text-align: center; cursor: pointer; font-weight: 600; font-size: 15px; color: #6b7280; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: all 0.2s; background: white; }
 .venue-tab.active { color: var(--aiko-pink); border-bottom-color: var(--aiko-pink); }
 
 .toggle-checkbox { position: absolute; opacity: 0; width: 0; height: 0; }
@@ -318,11 +234,7 @@ button { font-size: 14px !important; }
 .toggle-checkbox:checked + .toggle-label { background-color: var(--aiko-pink); }
 .toggle-checkbox:checked + .toggle-label:before { transform: translateX(24px); }
 
-.back-button-circle {
-  width: 50px; height: 50px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
-  cursor: pointer; position: fixed; top: 20px; left: 20px; z-index: 1001; backdrop-filter: blur(4px); border: 1px solid #f3f4f6;
-}
+.back-button-circle { width: 50px; height: 50px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.95); box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; position: fixed; top: 20px; left: 20px; z-index: 1001; backdrop-filter: blur(4px); border: 1px solid #f3f4f6; }
 .back-button-circle svg { width: 28px; height: 28px; stroke: var(--aiko-red); stroke-width: 3; }
 
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
@@ -353,8 +265,6 @@ button { font-size: 14px !important; }
 <canvas id="confetti-canvas"></canvas>
 
 <div id="app" class="mobile-frame">
-
-<!-- ヘッダーはHubにあるので削除（スペースも詰めない） -->
 
 <main id="main-content" style="opacity: 0; transition: opacity 0.5s;">
   <div id="live-detail" style="display:none"></div>
@@ -480,28 +390,6 @@ button { font-size: 14px !important; }
     <div id="last-songs" class="card-base bg-white p-2"></div></div>
   </div>
 
-  <!-- ナビゲーション (Vol.3.0 復活) -->
-  <nav class="bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-    <div class="flex w-full">
-      <a href="#" class="tab-item active" data-tab="search">
-        <i data-lucide="calendar-days" style="width:26px;height:26px"></i>
-        <span class="text-[11px] font-bold">公演</span>
-      </a>
-      <a href="#" class="tab-item" data-tab="song">
-        <i data-lucide="music" style="width:26px;height:26px"></i>
-        <span class="text-[11px] font-bold">楽曲</span>
-      </a>
-      <a href="#" class="tab-item" data-tab="venue">
-        <i data-lucide="map-pin" style="width:26px;height:26px"></i>
-        <span class="text-[11px] font-bold">場所</span>
-      </a>
-      <a href="#" class="tab-item" data-tab="pattern">
-        <i data-lucide="shuffle" style="width:26px;height:26px"></i>
-        <span class="text-[11px] font-bold">傾向</span>
-      </a>
-    </div>
-  </nav>
-
 </main>
 
 <div id="loading-container" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; z-index:9000; display:flex; align-items:center; justify-content:center;">
@@ -552,9 +440,9 @@ button { font-size: 14px !important; }
       </ul>
       
       <!-- 最新のお知らせエリア -->
-      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v6.0.0)</h3>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v6.1.0)</h3>
       <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-6 text-sm text-gray-600">
-        <p>内部構造の刷新により、さらに高速に動作するようになりました。</p>
+        <p>デザインをVol.3.0に戻し、操作感を統一しました。</p>
       </div>
 
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
@@ -563,13 +451,35 @@ button { font-size: 14px !important; }
   </div>
 </div>
 
+<!-- ナビゲーション (Hub Standard) -->
+<nav>
+  <div>
+    <div onclick="switchToTab('search')" class="tab-item active" data-tab="search">
+      <i data-lucide="calendar-days" style="width:24px;height:24px"></i>
+      <span class="text-[10px] font-bold">公演</span>
+    </div>
+    <div onclick="switchToTab('song')" class="tab-item" data-tab="song">
+      <i data-lucide="music" style="width:24px;height:24px"></i>
+      <span class="text-[10px] font-bold">楽曲</span>
+    </div>
+    <div onclick="switchToTab('venue')" class="tab-item" data-tab="venue">
+      <i data-lucide="map-pin" style="width:24px;height:24px"></i>
+      <span class="text-[10px] font-bold">場所</span>
+    </div>
+    <div onclick="switchToTab('pattern')" class="tab-item" data-tab="pattern">
+      <i data-lucide="shuffle" style="width:24px;height:24px"></i>
+      <span class="text-[10px] font-bold">傾向</span>
+    </div>
+  </div>
+</nav>
+
 </div>
 
 <script>
-// GASのAPIエンドポイント (ユーザーご提示のURL)
-const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
-// ★ キャッシュキーを更新
-const CACHE_KEY = 'lldb_data_live_v6_0'; 
+// GASのAPIエンドポイント (Hubと統一)
+const API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+// ★ キャッシュキーを更新 (古いキャッシュとの競合回避)
+const CACHE_KEY = 'lldb_data_live_v6_1_fix'; 
 
 // アプリの初期化Promise
 let appInitializedResolver;
@@ -618,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. ローディング開始
   startLoadingAnimation(isCachedLoaded ? 'fast' : 'normal');
 
-  // 3. データ取得 (★ 安全策: getAllData を使用)
+  // 3. データ取得
   loadAllData(isCachedLoaded);
 
   Promise.all([appInitializedPromise, animationFinishedPromise]).then(() => {
@@ -656,9 +566,8 @@ function saveToCache(data) {
 
 async function loadAllData(isAlreadyDisplayed) {
   try {
-    // ★ 修正: getAllData に戻して安全策をとる
-    // (バックエンドがgetLiveDataに対応していてもいなくても動く)
-    const response = await fetch(`${API_URL}?action=getAllData`);
+    // ★ 修正: 正しいエンドポイントでgetLiveData
+    const response = await fetch(`${API_URL}?action=getLiveData`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
 
@@ -738,7 +647,7 @@ function initializeApp(data) {
   albumData = data.albumData || [];
   songData = data.songData || {};
 
-  // ★ 追加: 最新更新日の表示 (Vol.3.0ロジック復活)
+  // ★ 更新日表示ロジック
   if (allLiveRecords.length > 0) {
     try {
         const latestDate = allLiveRecords.reduce((latest, rec) => {
@@ -753,6 +662,12 @@ function initializeApp(data) {
     } catch(e) { console.error(e); }
   }
 
+  // ★ 初期化時に検索フォームをクリアして状態をリセット
+  const searchInput = document.getElementById('search-input');
+  if(searchInput) searchInput.value = '';
+  const tourSelect = document.getElementById('tour-select');
+  if(tourSelect) tourSelect.value = '';
+  
   analyzeSongStats(allLiveRecords);
   analyzePatterns(allLiveRecords);
   analyzeLastPlayed(allLiveRecords);
@@ -763,6 +678,7 @@ function initializeApp(data) {
     document.getElementById('search-input').setAttribute('data-listener-attached', 'true');
   }
 
+  // ★ フィルタを初期状態で適用
   applyFilters();
   checkOrientation();
   window.addEventListener('resize', checkOrientation);
@@ -1096,8 +1012,8 @@ function renderAlbumChart() {
       datasets: [{
         label: '演奏回数',
         data: albumData.map(item => item.playCount),
-        backgroundColor: 'rgba(230, 57, 70, 0.8)', /* Theme Red */
-        borderColor: '#E63946',
+        backgroundColor: 'rgba(255, 105, 180, 0.8)', /* Theme Pink */
+        borderColor: 'rgba(255, 105, 180, 1)',
         borderWidth: 1,
         borderRadius: 4
       }]
@@ -1164,8 +1080,8 @@ function renderLiveCountChart() {
   const datasets = [{
     label: '楽曲演奏',
     data: songPlayData,
-    backgroundColor: 'rgba(230, 57, 70, 0.8)', /* Theme Red */
-    borderColor: '#E63946',
+    backgroundColor: 'rgba(255, 105, 180, 0.8)', /* Theme Pink */
+    borderColor: 'rgba(255, 105, 180, 1)',
     borderWidth: 1,
     stack: 'stack1',
     datalabels: {
@@ -1236,8 +1152,8 @@ function renderVenueLiveCountChart() {
   const datasets = [{
     label: '選択場所',
     data: selectedPlayData,
-    backgroundColor: 'rgba(230, 57, 70, 0.8)', /* Theme Red */
-    borderColor: '#E63946',
+    backgroundColor: 'rgba(255, 105, 180, 0.8)', /* Theme Pink */
+    borderColor: 'rgba(255, 105, 180, 1)',
     borderWidth: 1,
     stack: 'stack1',
     datalabels: {
@@ -1770,7 +1686,6 @@ function selectRegion(regionName) {
 
 function switchToTab(tabId) {
   // NavはHub側にあるため、ここでは自身のコンテンツ切り替えのみ行う
-  // ただし、もしiframe内にnavがある場合の考慮も残す
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   const targetTab = document.querySelector(`.tab-item[data-tab="${tabId}"]`);
   if(targetTab) targetTab.classList.add('active');
