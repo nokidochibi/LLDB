@@ -3,8 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.5.4.6</title>
+<title>Love Like DataBase vol.6.0.0</title>
 <meta name="theme-color" content="#E63946">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0D09G3X4F1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-0D09G3X4F1');
+</script>
 
 <!-- ホーム画面に追加したときの設定 -->
 <meta name="apple-mobile-web-app-title" content="LLDB">
@@ -271,98 +281,6 @@ nav > div {
   opacity: 1;
 }
 
-/* 軌跡（年表）グリッドレイアウト */
-.history-grid-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  border-top: 1px solid #e2e8f0;
-  padding-bottom: 20px;
-}
-.history-grid-header {
-  position: sticky;
-  top: 0;
-  background-color: var(--aiko-bg);
-  z-index: 30;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.history-row {
-  display: grid;
-  grid-template-columns: 48px 1fr 1fr 1fr;
-  min-height: 48px;
-  border-bottom: 1px dashed #e2e8f0;
-  position: relative;
-}
-.history-row.year-start {
-  border-top: 2px solid #cbd5e1;
-  margin-top: -1px;
-}
-
-.col-date {
-  font-size: 10px;
-  font-weight: bold;
-  color: #94a3b8;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  padding-top: 8px;
-  background-color: var(--aiko-bg);
-  border-right: 1px solid #e2e8f0;
-  line-height: 1.2;
-}
-.col-date .year {
-  font-size: 12px;
-  color: #475569;
-  font-weight: 800;
-}
-
-.col-live, .col-single, .col-album {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 6px 4px;
-  overflow: hidden;
-}
-.col-single, .col-album {
-  border-left: 1px dashed #e2e8f0;
-}
-
-.tour-line {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  background-color: #fca5a5;
-  z-index: 0;
-}
-.tour-line.start { top: 50%; bottom: -1px; border-top-left-radius: 4px; border-top-right-radius: 4px; }
-.tour-line.middle { top: -1px; bottom: -1px; }
-.tour-line.end { top: -1px; height: 50%; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; }
-.tour-dot { width: 10px; height: 10px; background-color: var(--aiko-red); border-radius: 50%; z-index: 1; box-shadow: 0 0 0 2px white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-
-.event-chip {
-  font-size: 10px;
-  font-weight: bold;
-  padding: 4px 8px;
-  border-radius: 8px;
-  text-align: center;
-  z-index: 2;
-  width: 90%;
-  max-width: 100%;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  line-height: 1.2;
-  margin-bottom: 4px;
-  cursor: default;
-}
-.event-chip.live { background-color: white; color: #ef4444; border: 1px solid #ef4444; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-.tour-line + .event-chip.live { margin-top: 0; }
-.event-chip.single { background-color: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; white-space: normal; height: auto; word-wrap: break-word; }
-.event-chip.album { background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047; white-space: normal; height: auto; word-wrap: break-word; }
-
 .tap-trigger { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 
 /* ヘッダーはHub側で持つためここでは非表示にするが、定義は残す */
@@ -438,7 +356,7 @@ button { font-size: 14px !important; }
 <div id="app" class="mobile-frame">
 
 <header id="main-header" class="shadow-sm">
-  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.5.4.6</h1>
+  <h1 class="font-bold text-left" style="font-size:22px; color:white; flex:1;">Love Like DataBase vol.6.0.0</h1>
   <button id="info-btn" style="background-color:white; color:#ef4444; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; border:none; cursor:pointer; flex-shrink:0; margin-left:8px;">読んでね</button>
 </header>
 
@@ -562,27 +480,6 @@ button { font-size: 14px !important; }
     <div id="last-songs" class="card-base bg-white p-2"></div></div>
   </div>
 
-  <!-- 軌跡タブ -->
-  <div id="tab-history" class="tab-content" style="display:none">
-    <div class="mb-4 px-1">
-      <h3 class="font-bold text-slate-600 text-xl">⏳ ライブ、CDリリースのタイムライン</h3>
-    </div>
-    
-    <div class="history-grid-header flex text-[10px] font-bold text-gray-400 pb-2 mb-0 shadow-sm pt-2">
-      <div style="width:48px; text-align:center;">年月</div>
-      <div class="flex-1 text-center">LIVE</div>
-      <div class="flex-1 text-center border-l border-dashed border-gray-200">SINGLE</div>
-      <div class="flex-1 text-center border-l border-dashed border-gray-200">ALBUM</div>
-    </div>
-    <div id="history-grid-container" class="history-grid-container bg-white shadow-sm rounded-b-xl">
-        <!-- JSで生成 -->
-    </div>
-    
-    <div class="text-center mt-12 mb-8 text-gray-300 text-sm">
-      <p>〜 現在 〜</p>
-    </div>
-  </div>
-
 </main>
 
 <div id="loading-container" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; z-index:9000; display:flex; align-items:center; justify-content:center;">
@@ -633,9 +530,9 @@ button { font-size: 14px !important; }
       </ul>
       
       <!-- 最新のお知らせエリア -->
-      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v5.4.6)</h3>
+      <h3 class="font-bold text-lg mb-3 text-aiko-red">🔔 最新のお知らせ (v6.0.0)</h3>
       <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-6 text-sm text-gray-600">
-        <p>Hub&Spoke構成への移行に伴い、デザインを調整しました。</p>
+        <p>内部構造の刷新により、さらに高速に動作するようになりました。</p>
       </div>
 
       <h3 class="font-bold text-lg mb-3 text-aiko-red">▼その他</h3>
@@ -663,10 +560,6 @@ button { font-size: 14px !important; }
       <i data-lucide="shuffle" style="width:24px;height:24px"></i>
       <span class="text-[10px] font-bold">傾向</span>
     </a>
-    <a href="#" class="tab-item" data-tab="history">
-      <i data-lucide="footprints" style="width:24px;height:24px"></i>
-      <span class="text-[10px] font-bold">軌跡</span>
-    </a>
   </div>
 </nav>
 
@@ -674,8 +567,9 @@ button { font-size: 14px !important; }
 
 <script>
 // GASのAPIエンドポイント
-const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
-const CACHE_KEY = 'lldb_data_v3_9_fix7'; 
+const API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+// ★ キャッシュキーを更新 (構造変更のため)
+const CACHE_KEY = 'lldb_data_live_v6_0'; 
 
 // アプリの初期化Promise
 let appInitializedResolver;
@@ -724,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. ローディング開始
   startLoadingAnimation(isCachedLoaded ? 'fast' : 'normal');
 
-  // 3. データ取得
+  // 3. データ取得 (★ Live専用エンドポイントを使用)
   loadAllData(isCachedLoaded);
 
   Promise.all([appInitializedPromise, animationFinishedPromise]).then(() => {
@@ -739,7 +633,7 @@ let allLiveRecords = [],
     lastPlayedStats = {}, 
     albumData = [], 
     songData = {}, 
-    historyData = [], 
+    // historyData = [], // ★ 削除: Historyデータは扱わない
     chartInstances = {};
 let selectedVenueInfo = null;
 let currentDisplayingRecord = null;
@@ -763,7 +657,8 @@ function saveToCache(data) {
 
 async function loadAllData(isAlreadyDisplayed) {
   try {
-    const response = await fetch(`${API_URL}?action=getAllData`);
+    // ★ 修正: action=getLiveData に変更
+    const response = await fetch(`${API_URL}?action=getLiveData`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
 
@@ -842,16 +737,14 @@ function initializeApp(data) {
   allLiveRecords = data.liveRecords || [];
   albumData = data.albumData || [];
   songData = data.songData || {};
-  historyData = data.historyData || []; 
+  // ★ 削除: historyDataの初期化
 
   analyzeSongStats(allLiveRecords);
   analyzePatterns(allLiveRecords);
   analyzeLastPlayed(allLiveRecords);
   populateFilters(allLiveRecords);
   
-  if (historyData.length > 0) {
-      renderHistoryTab();
-  }
+  // ★ 削除: renderHistoryTab() の呼び出し
 
   if (!document.getElementById('search-input').hasAttribute('data-listener-attached')) {
     setupEventListeners();
@@ -885,162 +778,7 @@ function formatTourName(name) {
   return n.trim();
 }
 
-function renderHistoryTab() {
-    const container = document.getElementById('history-grid-container');
-    if (!container) return;
-
-    if (historyData.length === 0) return;
-
-    let minDate = new Date();
-    let maxDate = new Date(0);
-    const tourRanges = {};
-
-    historyData.forEach(event => {
-        if (!event.date) return;
-        const d = new Date(event.date);
-        if (d < minDate) minDate = d;
-        if (d > maxDate) maxDate = d;
-
-        if (event.type === 'live') {
-            const shortName = formatTourName(event.title);
-            const ym = `${d.getFullYear()}/${('0' + (d.getMonth() + 1)).slice(-2)}`;
-            
-            if (shortName.match(/^(Pop|Rock|Aloha)/)) {
-                if (!tourRanges[shortName]) {
-                    tourRanges[shortName] = { start: ym, end: ym };
-                } else {
-                    if (ym < tourRanges[shortName].start) tourRanges[shortName].start = ym;
-                    if (ym > tourRanges[shortName].end) tourRanges[shortName].end = ym;
-                }
-            }
-        }
-    });
-
-    const timelineData = {};
-    let current = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
-
-    while (current <= end) {
-        const ym = `${current.getFullYear()}/${('0' + (current.getMonth() + 1)).slice(-2)}`;
-        timelineData[ym] = { live: [], single: [], album: [], isTourActive: false, tourType: '', tourId: '' };
-        current.setMonth(current.getMonth() + 1);
-    }
-
-    historyData.forEach(event => {
-        if (!event.date) return;
-        if (event.title === '深夜2時「寒いね」って彼とスーパー行ったじゃん。') return;
-
-        let title = event.title;
-        if (event.type === 'album' && title.startsWith('まとめ')) {
-            title = 'まとめ';
-        }
-
-        const d = new Date(event.date);
-        const ym = `${d.getFullYear()}/${('0' + (d.getMonth() + 1)).slice(-2)}`;
-        if (timelineData[ym]) {
-            if (event.type === 'live') {
-                const tourId = formatTourName(event.title);
-                let displayName = tourId;
-                const matchedRecord = allLiveRecords.find(r => r.tourName === event.title);
-                if (matchedRecord && matchedRecord.shortTourName) {
-                    displayName = matchedRecord.shortTourName;
-                }
-
-                if (!timelineData[ym].live.some(e => e.tourId === tourId)) {
-                    timelineData[ym].live.push({ 
-                        name: displayName,
-                        tourId: tourId,
-                        rawName: event.title,
-                        rawDate: event.date
-                    });
-                }
-            } else if (event.type === 'single') {
-                timelineData[ym].single.push({ name: title, dateObj: d });
-            } else if (event.type === 'album') {
-                if (!timelineData[ym].album.some(a => a.name === title)) {
-                    timelineData[ym].album.push({ name: title });
-                }
-            }
-        }
-    });
-
-    let html = '';
-    const sortedKeys = Object.keys(timelineData).sort();
-    let lastYear = null;
-
-    sortedKeys.forEach(ym => {
-        const [year, month] = ym.split('/');
-        const data = timelineData[ym];
-        
-        let tourLineClass = '';
-        let activeTourId = null;
-
-        for (const [id, range] of Object.entries(tourRanges)) {
-            if (ym >= range.start && ym <= range.end) {
-                activeTourId = id;
-                if (range.start === range.end) {
-                    tourLineClass = 'dot'; 
-                } else if (ym === range.start) {
-                    tourLineClass = 'start';
-                } else if (ym === range.end) {
-                    tourLineClass = 'end';
-                } else {
-                    tourLineClass = 'middle';
-                }
-                break;
-            }
-        }
-
-        const rowClass = (year !== lastYear) ? 'year-start' : '';
-        const displayYear = (year !== lastYear) ? year : '';
-        lastYear = year;
-
-        let liveHtml = '';
-        if (activeTourId && tourLineClass && tourLineClass !== 'dot') {
-            liveHtml += `<div class="tour-line ${tourLineClass}"></div>`;
-        }
-        
-        if (data.live.length > 0) {
-            data.live.forEach(l => {
-                if (!activeTourId && l.tourId.match(/^(Pop|Rock|Aloha)/)) {
-                     liveHtml += `<div class="tour-dot"></div>`;
-                }
-                const safeName = l.rawName.replace(/'/g, "\\'");
-                const safeDate = l.rawDate;
-                liveHtml += `<div class="event-chip live" onclick="findAndShowLive('${safeDate}', '${safeName}')">${l.name}</div>`;
-            });
-        }
-
-        let singleHtml = '';
-        if (data.single.length > 0) {
-            const groupedByDate = {};
-            data.single.forEach(s => {
-                const dateKey = s.dateObj.getDate();
-                if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
-                groupedByDate[dateKey].push(s.name);
-            });
-            Object.keys(groupedByDate).sort((a,b) => a - b).forEach(d => {
-                 const combinedName = groupedByDate[d].join('/');
-                 singleHtml += `<div class="event-chip single">${combinedName}</div>`;
-            });
-        }
-
-        let albumHtml = data.album.map(a => `<div class="event-chip album">${a.name}</div>`).join('');
-
-        html += `
-        <div class="history-row ${rowClass}">
-            <div class="col-date">
-                ${displayYear ? `<span class="year">${displayYear}</span>` : ''}
-                <span class="month">${Number(month)}月</span>
-            </div>
-            <div class="col-live">${liveHtml}</div>
-            <div class="col-single">${singleHtml}</div>
-            <div class="col-album">${albumHtml}</div>
-        </div>`;
-    });
-
-    container.innerHTML = html;
-}
+// ★ 削除: renderHistoryTab() 関数全体を削除
 
 function setupRandomTriggers() {
   function createDoubleTapHandler(callback) {
