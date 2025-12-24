@@ -36,17 +36,20 @@
    ========================================= */
 /* 親フレーム(index.html)のヘッダーがあるため、こちらのヘッダーは隠す */
 header#main-header { display: none !important; }
-/* ナビゲーションもHub側にあるため隠す */
-nav { display: none !important; }
+
 /* 全体のpadding調整 (Hubのヘッダー下から始まるため0でOK) */
-body { padding-top: 0 !important; padding-bottom: 100px !important; }
+/* Hubヘッダー(60px) + Liveアプリ内ナビ(約60px) + Safe Area */
+body { 
+    padding-top: 0 !important; 
+    padding-bottom: calc(70px + env(safe-area-inset-bottom)) !important; 
+}
 
 /* 詳細画面時はHubのヘッダーも隠れる前提だが、念のため上部余白を確保 */
 body.detail-view { padding-top: 0; }
 body.detail-view main { padding-top: 60px; padding-bottom: 40px; }
 
 /* =========================================
-   Vol.3.0 デザインスタイル
+   Vol.3.0 デザインスタイル (完全復元)
    ========================================= */
 :root {
   --aiko-pink: #FF69B4;
@@ -92,6 +95,45 @@ body {
   margin-bottom: 16px;
 }
 
+/* ナビゲーションバー (Vol.3.0スタイルで復元) */
+nav {
+  padding-bottom: env(safe-area-inset-bottom);
+  position: fixed !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex !important;
+  border-top: 2px solid #e5e7eb;
+  height: calc(64px + env(safe-area-inset-bottom));
+  z-index: 50;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+nav > div {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #9CA3AF;
+  background-color: white;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  flex: 1 1 0px;
+  width: 0;
+  height: 100%;
+}
+.tab-item.active { color: white; background-color: #4B5563; }
+.tab-item.active i { color: white; }
+
 /* セトリリストのスタイル */
 .setlist-item {
   padding: 3px 0;
@@ -109,19 +151,16 @@ body {
 }
 .setlist-item:last-child { border-bottom: none; }
 
-/* メドレータイトル行（黄色背景＋黄色ライン） */
 .setlist-medley-title {
   border-left-color: var(--aiko-yellow) !important;
   background-color: #fffbeb !important;
 }
 
-/* メドレー内の曲（黄色ラインのみ、背景なし） */
 .setlist-medley {
   border-left-color: var(--aiko-yellow) !important;
   background-color: transparent !important;
 }
 
-/* アンコールヘッダー */
 .setlist-encore-header {
   margin-top: 16px;
   margin-bottom: 4px;
@@ -134,7 +173,6 @@ body {
   border-radius: 0 4px 4px 0;
 }
 
-/* アンコール内の曲 */
 .setlist-encore {
   border-left-color: var(--aiko-red) !important;
   background-color: transparent !important;
@@ -226,7 +264,6 @@ body {
   opacity: 1;
 }
 
-/* タップ操作改善 */
 .tap-trigger {
   touch-action: manipulation;
   user-select: none;
@@ -275,7 +312,6 @@ button { font-size: 14px !important; }
   margin-bottom: -3px; transition: all 0.2s; background: white; }
 .venue-tab.active { color: var(--aiko-pink); border-bottom-color: var(--aiko-pink); }
 
-/* トグルスイッチ */
 .toggle-checkbox { position: absolute; opacity: 0; width: 0; height: 0; }
 .toggle-label { width: 48px; height: 24px; background-color: #e5e7eb; border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.3s; display: block; }
 .toggle-label:before { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
@@ -318,7 +354,7 @@ button { font-size: 14px !important; }
 
 <div id="app" class="mobile-frame">
 
-<!-- ヘッダーはHubにあるので削除 -->
+<!-- ヘッダーはHubにあるので削除（スペースも詰めない） -->
 
 <main id="main-content" style="opacity: 0; transition: opacity 0.5s;">
   <div id="live-detail" style="display:none"></div>
@@ -444,7 +480,27 @@ button { font-size: 14px !important; }
     <div id="last-songs" class="card-base bg-white p-2"></div></div>
   </div>
 
-  <!-- ナビゲーションはHubにあるので削除 -->
+  <!-- ナビゲーション (Vol.3.0 復活) -->
+  <nav class="bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+    <div class="flex w-full">
+      <a href="#" class="tab-item active" data-tab="search">
+        <i data-lucide="calendar-days" style="width:26px;height:26px"></i>
+        <span class="text-[11px] font-bold">公演</span>
+      </a>
+      <a href="#" class="tab-item" data-tab="song">
+        <i data-lucide="music" style="width:26px;height:26px"></i>
+        <span class="text-[11px] font-bold">楽曲</span>
+      </a>
+      <a href="#" class="tab-item" data-tab="venue">
+        <i data-lucide="map-pin" style="width:26px;height:26px"></i>
+        <span class="text-[11px] font-bold">場所</span>
+      </a>
+      <a href="#" class="tab-item" data-tab="pattern">
+        <i data-lucide="shuffle" style="width:26px;height:26px"></i>
+        <span class="text-[11px] font-bold">傾向</span>
+      </a>
+    </div>
+  </nav>
 
 </main>
 
@@ -510,8 +566,8 @@ button { font-size: 14px !important; }
 </div>
 
 <script>
-// GASのAPIエンドポイント (Hubと統一)
-const API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
+// GASのAPIエンドポイント (ユーザーご提示のURL)
+const API_URL = "https://script.google.com/macros/s/AKfycbzmH5dDDdgd1pbxmtFWnjK7eo2Kgv4BBeBBUDcYzXdrFXVQl2KmPH8mNXyLsFMHWoWz/exec";
 // ★ キャッシュキーを更新
 const CACHE_KEY = 'lldb_data_live_v6_0'; 
 
@@ -562,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. ローディング開始
   startLoadingAnimation(isCachedLoaded ? 'fast' : 'normal');
 
-  // 3. データ取得 (★ Live専用エンドポイントを使用)
+  // 3. データ取得 (★ 安全策: getAllData を使用)
   loadAllData(isCachedLoaded);
 
   Promise.all([appInitializedPromise, animationFinishedPromise]).then(() => {
@@ -600,9 +656,9 @@ function saveToCache(data) {
 
 async function loadAllData(isAlreadyDisplayed) {
   try {
-    // ★ 修正: action=getLiveData に変更
-    // ★ データが表示されない場合は、GAS側の更新とデプロイを確認してください
-    const response = await fetch(`${API_URL}?action=getLiveData`);
+    // ★ 修正: getAllData に戻して安全策をとる
+    // (バックエンドがgetLiveDataに対応していてもいなくても動く)
+    const response = await fetch(`${API_URL}?action=getAllData`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
 
@@ -1040,7 +1096,7 @@ function renderAlbumChart() {
       datasets: [{
         label: '演奏回数',
         data: albumData.map(item => item.playCount),
-        backgroundColor: 'rgba(255, 105, 180, 0.8)', /* Theme Red */
+        backgroundColor: 'rgba(230, 57, 70, 0.8)', /* Theme Red */
         borderColor: '#E63946',
         borderWidth: 1,
         borderRadius: 4
@@ -1108,7 +1164,7 @@ function renderLiveCountChart() {
   const datasets = [{
     label: '楽曲演奏',
     data: songPlayData,
-    backgroundColor: 'rgba(255, 105, 180, 0.8)', /* Theme Red */
+    backgroundColor: 'rgba(230, 57, 70, 0.8)', /* Theme Red */
     borderColor: '#E63946',
     borderWidth: 1,
     stack: 'stack1',
@@ -1180,7 +1236,7 @@ function renderVenueLiveCountChart() {
   const datasets = [{
     label: '選択場所',
     data: selectedPlayData,
-    backgroundColor: 'rgba(255, 105, 180, 0.8)', /* Theme Red */
+    backgroundColor: 'rgba(230, 57, 70, 0.8)', /* Theme Red */
     borderColor: '#E63946',
     borderWidth: 1,
     stack: 'stack1',
