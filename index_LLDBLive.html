@@ -834,7 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let allLiveRecords = [], 
     songStats = {},             
-    songStatsNoMedley = {},     
+    songStatsNoMedley = {},      
     patternStats = {}, 
     lastPlayedStats = {}, 
     albumData = [], 
@@ -1063,7 +1063,7 @@ function renderHistoryTab() {
                 if (!timelineData[ym].live.some(e => e.tourId === tourId)) {
                     timelineData[ym].live.push({ 
                         name: displayName, 
-                        tourId: tourId,     
+                        tourId: tourId,      
                         rawName: event.title,
                         rawDate: event.date 
                     });
@@ -1259,7 +1259,8 @@ function setupRandomTriggers() {
         const randomSong = songs[Math.floor(Math.random() * songs.length)];
         setTimeout(() => {
             selectSong(randomSong);
-            document.getElementById('song-ranking-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // 修正箇所: appコンテナの最上部へスクロールさせる
+            document.getElementById('app').scrollTo({ top: 0, behavior: 'smooth' });
         }, 600);
     });
     
