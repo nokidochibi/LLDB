@@ -837,8 +837,8 @@
             const json = await res.json();
             if (json.status === 'success') {
                 chartInstances.youtube = renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
-                // Twitterの色を青(#0ea5e9)から黒(#000000)に変更
-                chartInstances.twitter = renderFollowerChart('chart-twitter', json.data, 'twitter', '#000000');
+                // Twitterの色を青(#0ea5e9)からグレー(#7d8085)に変更
+                chartInstances.twitter = renderFollowerChart('chart-twitter', json.data, 'twitter', '#7d8085');
                 followersDataLoaded = true;
             }
         } catch (e) { console.error(e); }
