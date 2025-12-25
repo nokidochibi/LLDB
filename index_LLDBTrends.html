@@ -306,6 +306,25 @@
         .emoji { font-size: 1.1em; margin-bottom: 0px; line-height: 1; }
         .number-value { display: block; }
 
+        /* ★ カテゴリタグ用スタイル */
+        .video-tag {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #fff;
+            margin-right: 4px;
+            margin-bottom: 2px;
+            vertical-align: text-bottom;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+        .tag-mv { background-color: #e11d48; } /* Rose-600 */
+        .tag-live { background-color: #0284c7; } /* Sky-600 */
+        .tag-ny { background-color: #d97706; } /* Amber-600 */
+        .tag-other { background-color: #64748b; } /* Slate-500 */
+
         /* =========================================
            3. UI Components (Modal, Footer, Tabs)
            ========================================= */
@@ -703,7 +722,25 @@
                 const val = row[h.key];
                 
                 if (h.key === 'title') {
-                    td.innerHTML = `<a href="${row.url}" target="_blank">${formatTitle(val)}</a>`;
+                    // ★ カテゴリタグの生成
+                    let tagHtml = '';
+                    let isOtherCategory = false; // 「他」カテゴリ判定用フラグ
+
+                    if (row.isMV == 1) {
+                        tagHtml = '<span class="video-tag tag-mv">MV</span>';
+                    } else if (row.isFullOther == 1) {
+                        tagHtml = '<span class="video-tag tag-live">LIVE</span>';
+                    } else if (row.isNYMovie == 1) {
+                        tagHtml = '<span class="video-tag tag-ny">NY</span>';
+                    } else {
+                        tagHtml = '<span class="video-tag tag-other">他</span>';
+                        isOtherCategory = true; // 「他」の場合はフラグを立てる
+                    }
+
+                    // タグとタイトルを結合
+                    // isOtherCategory が true の場合、formatTitle に改行禁止フラグを渡す
+                    td.innerHTML = tagHtml + `<a href="${row.url}" target="_blank" style="display:inline;">${formatTitle(val, isOtherCategory)}</a>`;
+
                 } else if (h.key === 'totalViews') {
                     const num = parseFloat(val)||0;
                     const pct = (maxTotalViews > 0) ? (num / maxTotalViews * 100) : 0;
@@ -843,7 +880,7 @@
         document.getElementById('noGraphData').style.display = 'none';
     }
 
-    function formatTitle(title) {
+    function formatTitle(title, forceSingleLine = false) {
         if (!title) return '';
         let cleanText = title.replace(/[\r\n]+/g, ' ').replace(/[\s\u3000]+/g, ' ').trim();
 
@@ -852,8 +889,16 @@
             .replace(/^aiko\s+/gi, '')
             .replace(/aiko\s*-\s*/gi, '')
             .replace(/aiko/gi, '')
-            .replace(/music video/gi, 'MV')
+            .replace(/music video/gi, '') // "music video" を削除
+            .replace(/\s*[\/-]\s*MV/gi, '') // " - MV" や " / MV" などを削除
+            .replace(/\s*\(MV\)/gi, '') // "(MV)" を削除
+            .replace(/MV/gi, '') // 残った "MV" も削除
             .trim();
+
+        // 文末のハイフンなどが残った場合の掃除
+        if (formatted.endsWith('-') || formatted.endsWith('/')) {
+             formatted = formatted.substring(0, formatted.length - 1).trim();
+        }
 
         if (formatted.startsWith('-')) {
             formatted = formatted.substring(1).trim();
@@ -867,7 +912,8 @@
             const fmtPost = post.replace(/([「『][^」』]+[」』])/g, '<strong>$1</strong>');
             
             if (pre) {
-                return `<small>${pre}</small><br>${fmtPost}`;
+                // 常に改行せずスペースで繋ぐように変更
+                return `<small>${pre}</small> ${fmtPost}`;
             } else {
                 return fmtPost;
             }
