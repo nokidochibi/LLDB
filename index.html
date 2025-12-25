@@ -48,13 +48,6 @@
         }
         .app-screen.active { display: flex; }
         
-        /* ★ Liveアプリ専用の全画面モード（Hubヘッダーを無視して広げる） */
-        #app-live.active {
-            top: 0 !important;
-            height: 100% !important;
-            z-index: 10; /* ヘッダーより下、通常よりは上 */
-        }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -101,23 +94,6 @@
             position: fixed; top: 0; z-index: 60;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: all 0.3s;
-        }
-
-        /* ★ Liveモード時のヘッダー調整（背景透明、タイトル非表示、ボタンだけ残す） */
-        body.mode-live #main-app-header {
-            background-color: transparent !important;
-            box-shadow: none !important;
-            pointer-events: none; /* ヘッダー領域のクリック透過 */
-        }
-        body.mode-live #header-title {
-            opacity: 0;
-            pointer-events: none;
-        }
-        body.mode-live #header-menu-btn {
-            background-color: rgba(255,255,255,0.2); /* 少し見やすく */
-            backdrop-filter: blur(4px);
-            pointer-events: auto; /* ボタンだけクリック可能に */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .flower-icon {
@@ -279,13 +255,6 @@
             document.querySelectorAll('.app-screen').forEach(el => el.classList.remove('active'));
             const target = document.getElementById('app-' + appName);
             if(target) target.classList.add('active');
-
-            // 特殊処理: Liveアプリの時だけ全画面モードにする
-            if (appName === 'live') {
-                document.body.classList.add('mode-live');
-            } else {
-                document.body.classList.remove('mode-live');
-            }
 
             // ヘッダー更新
             const header = document.getElementById('main-app-header');
