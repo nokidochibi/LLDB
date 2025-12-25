@@ -274,11 +274,16 @@
                 font-size: 11px; /* 日付は小さめでOK */
             }
             
-            /* 平均/日列 */
-            th:nth-child(5), td:nth-child(5) { width: 12%; }
+            /* 平均/日列 - スマホでは中央揃えに */
+            th:nth-child(5), td:nth-child(5) { width: 12%; text-align: center; }
             
-            /* 平均/7日列 */
-            th:nth-child(6), td:nth-child(6) { width: 12%; }
+            /* 平均/7日列 - スマホでは中央揃えに */
+            th:nth-child(6), td:nth-child(6) { width: 12%; text-align: center; }
+            
+            /* スマホでは絵文字と数値を中央揃えにする */
+            .emoji-number-container {
+                align-items: center !important;
+            }
         }
 
         /* セル内装飾 */
@@ -323,7 +328,7 @@
         .tag-mv { background-color: #e11d48; } /* Rose-600 */
         .tag-live { background-color: #0284c7; } /* Sky-600 */
         .tag-ny { background-color: #d97706; } /* Amber-600 */
-        .tag-other { background-color: #64748b; } /* Slate-500 */
+        .tag-other { background-color: #64748b; } /* Slate-500 - 復活 */
 
         /* =========================================
            3. UI Components (Modal, Footer, Tabs)
@@ -481,8 +486,13 @@
         </div>
 
         <div class="follower-card">
-            <h3 class="font-bold text-sky-500 flex items-center gap-2 mb-4 text-base">
-                <i data-lucide="twitter" class="w-5 h-5"></i> Twitterフォロワー数
+            <!-- Twitter(Sky-500) から X(Slate-900) へ変更 -->
+            <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-4 text-base">
+                <!-- X Icon SVG -->
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
+                </svg>
+                Xフォロワー数
             </h3>
             <div style="height: 250px; position: relative;">
                 <canvas id="chart-twitter"></canvas>
@@ -764,7 +774,8 @@
                     } else {
                         td.innerHTML = `<div class="emoji-number-container">${emoji ? `<div class="emoji">${emoji}</div>` : ''}<span class="number-value">${Math.round(num).toLocaleString()}</span></div>`;
                     }
-                    td.style.textAlign = 'right';
+                    // JSでの強制右寄せを削除し、CSSに任せる
+                    // td.style.textAlign = 'right'; 
                 }
                 tr.appendChild(td);
             });
@@ -826,7 +837,8 @@
             const json = await res.json();
             if (json.status === 'success') {
                 chartInstances.youtube = renderFollowerChart('chart-youtube', json.data, 'youtube', '#ef4444');
-                chartInstances.twitter = renderFollowerChart('chart-twitter', json.data, 'twitter', '#0ea5e9');
+                // Twitterの色を青(#0ea5e9)から黒(#000000)に変更
+                chartInstances.twitter = renderFollowerChart('chart-twitter', json.data, 'twitter', '#000000');
                 followersDataLoaded = true;
             }
         } catch (e) { console.error(e); }
@@ -885,6 +897,7 @@
         let cleanText = title.replace(/[\r\n]+/g, ' ').replace(/[\s\u3000]+/g, ' ').trim();
 
         let formatted = cleanText
+            .replace(/#\S+/g, '') // ★ハッシュタグ削除を最初に実行（#aiko等が#だけ残るのを防ぐ）
             .replace(/^aiko\s*-\s*/gi, '')
             .replace(/^aiko\s+/gi, '')
             .replace(/aiko\s*-\s*/gi, '')
