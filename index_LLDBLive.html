@@ -377,7 +377,7 @@ nav > div {
   color: #ef4444;
   border: 1px solid #ef4444;
   cursor: pointer; /* 詳細へ飛べる */
-  
+   
   /* LIVE名は省略設定 */
   white-space: nowrap;
   overflow: hidden;
@@ -393,7 +393,7 @@ nav > div {
   background-color: #f0f9ff; /* 薄い青背景 */
   color: #0284c7;
   border: 1px solid #bae6fd;
-  
+   
   /* Singleは改行許可 */
   white-space: normal;
   height: auto;
@@ -403,7 +403,7 @@ nav > div {
   background-color: #fefce8; /* 薄い黄背景 */
   color: #854d0e;
   border: 1px solid #fef08a;
-  
+   
   /* Albumも改行許可 */
   white-space: normal;
   height: auto;
@@ -697,7 +697,7 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
     </div>
 
     <div class="mb-5">
-        <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-gray-400"></i> ご無沙汰な曲 TOP 10</h3>
+        <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-gray-400"></i> 最近演奏されていない曲 TOP 10</h3>
         <p class="text-gray-400 mb-2 ml-1 text-xs">※過去に1度でも演奏された曲が対象</p>
         <div id="not-played-recently-songs" class="card-base bg-white p-2"></div>
     </div>
@@ -833,8 +833,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let allLiveRecords = [], 
-    songStats = {},             
-    songStatsNoMedley = {},      
+    songStats = {},              
+    songStatsNoMedley = {},       
     patternStats = {}, 
     lastPlayedStats = {}, 
     albumData = [], 
@@ -1063,7 +1063,7 @@ function renderHistoryTab() {
                 if (!timelineData[ym].live.some(e => e.tourId === tourId)) {
                     timelineData[ym].live.push({ 
                         name: displayName, 
-                        tourId: tourId,      
+                        tourId: tourId,       
                         rawName: event.title,
                         rawDate: event.date 
                     });
@@ -1470,9 +1470,9 @@ function startConfetti() {
       ctx.clearRect(0, 0, width, height);
     }
   }
-  
+   
   animate();
-  
+   
   // リサイズ対応
   const resizeHandler = () => {
     width = window.innerWidth;
@@ -1855,6 +1855,9 @@ function applyFilters() {
     songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '');
   }
 
+  // ★トグルの状態取得
+  const isMedleyIncluded = document.getElementById('medley-toggle').checked;
+
   const filters = {
     search: document.getElementById('search-input').value.toLowerCase(),
     tour: document.getElementById('tour-select').value,
@@ -1881,7 +1884,30 @@ function applyFilters() {
     else if (filters.tour === 'aloha') tourMatch = tourName.includes('love like aloha');
     else if (filters.tour === 'other') tourMatch = !/love like (pop|rock|aloha)/.test(tourName);
 
-    const songMatch = !filters.song || rec.setlist.some(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim().toLowerCase() === filters.song);
+    // ★修正箇所: songMatchのロジック変更
+    let songMatch = true;
+    if (filters.song) {
+        if (isMedleyIncluded) {
+            // 従来通り：セットリスト内に該当曲があればOK
+            songMatch = rec.setlist.some(s => s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim().toLowerCase() === filters.song);
+        } else {
+            // メドレー除外：メドレー区間外で該当曲があるかチェック
+            let inMedley = false;
+            let found = false;
+            for (const s of rec.setlist) {
+                if (s === '__MEDLEY_START__') { inMedley = true; continue; }
+                if (s === '__MEDLEY_END__') { inMedley = false; continue; }
+                if (inMedley) continue; // メドレー中はスキップ
+
+                const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim().toLowerCase();
+                if (clean === filters.song) {
+                    found = true;
+                    break;
+                }
+            }
+            songMatch = found;
+        }
+    }
     
     // フリーワード検索ロジック
     let searchMatch = true;
