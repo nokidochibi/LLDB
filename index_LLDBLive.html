@@ -65,8 +65,8 @@ body.detail-view { padding-top: 0; }
   background-color: white;
   border-radius: 16px;
   box-shadow: var(--card-shadow);
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 12px; /* 余白圧縮 */
+  margin-bottom: 12px; /* 余白圧縮 */
   border: 1px solid rgba(0,0,0,0.03);
 }
 
@@ -121,7 +121,7 @@ nav > div {
 
 /* セトリリストのスタイル */
 .setlist-item {
-  padding: 6px 0;
+  padding: 5px 0; /* 余白圧縮 */
   margin-bottom: 0;
   background-color: transparent;
   border-bottom: 1px solid #f3f4f6;
@@ -130,10 +130,10 @@ nav > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 40px;
+  min-height: 38px; /* 高さ圧縮 */
   /* 左側のボーダー用スペース確保 */
   border-left: 4px solid transparent; 
-  padding-left: 10px; /* ボーダーとの余白 */
+  padding-left: 8px; /* 余白圧縮 */
 }
 .setlist-item:last-child { border-bottom: none; }
 
@@ -151,12 +151,12 @@ nav > div {
 
 /* アンコールヘッダー（拍手などのテキスト） */
 .setlist-encore-header {
-  margin-top: 20px;
-  margin-bottom: 8px;
+  margin-top: 16px; /* 余白圧縮 */
+  margin-bottom: 6px;
   font-weight: 800; /* 太字 */
   color: var(--aiko-red);
   font-size: 16px; /* フォントサイズ大きく */
-  padding: 4px 10px;
+  padding: 4px 8px;
   background-color: #fef2f2; /* 薄い赤背景 */
   border-left: 4px solid var(--aiko-red);
   border-radius: 0 4px 4px 0;
@@ -274,7 +274,7 @@ nav > div {
 .history-row {
   display: grid;
   grid-template-columns: 48px 1fr 1fr 1fr; /* 年月, LIVE, SINGLE, ALBUM */
-  min-height: 44px;
+  min-height: 40px; /* 高さ圧縮 */
   border-bottom: 1px dashed #f1f5f9;
   position: relative;
 }
@@ -359,7 +359,7 @@ nav > div {
 .event-chip {
   font-size: 10px;
   font-weight: bold;
-  padding: 3px 6px;
+  padding: 2px 6px; /* 余白圧縮 */
   border-radius: 6px;
   text-align: center;
   z-index: 2;
@@ -417,22 +417,24 @@ nav > div {
   -webkit-user-select: none;
 }
 
-main { padding: 16px; }
-body.detail-view main { padding-top: 20px; padding-bottom: 40px; }
+main { padding: 12px; } /* 余白圧縮 */
+body.detail-view main { padding-top: 16px; padding-bottom: 32px; }
 
 input, select { 
-    font-size: 15px !important; padding: 12px 14px !important; border-radius: 12px !important; 
+    font-size: 14px !important; /* 文字サイズ調整 */
+    padding: 10px 12px !important; /* 余白圧縮 */
+    border-radius: 12px !important; 
     border: 1px solid #cbd5e1 !important; background-color: #fff !important; 
 }
-button { font-size: 14px !important; }
+button { font-size: 13px !important; } /* 文字サイズ調整 */
 
 .clickable-item { cursor: pointer; transition: background-color 0.2s; }
 .clickable-item:hover { background-color: #f8fafc; }
 
 .action-btn {
-  padding: 10px 14px;
+  padding: 8px 12px; /* 余白圧縮 */
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
   border: none;
@@ -444,11 +446,12 @@ button { font-size: 14px !important; }
 .setlist-btn { background-color: var(--aiko-blue); color: white; box-shadow: 0 2px 4px rgba(0,191,255,0.3); }
 
 .venue-tabs { 
-    display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; gap: 0; 
-    position: sticky; top: 0px; background: #F8F9FA; z-index: 40; padding-top: 10px;
+    display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px; gap: 0; 
+    position: sticky; top: 0px; background: #F8F9FA; z-index: 40; padding-top: 8px;
 }
 .venue-tab { 
-    flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; 
+    flex: 1; padding: 10px; /* 余白圧縮 */
+    text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; 
     color: #94a3b8; border-bottom: 2px solid transparent; 
     margin-bottom: -2px; transition: all 0.2s; 
 }
@@ -462,8 +465,8 @@ button { font-size: 14px !important; }
   height: 0;
 }
 .toggle-label {
-  width: 44px;
-  height: 24px;
+  width: 40px; /* サイズ圧縮 */
+  height: 22px; /* サイズ圧縮 */
   background-color: #e2e8f0;
   border-radius: 9999px;
   position: relative;
@@ -476,8 +479,8 @@ button { font-size: 14px !important; }
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 20px;
-  height: 20px;
+  width: 18px; /* サイズ圧縮 */
+  height: 18px; /* サイズ圧縮 */
   background-color: white;
   border-radius: 50%;
   transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -487,15 +490,16 @@ button { font-size: 14px !important; }
   background-color: var(--aiko-red);
 }
 .toggle-checkbox:checked + .toggle-label:before {
-  transform: translateX(20px);
+  transform: translateX(18px); /* 位置調整 */
 }
 
 .back-button-circle {
-  width: 48px; height: 48px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.9);
+  width: 44px; height: 44px; /* サイズ圧縮 */
+  border-radius: 50%; background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
-  cursor: pointer; position: fixed; top: 20px; left: 20px; z-index: 1001; backdrop-filter: blur(4px); border: 1px solid #f1f5f9;
+  cursor: pointer; position: fixed; top: 16px; left: 16px; z-index: 1001; backdrop-filter: blur(4px); border: 1px solid #f1f5f9;
 }
-.back-button-circle svg { width: 24px; height: 24px; stroke: var(--aiko-red); stroke-width: 2.5; }
+.back-button-circle svg { width: 22px; height: 22px; stroke: var(--aiko-red); stroke-width: 2.5; }
 
 /* モーダル */
 .modal-overlay { 
@@ -503,32 +507,32 @@ button { font-size: 14px !important; }
     display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); 
 }
 .modal-content { 
-    background: white; border-radius: 20px; padding: 24px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative;
+    background: white; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
 }
 .modal-close { 
-    position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; background: #f1f5f9; border-radius: 50%; 
-    display: flex; align-items: center; justify-content: center; font-size: 20px; color: #64748b; cursor: pointer; 
+    position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; background: #f1f5f9; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; font-size: 18px; color: #64748b; cursor: pointer; 
 }
 
 /* ランキング */
-.rank-number { display: inline-block; min-width: 32px; text-align: right; margin-right: 12px; flex-shrink: 0; font-size: 18px; font-weight: 800; font-style: italic; }
-.song-title, .venue-name { flex: 1; word-break: break-word; font-size: 15px; font-weight: 700; line-height: 1.4; }
-.song-count { white-space: nowrap; flex-shrink: 0; font-size: 16px; font-weight: bold; color: #64748b; }
-.song-count span { font-size: 11px; font-weight: normal; margin-left: 2px; }
+.rank-number { display: inline-block; min-width: 28px; text-align: right; margin-right: 10px; flex-shrink: 0; font-size: 16px; font-weight: 800; font-style: italic; }
+.song-title, .venue-name { flex: 1; word-break: break-word; font-size: 14px; font-weight: 700; line-height: 1.4; }
+.song-count { white-space: nowrap; flex-shrink: 0; font-size: 15px; font-weight: bold; color: #64748b; }
+.song-count span { font-size: 10px; font-weight: normal; margin-left: 2px; }
 
-.live-card { position: relative; overflow: hidden; padding-bottom: 16px; border: 1px solid rgba(0,0,0,0.03); }
+.live-card { position: relative; overflow: hidden; padding-bottom: 14px; border: 1px solid rgba(0,0,0,0.03); }
 .live-card-label {
   position: absolute;
-  top: 18px;
-  right: -40px;
+  top: 16px;
+  right: -42px;
   transform: rotate(45deg);
   background-color: var(--aiko-red);
   color: white;
-  padding: 4px 0;
+  padding: 3px 0;
   width: 140px;
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   z-index: 1;
@@ -577,17 +581,17 @@ button { font-size: 14px !important; }
 
   <!-- 公演タブ -->
   <div id="tab-search" class="tab-content" style="display:block">
-    <p class="text-gray-400 mb-2 text-xs text-right font-mono">Data updated: <span id="last-update-date">-</span></p>
+    <p class="text-gray-400 mb-1 text-xs text-right font-mono">Data updated: <span id="last-update-date">-</span></p>
     <div class="card-base bg-white border-0">
-      <div class="flex gap-2 mb-3 items-center">
+      <div class="flex gap-2 mb-2 items-center">
         <div class="relative flex-1">
-            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-            <input type="text" id="search-input" placeholder="フリーワードで検索" class="w-full pl-9 pr-3 py-2.5 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-red-200 focus:border-red-400 transition">
+            <!-- 虫眼鏡アイコン削除 & 余白調整 -->
+            <input type="text" id="search-input" placeholder="フリーワードで検索" class="w-full px-3 py-2 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-red-200 focus:border-red-400 transition">
         </div>
         <button id="clear-all-btn" class="action-btn clear-btn">クリア</button>
       </div>
 
-      <div class="flex flex-col gap-3 mb-3">
+      <div class="flex flex-col gap-2 mb-2">
         <select id="tour-select" class="w-full text-gray-700 bg-gray-50 border-gray-200"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
         <div class="flex gap-2">
           <select id="year-select" class="flex-1 text-gray-700 bg-gray-50 border-gray-200"><option value="">すべての年</option></select>
@@ -600,38 +604,39 @@ button { font-size: 14px !important; }
       </div>
     </div>
 
-    <div id="omikuji-trigger-area" class="my-6 py-2 tap-trigger select-none cursor-pointer text-gray-600 hover:text-gray-800 transition-colors bg-white/50 rounded-xl p-3 border border-dashed border-gray-200 text-center">
-      <h3 class="font-bold text-lg flex items-center justify-center gap-2">
-        <span id="omikuji-icon" class="inline-block text-xl">🎫</span>
+    <div id="omikuji-trigger-area" class="my-4 py-1 tap-trigger select-none cursor-pointer text-gray-600 hover:text-gray-800 transition-colors bg-white/50 rounded-xl p-3 border border-dashed border-gray-200 text-center">
+      <h3 class="font-bold text-base flex items-center justify-center gap-2">
+        <span id="omikuji-icon" class="inline-block text-lg">🎫</span>
         <span>
-          <span id="display-count-text">HIT</span>: 
-          <span id="display-count" class="text-xl text-aiko-red">0</span> / <span id="total-count">0</span>
+          <!-- テキスト変更 -->
+          <span id="display-count-text">表示中の公演数</span>: 
+          <span id="display-count" class="text-lg text-aiko-red">0</span> / <span id="total-count">0</span>
         </span>
       </h3>
     </div>
 
-    <div id="live-list-container" class="space-y-4"></div>
+    <div id="live-list-container" class="space-y-3"></div>
   </div>
 
   <!-- 楽曲タブ -->
   <div id="tab-song" class="tab-content" style="display:none">
-    <div class="mb-8">
-      <h3 class="font-bold mb-3 text-gray-700 text-lg flex items-center gap-2"><i data-lucide="bar-chart-2" class="w-5 h-5 text-aiko-red"></i> 年別演奏回数</h3>
-      <div class="card-base bg-white p-3">
-        <canvas id="live-count-chart" style="height:250px; max-height:250px"></canvas>
+    <div class="mb-5">
+      <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-aiko-red"></i> 年別演奏回数</h3>
+      <div class="card-base bg-white p-2">
+        <canvas id="live-count-chart" style="height:220px; max-height:220px"></canvas>
       </div>
     </div>
 
-    <div class="card-base bg-white border-0 mb-6">
-      <div class="flex gap-2 mb-4 items-center">
+    <div class="card-base bg-white border-0 mb-4">
+      <div class="flex gap-2 mb-3 items-center">
         <div class="relative flex-1">
-            <i data-lucide="music" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-            <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="w-full pl-9 bg-gray-50 border-gray-200">
+            <!-- 音楽アイコン削除 & 余白調整 -->
+            <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="w-full px-3 bg-gray-50 border-gray-200">
         </div>
         <button id="song-clear-btn" class="action-btn clear-btn">クリア</button>
         <button id="show-setlist-btn" class="action-btn setlist-btn" style="display: none;">公演表示</button>
       </div>
-      <div class="flex justify-between items-center text-sm font-semibold">
+      <div class="flex justify-between items-center text-xs font-semibold">
         <span class="text-gray-500">全楽曲: <span id="total-songs" class="font-bold text-gray-800">-</span> 曲</span>
         <select id="song-sort" class="text-aiko-red font-bold border-none bg-transparent focus:ring-0" style="padding:0!important; width:auto!important; border:none!important;">
           <option value="count-desc">演奏回数 降順</option><option value="count-asc">演奏回数 昇順</option>
@@ -639,11 +644,12 @@ button { font-size: 14px !important; }
       </div>
     </div>
 
-    <div class="flex justify-between items-center mt-8 mb-4 px-1">
+    <div class="flex justify-between items-center mt-6 mb-3 px-1">
       <h3 id="song-ranking-header" class="font-bold text-gray-700 text-lg cursor-pointer select-none tap-trigger flex items-center gap-2">
-        <span id="song-ranking-icon" class="inline-block"><i data-lucide="crown" class="w-5 h-5 text-yellow-500 fill-current"></i></span> 演奏回数ランキング
+        <!-- ギターアイコンに変更 -->
+        <span id="song-ranking-icon" class="inline-block">🎸</span> 演奏回数ランキング
       </h3>
-      <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
+      <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-full shadow-sm border border-gray-100">
         <span class="text-[10px] font-bold text-gray-500">メドレー<br>込み</span>
         <div class="relative inline-block align-middle select-none">
             <input type="checkbox" name="toggle" id="medley-toggle" class="toggle-checkbox" checked/>
@@ -657,57 +663,57 @@ button { font-size: 14px !important; }
 
   <!-- 場所タブ -->
   <div id="tab-venue" class="tab-content" style="display:none">
-    <div class="mb-8">
-      <h3 class="font-bold mb-3 text-gray-700 text-lg flex items-center gap-2"><i data-lucide="bar-chart" class="w-5 h-5 text-aiko-red"></i> 年別開催回数</h3>
-      <div class="card-base bg-white p-3">
-        <canvas id="venue-live-count-chart" style="height:250px; max-height:250px"></canvas>
+    <div class="mb-5">
+      <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="bar-chart" class="w-4 h-4 text-aiko-red"></i> 年別開催回数</h3>
+      <div class="card-base bg-white p-2">
+        <canvas id="venue-live-count-chart" style="height:220px; max-height:220px"></canvas>
       </div>
     </div>
-    <div class="card-base bg-white border-0 mb-0 rounded-b-none pb-6">
+    <div class="card-base bg-white border-0 mb-0 rounded-b-none pb-4">
       <div class="flex gap-2 items-center">
         <div class="relative flex-1">
-            <i data-lucide="map-pin" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
-            <input type="text" id="venue-search-input" placeholder="会場 / 都道府県で検索" class="w-full pl-9 bg-gray-50 border-gray-200">
+            <!-- ピンアイコン削除 & 余白調整 -->
+            <input type="text" id="venue-search-input" placeholder="会場 / 都道府県で検索" class="w-full px-3 bg-gray-50 border-gray-200">
         </div>
         <button id="venue-clear-btn" class="action-btn clear-btn">クリア</button>
         <button id="venue-show-setlist-btn" class="action-btn setlist-btn" style="display: none;">公演表示</button>
       </div>
     </div>
-    <div class="venue-tabs">
+    <div class="venue-tabs mb-3">
       <div class="venue-tab active" data-venue-tab="venue" id="venue-tab-header">会場ランキング</div>
       <div class="venue-tab" data-venue-tab="region" id="region-tab-header">都道府県ランキング</div>
     </div>
-    <div id="venue-ranking-container" class="mt-4"></div>
-    <div id="region-ranking-container" class="mt-4" style="display:none"></div>
+    <div id="venue-ranking-container" class="mt-2"></div>
+    <div id="region-ranking-container" class="mt-2" style="display:none"></div>
   </div>
   
   <!-- 傾向タブ -->
   <div id="tab-pattern" class="tab-content" style="display:none">
-    <div class="mb-8">
-      <h3 class="font-bold mb-3 text-gray-700 text-lg flex items-center gap-2"><i data-lucide="disc" class="w-5 h-5 text-aiko-red"></i> アルバム別演奏回数</h3>
-      <div class="card-base bg-white p-3">
-        <canvas id="album-chart" style="height:350px; max-height:350px"></canvas>
+    <div class="mb-5">
+      <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="disc" class="w-4 h-4 text-aiko-red"></i> アルバム別演奏回数</h3>
+      <div class="card-base bg-white p-2">
+        <canvas id="album-chart" style="height:300px; max-height:300px"></canvas>
       </div>
     </div>
 
-    <div class="mb-8">
-        <h3 class="font-bold mb-3 text-gray-700 text-lg flex items-center gap-2"><i data-lucide="clock" class="w-5 h-5 text-gray-400"></i> ご無沙汰な曲 TOP 10</h3>
-        <p class="text-gray-400 mb-3 ml-1 text-xs">※過去に1度でも演奏された曲が対象</p>
+    <div class="mb-5">
+        <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-gray-400"></i> ご無沙汰な曲 TOP 10</h3>
+        <p class="text-gray-400 mb-2 ml-1 text-xs">※過去に1度でも演奏された曲が対象</p>
         <div id="not-played-recently-songs" class="card-base bg-white p-2"></div>
     </div>
 
-    <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700 text-lg">🎬 オープニング曲 TOP 10</h3>
+    <div class="mb-5"><h3 class="font-bold mb-2 text-gray-700 text-base">🎬 オープニング曲 TOP 10</h3>
     <div id="opening-songs" class="card-base bg-white p-2"></div></div>
-    <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700 text-lg">👏 アンコール曲 TOP 10</h3>
+    <div class="mb-5"><h3 class="font-bold mb-2 text-gray-700 text-base">👏 アンコール曲 TOP 10</h3>
     <div id="encore-songs" class="card-base bg-white p-2"></div></div>
-    <div class="mb-8"><h3 class="font-bold mb-3 text-gray-700 text-lg">🏁 大トリ曲 TOP 10</h3>
+    <div class="mb-5"><h3 class="font-bold mb-2 text-gray-700 text-base">🏁 大トリ曲 TOP 10</h3>
     <div id="last-songs" class="card-base bg-white p-2"></div></div>
   </div>
 
   <!-- 軌跡タブ -->
   <div id="tab-history" class="tab-content" style="display:none">
-    <div class="mb-4 px-1">
-      <h3 class="font-bold text-gray-700 text-lg flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 text-aiko-red"></i> HISTORY</h3>
+    <div class="mb-3 px-1">
+      <h3 class="font-bold text-gray-700 text-base flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-aiko-red"></i> HISTORY</h3>
     </div>
     
     <div class="history-grid-header flex text-[10px] font-bold text-gray-400 pb-2 pt-2 mb-0">
@@ -718,7 +724,7 @@ button { font-size: 14px !important; }
     </div>
     <div id="history-grid-container" class="history-grid-container bg-white"></div>
     
-    <div class="text-center mt-8 mb-4 text-gray-400 text-xs tracking-widest">
+    <div class="text-center mt-6 mb-4 text-gray-400 text-xs tracking-widest">
       <p>〜 FUTURE 〜</p>
     </div>
   </div>
@@ -827,8 +833,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let allLiveRecords = [], 
-    songStats = {},            
-    songStatsNoMedley = {},    
+    songStats = {},             
+    songStatsNoMedley = {},     
     patternStats = {}, 
     lastPlayedStats = {}, 
     albumData = [], 
@@ -1057,7 +1063,7 @@ function renderHistoryTab() {
                 if (!timelineData[ym].live.some(e => e.tourId === tourId)) {
                     timelineData[ym].live.push({ 
                         name: displayName, 
-                        tourId: tourId,    
+                        tourId: tourId,     
                         rawName: event.title,
                         rawDate: event.date 
                     });
@@ -1270,8 +1276,8 @@ function setupRandomTriggers() {
               if(id === 'venue-tab-header') {
                   const venues = [];
                   allLiveRecords.forEach(rec => {
-                       const v = rec.region === 'オンライン' ? 'オンライン' : `${rec.venue} (${rec.region})`;
-                       if (!venues.includes(v)) venues.push(v);
+                        const v = rec.region === 'オンライン' ? 'オンライン' : `${rec.venue} (${rec.region})`;
+                        if (!venues.includes(v)) venues.push(v);
                   });
                   if(venues.length > 0) {
                       const randomVenue = venues[Math.floor(Math.random() * venues.length)];
@@ -1337,69 +1343,143 @@ function startConfetti() {
   canvas.height = height;
 
   const particles = [];
-  const particleCount = 400;
-  const colors = ['#FFD700', '#C0C0C0', '#FF69B4', '#ef4444', '#FFA500'];
-
-  class Particle {
+  const colors = ['#FFD700', '#C0C0C0', '#E5E4E2', '#DAA520', '#FF69B4', '#ef4444', '#FFA500']; 
+  
+  // 中央から弾けるパーティクル
+  class ExplosionParticle {
     constructor() {
-      this.x = width / 2;
-      this.y = height / 2;
+      // 元コードでは特定の要素（tour-select）の位置を取得していましたが、
+      // 単体動作のため画面中央を起点とするように調整しています。
+      const menuRect = document.getElementById('tour-select')?.getBoundingClientRect();
+      const originX = menuRect ? (menuRect.left + menuRect.width / 2) : (width / 2);
+      const originY = menuRect ? (menuRect.top + menuRect.height / 2) : (height / 2);
+
+      this.x = originX;
+      this.y = originY;
+      
       this.color = colors[Math.floor(Math.random() * colors.length)];
-      this.w = Math.random() * 10 + 5;
-      this.h = Math.random() * 4 + 2;
+      this.w = Math.random() * 8 + 4;
+      this.h = Math.random() * 4 + 2; 
+      
       const angle = Math.random() * Math.PI * 2;
-      const velocity = Math.random() * 15 + 8;
+      const velocity = Math.random() * 18 + 10; 
       this.vx = Math.cos(angle) * velocity;
-      this.vy = Math.sin(angle) * velocity - 5;
-      this.gravity = 0.35;
-      this.friction = 0.95;
+      this.vy = Math.sin(angle) * velocity - 8; 
+      
+      this.gravity = 0.4;
+      this.friction = 0.92; 
       this.rotation = Math.random() * 360;
-      this.rotationSpeed = (Math.random() - 0.5) * 15;
+      this.rotationSpeed = (Math.random() - 0.5) * 20;
       this.alpha = 1;
     }
     update() {
+      this.vy += this.gravity;
       this.vx *= this.friction;
       this.vy *= this.friction;
-      this.vy += this.gravity;
       this.x += this.vx;
       this.y += this.vy;
       this.rotation += this.rotationSpeed;
-      if (this.y > height + 20) this.alpha = 0;
+      if (this.y > height + 20) this.alpha -= 0.05; 
     }
     draw(ctx) {
       if (this.alpha <= 0) return;
       ctx.save();
       ctx.translate(this.x, this.y);
-      ctx.rotate((this.rotation * Math.PI) / 180);
+      ctx.rotate(this.rotation * Math.PI / 180);
+      ctx.globalAlpha = this.alpha;
       ctx.fillStyle = this.color;
-      ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+      ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
       ctx.restore();
     }
   }
-  for (let i = 0; i < particleCount; i++) {
-    particles.push(new Particle());
+
+  // 上空から降ってくる銀テープ
+  class CannonParticle {
+    constructor() {
+      this.x = Math.random() * width; 
+      // 画面上部の見えない位置からスタート
+      this.y = - (Math.random() * 300 + 100); 
+      
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.w = Math.random() * 8 + 4; 
+      this.h = Math.random() * 60 + 30; // テープの長さ
+      this.vy = Math.random() * 5 + 5; // 落下速度
+      this.vx = (Math.random() - 0.5) * 10; // 横揺れ
+      this.gravity = 0.2; 
+      this.friction = 0.94; 
+      this.angle = Math.random() * 360;
+      this.angleSpeed = (Math.random() - 0.5) * 15;
+      this.flip = 0;
+      this.flipSpeed = Math.random() * 0.2 + 0.05;
+    }
+    update() {
+      this.vy += this.gravity;
+      this.vx *= this.friction;
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.vy > 6) this.vy *= 0.95; // 落下速度制限（空気抵抗風）
+      this.angle += this.angleSpeed;
+      this.flip += this.flipSpeed;
+    }
+    draw(ctx) {
+      // 画面外の下に落ちたら描画しない
+      if (this.y > height + 100 && this.vy > 0) return;
+      
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle * Math.PI / 180);
+      const scaleY = Math.cos(this.flip); // 回転による「ひらひら」効果
+      ctx.scale(1, scaleY);
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+      ctx.restore();
+    }
   }
+
+  // 1. はじけるエフェクト（Explosion）を生成
+  for (let i = 0; i < 200; i++) {
+    particles.push(new ExplosionParticle());
+  }
+
+  // 2. 少し遅れて降ってくるテープ（Cannon/Confetti）を生成
+  setTimeout(() => {
+      for (let i = 0; i < 100; i++) {
+        particles.push(new CannonParticle());
+      }
+  }, 350); 
+
+  // アニメーションループ
   function animate() {
     ctx.clearRect(0, 0, width, height);
     let activeParticles = 0;
+    
     particles.forEach(p => {
       p.update();
       p.draw(ctx);
-      if (p.y < height + 50) activeParticles++;
+      // パーティクルが画面内、あるいは活動中かチェック
+      if (p.alpha > 0 && (p.y < height + 100 || (p.vy && p.vy < 0))) {
+          activeParticles++;
+      }
     });
+    
+    // まだ動いているパーティクルがいればループ継続
     if (activeParticles > 0) {
       requestAnimationFrame(animate);
     } else {
       ctx.clearRect(0, 0, width, height);
     }
   }
+  
   animate();
-  window.addEventListener('resize', () => {
+  
+  // リサイズ対応
+  const resizeHandler = () => {
     width = window.innerWidth;
     height = window.innerHeight;
     canvas.width = width;
     canvas.height = height;
-  });
+  };
+  window.addEventListener('resize', resizeHandler);
 }
 
 function checkOrientation() {
