@@ -2069,19 +2069,11 @@ function showLiveDetail(rec) {
     </div>`;
 
   const summaryHtml = `
-    <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-between gap-2">
-      <div class="text-sm text-gray-600 font-bold flex-1">
-        <div class="mb-2 text-base">📊 このライブの成分表</div>
-        <div class="grid grid-cols-2 gap-x-1 gap-y-1 text-xs">
-            <div class="whitespace-nowrap"><span class="inline-block w-2 h-2 rounded-full mr-1" style="background-color: var(--aiko-pink);"></span>表題: ${typeCounts['表題曲']}</div>
-            <div class="whitespace-nowrap"><span class="inline-block w-2 h-2 rounded-full mr-1 bg-blue-500"></span>C/W: ${typeCounts['カップリング曲']}</div>
-            <div class="whitespace-nowrap"><span class="inline-block w-2 h-2 rounded-full mr-1 bg-yellow-500"></span>アルバム: ${typeCounts['アルバム曲']}</div>
-            <div class="whitespace-nowrap text-gray-400"><span class="inline-block w-2 h-2 rounded-full mr-1 bg-gray-300"></span>その他: ${typeCounts['その他']}</div>
-        </div>
-      </div>
-      <div style="width: 70px; height: 70px; flex-shrink: 0; position: relative;">
-        <canvas id="composition-chart"></canvas>
-      </div>
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600 font-bold text-center border border-gray-100">
+      <div class="mb-1">📊 このライブの成分表</div>
+      <span class="text-aiko-pink">表題曲: ${typeCounts['表題曲']}</span> / 
+      <span class="text-blue-500">カップリング: ${typeCounts['カップリング曲']}</span> / 
+      <span class="text-yellow-500">アルバム: ${typeCounts['アルバム曲']}</span>
     </div>
   `;
 
@@ -2115,44 +2107,127 @@ function showLiveDetail(rec) {
 
   document.getElementById('detail-header-area').onclick = hideDetailView;
   document.getElementById('app').scrollTop = 0;
+}
 
-  if (setlistHtml.trim()) {
-      const ctxComp = document.getElementById('composition-chart');
-      if (ctxComp) {
-          if (chartInstances.composition) {
-            chartInstances.composition.destroy();
-          }
-          let pinkColor = getComputedStyle(document.documentElement).getPropertyValue('--aiko-pink').trim();
-          if(!pinkColor) pinkColor = '#FF69B4';
+function hideDetailView() {
+  document.body.classList.remove('detail-view');
+  document.getElementById('live-detail').style.display = 'none';
+  document.getElementById('back-button-fixed').style.display = 'none';
+  // document.getElementById('main-header').style.display = 'flex'; // ヘッダーは親管理なのでここでは触らない
+  document.querySelector('nav').style.display = 'flex';
+  switchToTab(document.querySelector('.tab-item.active').dataset.tab);
+  currentDisplayingRecord = null;
+}
 
-          chartInstances.composition = new Chart(ctxComp, {
-            type: 'doughnut',
-            data: {
-              labels: ['表題曲', 'カップリング曲', 'アルバム曲', 'その他'],
-              datasets: [{
-                data: [typeCounts['表題曲'], typeCounts['カップリング曲'], typeCounts['アルバム曲'], typeCounts['その他']],
-                backgroundColor: [
-                  pinkColor,
-                  '#3B82F6', // blue-500
-                  '#EAB308', // yellow-500
-                  '#D1D5DB'  // gray-300
-                ],
-                borderWidth: 0
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              cutout: '55%',
-              plugins: {
-                legend: { display: false },
-                tooltip: { enabled: false },
-                datalabels: { display: false }
-              },
-              animation: { duration: 800 }
-            }
-          });
-      }
+function copySetlist() {
+  if (!currentDisplayingRecord) return;
+  if (!confirm('セットリストをコピーしますか？')) return;
+
+  let text = '';
+  // Setlist formatter logic for copy
+  let songNum = 1;
+  let medleyNum = 1;
+  let inMedley = false;
+  
+  currentDisplayingRecord.setlist.forEach((s) => {
+    if (s === '__MEDLEY_START__') {
+        text += `${songNum++}. メドレー\n`;
+        inMedley = true;
+        medleyNum = 1;
+        return;
+    }
+    if (s === '__MEDLEY_END__') {
+        inMedley = false;
+        return;
+    }
+
+    const cleanName = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
+    
+    if (inMedley) {
+        text += `  (${medleyNum++}) ${cleanName}\n`;
+    } else {
+        text += `${songNum++}. ${cleanName}\n`;
+    }
+  });
+    
+  navigator.clipboard.writeText(text).then(() => {
+      alert('コピーしました！');
+  }).catch(err => {
+      console.error(err);
+      alert('コピーに失敗しました');
+  });
+}
+
+function searchVenue(venue) {
+  ['tour-select', 'year-select', 'region-select', 'song-filter-input'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('search-input').value = venue;
+  switchToTab('search');
+  applyFilters();
+}
+
+function searchRegion(region) {
+  ['search-input', 'tour-select', 'year-select', 'song-filter-input'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('region-select').value = region;
+  switchToTab('search');
+  applyFilters();
+}
+
+function selectSong(songName) {
+  document.getElementById('song-search-input').value = songName;
+  // 楽曲タブへ移動してからランキング描画
+  switchToTab('song'); 
+  renderSongRanking();
+  renderLiveCountChart();
+  document.getElementById('show-setlist-btn').style.display = 'inline-block';
+}
+
+function selectVenue(fullVenueName) {
+  selectedVenueInfo = { type: 'venue', name: fullVenueName };
+  document.getElementById('venue-search-input').value = fullVenueName;
+  // 場所タブへ移動
+  switchToTab('venue');
+  // 明示的に会場タブをアクティブにする
+  document.querySelectorAll('.venue-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.venue-tab[data-venue-tab="venue"]').classList.add('active');
+  document.getElementById('venue-ranking-container').style.display = 'block';
+  document.getElementById('region-ranking-container').style.display = 'none';
+  
+  renderVenueRanking();
+  renderVenueLiveCountChart();
+  document.getElementById('venue-show-setlist-btn').style.display = 'inline-block';
+}
+
+function selectRegion(regionName) {
+  selectedVenueInfo = { type: 'region', name: regionName };
+  document.getElementById('venue-search-input').value = regionName;
+  switchToTab('venue');
+  // 明示的に都道府県タブをアクティブにする
+  document.querySelectorAll('.venue-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.venue-tab[data-venue-tab="region"]').classList.add('active');
+  document.getElementById('venue-ranking-container').style.display = 'none';
+  document.getElementById('region-ranking-container').style.display = 'block';
+
+  renderVenueRanking();
+  renderVenueLiveCountChart();
+  document.getElementById('venue-show-setlist-btn').style.display = 'inline-block';
+}
+
+function switchToTab(tabId) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab-item[data-tab="${tabId}"]`).classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.getElementById(`tab-${tabId}`).style.display = 'block';
+  document.getElementById('app').scrollTop = 0;
+  lucide.createIcons();
+
+  if (tabId === 'song') {
+    if(chartInstances.liveCount) chartInstances.liveCount.resize();
+  }
+  if (tabId === 'pattern') {
+    renderAlbumChart();
+  }
+  if (tabId === 'venue' && chartInstances.venueLiveCount) {
+    chartInstances.venueLiveCount.resize();
   }
 }
 
