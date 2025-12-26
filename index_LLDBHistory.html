@@ -12,7 +12,8 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-0D09G3X4F1');
+      // iframe内での重複計測を防ぐため、自動PV送信はOFFにし、必要なイベントのみ手動で送る設定
+      gtag('config', 'G-0D09G3X4F1', { 'send_page_view': false });
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -167,7 +168,7 @@
         <div id="input-area" class="card-base m-4 bg-white">
             <div class="flex items-end gap-3">
                 <div class="flex-1">
-                    <label class="block text-xs font-bold text-gray-400 mb-1.5 ml-1">生年月日を選択</label>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5 ml-1">生年月日を選択してね</label>
                     <div class="flex gap-2">
                         <select id="year" class="flex-[3]"></select>
                         <select id="month" class="flex-[2]"></select>
@@ -349,6 +350,11 @@
             const d = document.getElementById('day').value;
             birthDate = new Date(y, m - 1, d);
             localStorage.setItem('lldb_user_birth', `${y}-${m}-${d}`);
+
+            // GA4 Tracking
+            safeTrackEvent('generate_lead', {
+                item_category: 'history_timeline'
+            });
 
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('content-area').classList.add('hidden');
@@ -592,6 +598,17 @@
                 // aikoの当時の年齢・日数詳細
                 const aikoAgeString = calculateDetailedAge(AIKO_BIRTH, bestMatch.releaseDateObj);
                 document.getElementById('match-aiko-days').innerHTML = aikoAgeString;
+            }
+        }
+
+        // GA4送信用の安全なラッパー関数
+        function safeTrackEvent(eventName, params) {
+            try {
+                if (typeof gtag === 'function') {
+                    gtag('event', eventName, params);
+                }
+            } catch (e) {
+                console.warn('GA4 Tracking Error:', e);
             }
         }
     </script>
