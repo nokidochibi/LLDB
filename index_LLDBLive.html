@@ -724,7 +724,7 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
   <!-- 軌跡タブ -->
   <div id="tab-history" class="tab-content" style="display:none">
     <div class="mb-3 px-1">
-      <h3 class="font-bold text-gray-700 text-base flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-aiko-red"></i> ライブ/CDリリースのタイムライン</h3>
+      <h3 class="font-bold text-gray-700 text-base flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-aiko-red"></i> Live/CDリリースのタイムライン</h3>
     </div>
     
     <div class="history-grid-header flex text-[10px] font-bold text-gray-400 pb-2 pt-2 mb-0">
@@ -1250,7 +1250,11 @@ function setupRandomTriggers() {
 
   const omikujiArea = document.getElementById('omikuji-trigger-area');
   if (omikujiArea) {
-    const handlers = createDoubleTapHandler(() => { playOmikuji(); });
+    const handlers = createDoubleTapHandler(() => { 
+        // ★追加: おみくじ機能の利用計測
+        safeTrackEvent('select_content', { content_type: 'random_trigger', item_id: 'omikuji_double_tap' });
+        playOmikuji(); 
+    });
     omikujiArea.addEventListener('touchstart', handlers.touchstart, {passive: false});
     omikujiArea.addEventListener('touchend', handlers.touchend, {passive: false});
     omikujiArea.addEventListener('dblclick', handlers.dblclick);
@@ -1259,6 +1263,8 @@ function setupRandomTriggers() {
   const songHeader = document.getElementById('song-ranking-header');
   if (songHeader) {
     const handlers = createDoubleTapHandler(() => {
+        // ★追加: ランキングヘッダーのダブルタップ計測
+        safeTrackEvent('select_content', { content_type: 'random_trigger', item_id: 'song_ranking_double_tap' });
         const icon = document.getElementById('song-ranking-icon');
         if (icon) {
             icon.classList.remove('spin-once');
@@ -1285,6 +1291,9 @@ function setupRandomTriggers() {
       if(el) {
           const handlers = createDoubleTapHandler(() => {
               if(!el.classList.contains('active')) return;
+              // ★追加: 場所タブヘッダーのダブルタップ計測
+              safeTrackEvent('select_content', { content_type: 'random_trigger', item_id: id + '_double_tap' });
+
               if(id === 'venue-tab-header') {
                   const venues = [];
                   allLiveRecords.forEach(rec => {
@@ -1326,6 +1335,13 @@ function playOmikuji() {
 }
 
 function showOmikujiResult(rec) {
+    // ★追加: おみくじ結果表示の計測
+    safeTrackEvent('earn_virtual_currency', { 
+        virtual_currency_name: 'omikuji', 
+        value: 1, 
+        item_name: rec.tourName 
+    });
+
     const tourNameLower = rec.tourName.toLowerCase();
     let labelType = 'other', labelText = 'その他';
     if (tourNameLower.includes('love like pop')) { labelType = 'pop'; labelText = 'POP'; }
@@ -2487,10 +2503,30 @@ function setupEventListeners() {
   [document.getElementById('modal-overlay')].forEach(modal => {
     modal.addEventListener('click', e => { if (e.target === e.currentTarget) e.target.style.display = 'none'; });
   });
+
+  // ★追加: フィルタ操作のトラッキング (既存のイベントリスナーはそのままに、追加で登録)
+  ['tour-select', 'year-select', 'region-select'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) {
+          el.addEventListener('change', (e) => {
+              if(e.target.value) {
+                  safeTrackEvent('select_content', {
+                      content_type: 'filter_' + id.replace('-select', ''), // filter_tour, filter_year etc.
+                      item_id: e.target.value
+                  });
+              }
+          });
+      }
+  });
 }
 
 function handleError(error) {
   console.error("API Error:", error);
+  // ★追加: エラーのトラッキング
+  safeTrackEvent('exception', {
+      description: error.message,
+      fatal: true
+  });
   document.getElementById('live-list-container').innerHTML = `<p class="text-center text-red-500 py-8 text-sm">データ読み込み中にエラーが発生しました。<br>(${error.message})</p>`;
 }
 
