@@ -17,8 +17,9 @@
     </script>
 
     <!-- アイコン設定 -->
-    <link id="app-icon" rel="icon" type="image/png" href="./icon.png">
-    <link id="apple-touch-icon" rel="apple-touch-icon" href="./icon.png">
+    <link rel="icon" type="image/png" href="./icon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Love Like DataBase","short_name":"LLDB","start_url":".","display":"standalone","background_color":"#F8F8F8","theme_color":"#ef4444","icons":[{"src":"./icon.png","sizes":"192x192 512x512","type":"image/png"}]}'>
 
     <!-- 外部ライブラリ (共通) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -67,8 +68,8 @@
 <body class="bg-gray-50">
 
     <!-- ==========================================================================
-          【1. COMMON UI】 ヘッダー & 暖簾メニュー
-          ========================================================================== -->
+           【1. COMMON UI】 ヘッダー & 暖簾メニュー
+           ========================================================================== -->
     <style>
         /* 暖簾メニュー & ヘッダー用スタイル */
         #noren-menu {
@@ -208,45 +209,45 @@
 
 
     <!-- ==========================================================================
-          【2. APP: LLDB Live】 
-          ========================================================================== -->
+           【2. APP: LLDB Live】 
+           ========================================================================== -->
     <div id="app-live" class="app-screen active">
         <!-- Liveアプリは独自のUI/UXを持つため全画面表示 -->
         <iframe src="./index_LLDBLive.html?v=4.0" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
-          【3. APP: LLDB Trends】
-          ========================================================================== -->
+           【3. APP: LLDB Trends】
+           ========================================================================== -->
     <div id="app-trends" class="app-screen">
         <iframe src="./index_LLDBTrends.html?v=4.0" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
-          【4. APP: LLDB Song Helper】
-          ========================================================================== -->
+           【4. APP: LLDB Song Helper】
+           ========================================================================== -->
     <div id="app-songHelper" class="app-screen">
         <iframe src="./index_LLDBSongHelper.html?v=4.0" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
-          【5. APP: LLDB History】
-          ========================================================================== -->
+           【5. APP: LLDB History】
+           ========================================================================== -->
     <div id="app-history" class="app-screen">
         <iframe src="./index_LLDBHistory.html?v=4.0" class="w-full h-full border-none"></iframe>
     </div>
 
 
     <!-- ==========================================================================
-          【6. ROUTING】 共通ルーティング制御
-          ========================================================================== -->
+           【6. ROUTING】 共通ルーティング制御
+           ========================================================================== -->
     <script>
         // アプリ定義 (タイトル更新)
         const apps = {
             'live': { title: 'Love Like DataBase vol.4.0', color: 'bg-[#E63946]' }, /* Red */
-            'trends': { title: 'LLDB Trends', color: 'bg-[#1D3557]' },      /* Navy */
+            'trends': { title: 'LLDB Trends', color: 'bg-[#1D3557]' },       /* Navy */
             'songHelper': { title: 'LLDB Song Helper', color: 'bg-[#F4A261]' }, /* Orange */
-            'history': { title: 'LLDB History', color: 'bg-[#2A9D8F]' }      /* Teal */
+            'history': { title: 'LLDB History', color: 'bg-[#2A9D8F]' }       /* Teal */
         };
 
         // アプリ切り替え
