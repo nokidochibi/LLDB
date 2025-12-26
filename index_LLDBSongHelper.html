@@ -299,7 +299,7 @@
                 <!-- textarea: rows=1で初期化 -->
                 <textarea id="search-input" rows="1"
                     class="flex-1 bg-transparent border-none focus:outline-none text-[15px] placeholder-gray-400 min-w-0"
-                    placeholder="例：砂山" required autocomplete="off"></textarea>
+                    placeholder="例：あれは" required autocomplete="off"></textarea>
                 
                 <!-- 送信ボタン: mb-2 で位置調整 -->
                 <button type="submit" id="submit-btn"
@@ -447,7 +447,7 @@
             }
 
             if (mode === 'lyrics') {
-                dom.searchInput.placeholder = "例：砂山";
+                dom.searchInput.placeholder = "例：あれは";
             } else if (mode === 'title') {
                 dom.searchInput.placeholder = "例：ポニーテール";
             } else if (mode === 'request') {
@@ -471,6 +471,11 @@
                 dom.footerTabs.style.display = 'flex';
                 switchTab(lastMode);
             } else {
+                // ★追加: シークレットモード計測
+                safeTrackEvent('unlock_achievement', {
+                    achievement_id: 'secret_mode_activated'
+                });
+
                 lastMode = currentMode;
                 isDarkMode = true;
                 dom.body.classList.add('dark-mode');
@@ -524,6 +529,11 @@
             } catch (error) {
                 removeLoading(loadingId);
                 addMessage("通信失敗！もう一度試してみて！", 'bot');
+                // ★追加: エラー計測
+                safeTrackEvent('exception', {
+                    description: error.message,
+                    fatal: false
+                });
             }
         });
 
@@ -549,6 +559,11 @@
                 .catch(err => {
                     removeLoading(loadingId);
                     addMessage("通信失敗！もう一度試してみて！", 'bot');
+                    // ★追加: エラー計測
+                    safeTrackEvent('exception', {
+                        description: err.message,
+                        fatal: false
+                    });
                 });
         };
 
@@ -570,7 +585,10 @@
 
             try {
                 await fetch(`${GAS_API_URL}?action=postRequest&q=${encodeURIComponent(query)}`);
-            } catch(e) { console.error("Post failed", e); }
+            } catch(e) { 
+                console.error("Post failed", e); 
+                safeTrackEvent('exception', { description: "postRequest: " + e.message, fatal: false });
+            }
         }
 
         async function fetchRequests() {
@@ -580,7 +598,10 @@
                 if (json.status === 'success') {
                     renderRequests(json.data);
                 }
-            } catch(e) { console.error("Fetch failed", e); }
+            } catch(e) { 
+                console.error("Fetch failed", e); 
+                safeTrackEvent('exception', { description: "fetchRequests: " + e.message, fatal: false });
+            }
         }
 
         function renderRequests(data) {
@@ -782,6 +803,13 @@
                 ta.value = cleanText; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
                 showToast("コピーしたよ！");
             }
+
+            // ★追加: 歌詞コピー計測
+            safeTrackEvent('share', {
+                method: 'clipboard',
+                content_type: 'lyrics_phrase',
+                item_name: text.substring(0, 20) 
+            });
         }
 
         function showToast(msg) {
