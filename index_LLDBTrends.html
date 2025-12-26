@@ -12,7 +12,8 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-0D09G3X4F1');
+      // iframe内での重複計測を防ぐため、自動PV送信はOFFにし、必要なイベントのみ手動で送る設定
+      gtag('config', 'G-0D09G3X4F1', { 'send_page_view': false });
     </script>
     
     <!-- Chart.js & Icons -->
@@ -443,7 +444,7 @@
                 <span class="filter-option" data-category="isFullOther" data-checkbox-id="filterFullOther">Live</span>
                 <input type="checkbox" class="category-checkbox-hidden" id="filterFullOther" data-category="isFullOther" checked>
                 
-                <span class="filter-option" data-category="isNYMovie" data-checkbox-id="filterNYMovie">new year</span>
+                <span class="filter-option" data-category="isNYMovie" data-checkbox-id="filterNYMovie">New Year</span>
                 <input type="checkbox" class="category-checkbox-hidden" id="filterNYMovie" data-category="isNYMovie" checked>
                 
                 <span class="filter-option" data-category="isOther" data-checkbox-id="filterOther">他(ショート等)</span>
@@ -571,6 +572,22 @@
         window.addEventListener('click', (e) => {
             if(e.target === document.getElementById('graphModal')) closeGraphModal();
         });
+
+        // ▼ 追加ここから：テーブル内のリンククリックを監視
+        const tableContainer = document.getElementById('tableContainer');
+        if (tableContainer) {
+            tableContainer.addEventListener('click', (e) => {
+                // クリックされた要素がリンク(Aタグ)か、その内部の要素か確認
+                const link = e.target.closest('a');
+                if (link && link.href && link.href.includes('youtube.com')) {
+                    safeTrackEvent('select_content', {
+                        content_type: 'external_video',
+                        item_name: link.textContent.trim() // リンクのテキスト（曲名）を取得
+                    });
+                }
+            });
+        }
+        // ▲ 追加ここまで
     });
 
     function updateStickyOffset() {
@@ -784,6 +801,12 @@
     }
 
     async function openGraph(url, title) {
+        // GA4 Tracking
+        safeTrackEvent('select_content', {
+            content_type: 'trend_graph',
+            item_name: title
+        });
+
         document.getElementById('graphModal').classList.add('open');
         document.getElementById('graphTitle').textContent = title;
         document.getElementById('graphLoading').style.display = 'block';
@@ -932,6 +955,17 @@
             }
         }
         return `<small>${formatted}</small>`;
+    }
+
+    // GA4送信用の安全なラッパー関数
+    function safeTrackEvent(eventName, params) {
+        try {
+            if (typeof gtag === 'function') {
+                gtag('event', eventName, params);
+            }
+        } catch (e) {
+            console.warn('GA4 Tracking Error:', e);
+        }
     }
 </script>
 </body>
