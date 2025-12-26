@@ -17,7 +17,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         /* =========================================
            1. Base & Theme Colors (Teal Theme)
@@ -27,8 +27,8 @@
             --header-bg: #F8F9FA;
             --accent-color: #2A9D8F;   /* New Theme Color (Teal) */
             --accent-light: #e0f2f1;   /* Light Teal for backgrounds */
+            --accent-dark: #1F7A6F;
             --text-main: #334155;
-            /* ナビゲーションの高さを85pxに統一 */
             --nav-height: 85px;        
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
@@ -38,7 +38,6 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             padding-top: 0px;
-            /* フッターの高さ + Safe Area 分の余白 */
             padding-bottom: calc(var(--nav-height) + 20px + env(safe-area-inset-bottom));
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
@@ -56,7 +55,7 @@
             border: 1px solid rgba(0,0,0,0.03);
         }
 
-        /* セレクトボックスのデザイン調整 */
+        /* セレクトボックス */
         select {
             font-size: 15px !important;
             padding: 12px 14px !important;
@@ -73,48 +72,37 @@
             background-size: 1.5em 1.5em;
         }
 
-        /* 年表テーブルスタイル - 洗練されたすりガラスヘッダー */
+        /* 年表テーブル */
         .history-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        
         .history-table th {
-            /* Sticky設定 */
             position: sticky;
             top: 0;
-            
-            /* ★変更点: すりガラス風デザイン */
-            background-color: rgba(255, 255, 255, 0.92); /* 半透明の白 */
-            backdrop-filter: blur(8px);                 /* 背景をぼかす */
-            -webkit-backdrop-filter: blur(8px);         /* Safari対応 */
-            
-            /* 色と境界線 */
-            color: var(--text-main);                    /* 文字は濃いグレー */
-            border-bottom: 2px solid var(--accent-light); /* 下部にアクセント色のライン */
-            
+            background-color: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--text-main);
+            border-bottom: 2px solid var(--accent-light);
             font-size: 11px;
             font-weight: 700;
-            padding: 12px 2px;                          /* 少し高さを出す */
+            padding: 12px 2px;
             z-index: 20;
             white-space: nowrap;
             text-align: center;
         }
-        
-        /* 角丸ヘッダーの維持 */
         .history-table th:first-child { border-top-left-radius: 12px; }
         .history-table th:last-child { border-top-right-radius: 12px; }
 
         .history-table td {
-            padding: 10px 4px; /* 余白を少し広げて上品に */
+            padding: 10px 4px;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
             font-size: 11px;
-            height: 44px;      /* 行間を少し広げる */
+            height: 44px;
             word-wrap: break-word;
             background-color: white;
         }
         .history-table tr:last-child td:first-child { border-bottom-left-radius: 12px; }
         .history-table tr:last-child td:last-child { border-bottom-right-radius: 12px; }
-        
-        /* 偶数行の色をさらに薄くして、白背景となじませる */
         .history-table tr:nth-child(even) td { background-color: #fcfcfc; } 
         
         .lifestage-text {
@@ -139,8 +127,7 @@
             font-weight: bold;
             margin-bottom: 3px;
             line-height: 1.3;
-            box-shadow: none; /* 影を消してフラットに */
-            border: 1px solid transparent; /* ボーダーで区切る */
+            border: 1px solid transparent;
             max-width: 100%;
         }
         .chip-live { background-color: #fef2f2; color: #ef4444; border-color: #fecaca; }
@@ -148,7 +135,7 @@
         .chip-album { background-color: #fefce8; color: #854d0e; border-color: #fef08a; }
 
         /* =========================================
-           2. Footer & Tabs (YouTube Style)
+           2. Footer & Tabs
            ========================================= */
         nav {
             position: fixed !important;
@@ -159,10 +146,9 @@
             border-top: 1px solid #e5e7eb;
             z-index: 50;
             width: 100%;
-            background-color: rgba(255, 255, 255, 0.95); /* フッターも少し透過 */
+            background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            /* 高さ調整: ベース85px + Safe Area */
             height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.02);
@@ -182,18 +168,15 @@
             justify-content: flex-start;
             padding-top: 12px;
             gap: 4px;
-            
             color: #94a3b8;
             cursor: pointer;
             transition: all 0.2s;
             background-color: transparent;
             height: 100%;
-            position: relative;
         }
         
         .tab-item.active {
             color: var(--accent-color);
-            background-color: transparent !important;
         }
         .tab-item.active svg {
             stroke-width: 2.5px;
@@ -202,16 +185,14 @@
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* JITカラークラス置換用 */
+        /* Utility */
         .text-theme { color: var(--accent-color); }
         .bg-theme { background-color: var(--accent-color); }
-        .border-theme { border-color: var(--accent-color); }
-        .hover-bg-theme:hover { background-color: #248a7d; }
-
-        /* CD Jacket Styles */
+        .hover-bg-theme:hover { background-color: var(--accent-dark); }
+        
+        /* 今日の自分用スタイル */
         .cd-jacket {
             aspect-ratio: 1/1;
-            width: 100%;
             object-fit: cover;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -223,6 +204,7 @@
 
     <main class="w-full max-w-lg mx-auto">
         
+        <!-- 入力エリア -->
         <div id="input-area" class="card-base m-4 bg-white">
             <div class="flex items-end gap-3">
                 <div class="flex-1">
@@ -240,6 +222,7 @@
         </div>
 
         <div id="content-area" class="hidden fade-in px-2">
+            
             <!-- 年表タブ -->
             <div id="view-history" class="hidden">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
@@ -259,94 +242,85 @@
                 <div class="h-8"></div>
             </div>
 
-            <!-- 今日の自分タブ（UI刷新） -->
+            <!-- 今日の自分タブ -->
             <div id="view-today" class="hidden p-2">
-                 <!-- 1. 今日のあなたの年齢 -->
-                 <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100 text-center relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#2A9D8F] to-transparent opacity-50"></div>
-                    <div class="mb-1 text-sm font-bold text-gray-400 tracking-wider">TODAY'S YOU</div>
-                    <div class="flex items-baseline justify-center gap-1">
-                        <span class="text-xs text-gray-500 font-bold">生まれてから</span>
-                        <span id="user-days-alive" class="text-5xl font-extrabold text-theme tabular-nums tracking-tight">0</span>
-                        <span class="text-lg font-bold text-gray-500">日</span>
+                
+                <!-- ユーザーの日数 -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-4 border border-gray-100 text-center relative overflow-hidden">
+                    <div class="absolute -top-4 -left-4 p-4 opacity-5">
+                        <i data-lucide="sun" class="w-32 h-32 text-theme"></i>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-2">の時間が経過しました</p>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">今日のあなた</h3>
+                    <div class="flex items-baseline justify-center gap-1 mb-1">
+                        <span id="user-days" class="text-5xl font-black text-theme tracking-tight">0</span>
+                        <span class="text-sm font-bold text-gray-400">Days</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400">あなたが生まれてから今日までの日数</p>
                 </div>
 
-                <!-- 2. そのころaikoは... -->
-                <div class="relative mb-8 text-center">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div class="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div class="relative flex justify-center">
-                        <span class="bg-[#F8F9FA] px-4 text-xs font-bold text-gray-500 flex items-center gap-2">
-                            <i data-lucide="history" class="w-4 h-4 text-theme"></i>
-                            そのころ aikoは...
-                        </span>
-                    </div>
+                <!-- つなぎのテキスト -->
+                <div class="text-center mb-4">
+                    <span class="bg-gray-100 text-gray-500 text-xs font-bold px-4 py-1.5 rounded-full shadow-inner">
+                        そのころ aikoがリリースしたCDは...
+                    </span>
+                    <div class="h-4 w-0.5 bg-gray-200 mx-auto mt-2"></div>
                 </div>
 
-                <!-- 3. 結果表示カード -->
+                <!-- CD情報カード -->
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative">
-                    <!-- ヘッダー装飾 -->
-                    <div class="bg-[#264653] p-4 text-white">
-                        <div class="flex items-center justify-between">
-                            <span id="match-cd-type" class="bg-[#E9C46A] text-[#264653] text-[10px] font-black px-2 py-1 rounded shadow uppercase tracking-wider">
-                                SINGLE
-                            </span>
-                            <span class="text-[10px] opacity-70 font-mono tracking-widest">RELEASE INFO</span>
-                        </div>
-                        <h2 id="match-cd-title" class="text-xl font-bold mt-2 leading-tight">タイトル</h2>
+                    <!-- ヘッダー -->
+                    <div class="bg-[#2A9D8F] p-4 text-white text-center">
+                         <div class="inline-block bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold mb-1 backdrop-blur-sm">
+                             <span id="match-cd-type">SINGLE</span>
+                         </div>
+                         <h2 id="match-cd-title" class="text-xl font-bold leading-tight">Loading...</h2>
                     </div>
 
                     <div class="p-5">
-                        <!-- ジャケット画像エリア -->
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="flex flex-col gap-1">
+                        <!-- ジャケット画像 -->
+                        <div class="flex gap-4 mb-6">
+                            <div class="flex-1 text-center">
                                 <div class="relative group">
-                                    <img id="img-first" src="" alt="初回盤" class="cd-jacket shadow-md" onerror="this.src='https://placehold.co/200x200/f1f5f9/94a3b8?text=No+Image'">
-                                    <div class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] py-1 text-center font-bold rounded-b-lg backdrop-blur-sm">
-                                        初回盤
-                                    </div>
+                                    <img id="match-img-first" src="" class="cd-jacket w-full shadow-md" alt="初回盤" onerror="this.src='https://placehold.co/200x200/e2e8f0/94a3b8?text=No+Image'">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[9px] py-1 rounded-b-lg backdrop-blur-[2px]">初回盤</div>
                                 </div>
                             </div>
-                            <div class="flex flex-col gap-1">
+                            <div class="flex-1 text-center">
                                 <div class="relative group">
-                                    <img id="img-regular" src="" alt="通常盤" class="cd-jacket shadow-md" onerror="this.src='https://placehold.co/200x200/f1f5f9/94a3b8?text=No+Image'">
-                                    <div class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] py-1 text-center font-bold rounded-b-lg backdrop-blur-sm">
-                                        通常盤
-                                    </div>
+                                    <img id="match-img-regular" src="" class="cd-jacket w-full shadow-md" alt="通常盤" onerror="this.src='https://placehold.co/200x200/e2e8f0/94a3b8?text=No+Image'">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[9px] py-1 rounded-b-lg backdrop-blur-[2px]">通常盤</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 収録曲 -->
                         <div class="mb-6">
-                            <h4 class="text-xs font-bold text-gray-400 mb-2 border-b border-gray-100 pb-1 flex items-center gap-1">
+                            <h4 class="text-xs font-bold text-gray-400 border-b border-gray-100 pb-1 mb-2 flex items-center gap-1">
                                 <i data-lucide="music" class="w-3 h-3"></i> 収録曲
                             </h4>
-                            <ul id="match-tracklist" class="text-xs text-gray-600 leading-relaxed space-y-1 list-none">
-                                <!-- JSで挿入 -->
-                            </ul>
+                            <div id="match-tracks" class="text-sm text-gray-600 leading-relaxed font-medium bg-gray-50 p-3 rounded-xl border border-dashed border-gray-200">
+                                <!-- Tracks will be inserted here -->
+                            </div>
                         </div>
 
-                        <!-- フッター情報 -->
-                        <div class="bg-[#f8fafc] -m-5 mt-0 p-4 border-t border-gray-100 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase">Release Date</p>
-                                <p id="match-release-date" class="text-sm font-bold text-gray-700">----/--/--</p>
+                        <!-- リリース日・aiko年齢 -->
+                        <div class="bg-[#e0f2f1] rounded-xl p-3 flex justify-between items-center text-xs">
+                            <div class="text-center flex-1 border-r border-[#2A9D8F]/20">
+                                <div class="text-[#1F7A6F] font-bold opacity-70 mb-0.5">リリース日</div>
+                                <div id="match-release-date" class="font-bold text-gray-700 text-sm">----/--/--</div>
                             </div>
-                            <div class="text-right">
-                                <p class="text-[10px] text-gray-400 font-bold uppercase">aiko's Age</p>
-                                <p class="text-sm font-bold text-theme">
-                                    <span id="match-aiko-days" class="text-lg">0</span> Days
-                                </p>
+                            <div class="text-center flex-1">
+                                <div class="text-[#1F7A6F] font-bold opacity-70 mb-0.5">当時のaiko</div>
+                                <div class="font-black text-[#2A9D8F] text-lg leading-none">
+                                    <span id="match-aiko-days">0</span>
+                                    <span class="text-[10px] font-normal text-gray-500">Days</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="h-20"></div>
+                <div class="h-8"></div>
             </div>
         </div>
 
@@ -371,24 +345,13 @@
 
     <script>
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
-        const AIKO_BIRTH = new Date(1975, 10, 22); // Month is 0-indexed (11月 -> 10)
+        const AIKO_BIRTH = new Date(1975, 10, 22); // 1975/11/22 (Month is 0-indexed)
         
-        // ★ キャッシュキーを更新
+        // ★ キャッシュキー更新
         const CACHE_KEY = 'lldb_data_history_v7_0';
 
         let allData = null;
         let birthDate = null;
-
-        // ★ プレビュー用モックデータ (実際のGAS連携時は上書きまたはfallbackとして機能)
-        const mockReleaseList = [
-            { date: "1998-07-17", type: "Single", title: "あした", imgFirst: "", imgRegular: "", tracks: "1.あした\n2.I'm feeling blue" },
-            { date: "1999-03-03", type: "Single", title: "ナキ・ムシ", imgFirst: "", imgRegular: "", tracks: "1.ナキ・ムシ\n2.赤い靴" },
-            { date: "1999-04-21", type: "Album", title: "小さな丸い好日", imgFirst: "", imgRegular: "", tracks: "1.オレンジな満月\n2.ジェット\n3.私生活" },
-            { date: "1999-08-04", type: "Single", title: "花火", imgFirst: "", imgRegular: "", tracks: "1.花火\n2.親指の使い方" },
-            { date: "2000-02-17", type: "Single", title: "桜の木の下", imgFirst: "", imgRegular: "", tracks: "1.愛の病\n2.桜の時" },
-            { date: "2000-09-20", type: "Single", title: "ボーイフレンド", imgFirst: "", imgRegular: "", tracks: "1.ボーイフレンド\n2.密かなさよならの仕方" },
-            // 必要に応じて追加
-        ];
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -418,7 +381,7 @@
             document.getElementById('view-history').classList.toggle('hidden', tabName !== 'history');
             document.getElementById('view-today').classList.toggle('hidden', tabName !== 'today');
             
-            if (tabName === 'today' && birthDate) {
+            if (tabName === 'today' && allData && birthDate) {
                 renderTodayStats();
             }
             lucide.createIcons();
@@ -440,7 +403,6 @@
                     if (cache) {
                           allData = JSON.parse(cache);
                     } else {
-                        // GAS呼び出し
                         const res = await fetch(`${GAS_API_URL}?action=getHistoryData`);
                         const json = await res.json();
                         allData = json;
@@ -448,42 +410,25 @@
                     }
                 } catch (e) {
                     console.error(e);
-                    // エラー時はモックデータを使用（プレビュー用）
-                    console.log("Using Mock Data");
-                    allData = { historyData: [], releaseList: mockReleaseList }; 
+                    alert('データの読み込みに失敗しました。');
+                    document.getElementById('loading').classList.add('hidden');
+                    return;
                 }
             }
 
-            // データ形式の補完 (GASが古い形式の場合のフォールバック)
-            if (!allData.releaseList) {
-                allData.releaseList = mockReleaseList; 
-            }
-
             renderTimeline();
-            renderTodayStats();
-            
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('content-area').classList.remove('hidden');
-            // デフォルトは年表タブのまま
-            if(!document.querySelector('.tab-item.active[data-tab="today"]')) {
-                switchTab('history');
-            }
+            switchTab('history');
         }
 
-        /* ===========================================
-           年表ロジック (既存維持) 
-           ===========================================
-        */
+        // --- 年表ロジック (既存維持) ---
         function getLifeStage(targetDate, birth) {
             const getSchoolCohort = (d) => {
                 const y = d.getFullYear();
                 const m = d.getMonth() + 1;
-                const date = d.getDate();
-                if (m <= 3) return y - 1;
-                if (m === 4 && date === 1) return y - 1;
-                return y;
+                return (m <= 3 || (m === 4 && d.getDate() === 1)) ? y - 1 : y;
             };
-
             const getFiscalYear = (d) => {
                 const y = d.getFullYear();
                 const m = d.getMonth() + 1;
@@ -593,85 +538,77 @@
             }
         }
 
-        /* ===========================================
-           UI刷新: 今日の自分ロジック 
-           ===========================================
-        */
+        // --- 今日の自分 ロジック (新規実装) ---
         function renderTodayStats() {
-            if (!birthDate || !allData.releaseList) return;
-            
+            if (!birthDate || !allData.listData) return;
+
+            // 1. 今日の自分の日数を算出
             const today = new Date();
-            // 1. ユーザーの経過日数 (ミリ秒 -> 日)
-            const userDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+            // 時間の影響を排除して日付のみで計算
+            today.setHours(0,0,0,0);
+            const userBirthClean = new Date(birthDate);
+            userBirthClean.setHours(0,0,0,0);
             
-            document.getElementById('user-days-alive').innerText = userDays.toLocaleString();
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const userDays = Math.floor((today - userBirthClean) / msPerDay);
+            
+            document.getElementById('user-days').innerText = userDays.toLocaleString();
 
-            // 2. 最も近いaikoのリリースを探す
+            // 2. 最も近いリリース日を探す
+            let bestMatch = null;
             let minDiff = Infinity;
-            let targetRelease = null;
-            let targetAikoDays = 0;
 
-            allData.releaseList.forEach(item => {
-                if(!item.date) return;
-                const releaseDate = new Date(item.date);
-                // リリース時のaikoの年齢（日）
-                const aikoDaysAtRelease = Math.floor((releaseDate - AIKO_BIRTH) / (1000 * 60 * 60 * 24));
+            allData.listData.forEach(cd => {
+                if (!cd.releaseDate) return;
                 
-                // 差分（絶対値）
+                const releaseDate = new Date(cd.releaseDate);
+                releaseDate.setHours(0,0,0,0);
+                
+                // aikoの誕生日からリリース日までの日数
+                const aikoDaysAtRelease = Math.floor((releaseDate - AIKO_BIRTH) / msPerDay);
+                
+                // 差分の絶対値
                 const diff = Math.abs(userDays - aikoDaysAtRelease);
                 
                 if (diff < minDiff) {
                     minDiff = diff;
-                    targetRelease = item;
-                    targetAikoDays = aikoDaysAtRelease;
+                    bestMatch = {
+                        ...cd,
+                        aikoDaysAtRelease: aikoDaysAtRelease,
+                        formattedRelease: `${releaseDate.getFullYear()}/${releaseDate.getMonth() + 1}/${releaseDate.getDate()}`
+                    };
                 }
             });
 
-            // 3. 表示更新
-            if (targetRelease) {
-                // CDの種類
-                const typeEl = document.getElementById('match-cd-type');
-                typeEl.innerText = targetRelease.type || 'CD';
-                // 色分け (Single: Blue系, Album: Orange/Yellow系)
-                if(targetRelease.type && targetRelease.type.includes('Single')) {
-                    typeEl.className = "bg-[#e0f2fe] text-[#0369a1] text-[10px] font-black px-2 py-1 rounded shadow uppercase tracking-wider";
-                } else {
-                    typeEl.className = "bg-[#fef3c7] text-[#92400e] text-[10px] font-black px-2 py-1 rounded shadow uppercase tracking-wider";
-                }
+            // 3. UIに反映
+            if (bestMatch) {
+                document.getElementById('match-cd-title').innerText = bestMatch.title || 'Unknown Title';
+                document.getElementById('match-cd-type').innerText = bestMatch.type || 'CD';
+                
+                const img1 = document.getElementById('match-img-first');
+                const img2 = document.getElementById('match-img-regular');
+                img1.src = bestMatch.imgFirst || '';
+                img2.src = bestMatch.imgRegular || '';
 
-                document.getElementById('match-cd-title').innerText = targetRelease.title || '';
-                
-                // 画像
-                document.getElementById('img-first').src = targetRelease.imgFirst || '';
-                document.getElementById('img-regular').src = targetRelease.imgRegular || '';
-                
-                // トラックリスト (改行区切りをリスト化)
-                const tracksContainer = document.getElementById('match-tracklist');
-                tracksContainer.innerHTML = '';
-                if (targetRelease.tracks) {
-                    // 文字列なら改行で分割、配列ならそのまま
-                    const tracks = typeof targetRelease.tracks === 'string' 
-                                   ? targetRelease.tracks.split(/\n|<br>|\r/) 
-                                   : targetRelease.tracks;
-                    
-                    tracks.forEach(track => {
-                        if(track.trim()) {
-                            const li = document.createElement('li');
-                            li.className = "flex items-start gap-1";
-                            li.innerHTML = `<span class="inline-block w-1 h-1 bg-gray-300 rounded-full mt-1.5 flex-shrink-0"></span> ${track.trim()}`;
-                            tracksContainer.appendChild(li);
-                        }
-                    });
+                // 収録曲の整形 (カンマや改行区切りに対応)
+                let tracksHtml = '';
+                if (bestMatch.tracks) {
+                    // スプシのセル内改行や読点に対応してリスト化
+                    const tracks = bestMatch.tracks.split(/\n|、|,/).map(t => t.trim()).filter(t => t);
+                    if (tracks.length > 0) {
+                        tracksHtml = '<ul class="list-disc pl-4 space-y-1">';
+                        tracks.forEach(t => tracksHtml += `<li>${t}</li>`);
+                        tracksHtml += '</ul>';
+                    } else {
+                        tracksHtml = bestMatch.tracks;
+                    }
                 } else {
-                    tracksContainer.innerHTML = '<li class="text-gray-400 italic">情報なし</li>';
+                    tracksHtml = '<span class="text-gray-400">情報なし</span>';
                 }
+                document.getElementById('match-tracks').innerHTML = tracksHtml;
 
-                // 日付
-                const d = new Date(targetRelease.date);
-                document.getElementById('match-release-date').innerText = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-                
-                // aikoの日数
-                document.getElementById('match-aiko-days').innerText = targetAikoDays.toLocaleString();
+                document.getElementById('match-release-date').innerText = bestMatch.formattedRelease;
+                document.getElementById('match-aiko-days').innerText = bestMatch.aikoDaysAtRelease.toLocaleString();
             }
         }
     </script>
