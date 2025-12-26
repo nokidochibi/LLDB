@@ -168,7 +168,7 @@
         <div id="input-area" class="card-base m-4 bg-white">
             <div class="flex items-end gap-3">
                 <div class="flex-1">
-                    <label class="block text-xs font-bold text-gray-400 mb-1.5 ml-1">生年月日を選択してね</label>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5 ml-1">生年月日を選択</label>
                     <div class="flex gap-2">
                         <select id="year" class="flex-[3]"></select>
                         <select id="month" class="flex-[2]"></select>
@@ -340,6 +340,12 @@
                 if (allData && birthDate) {
                     renderTodayStats();
                 }
+                
+                // ★追加: 「今日の自分」タブ切り替え計測
+                safeTrackEvent('screen_view', {
+                    screen_name: 'History_TodayMe',
+                    app_name: 'LLDB_History'
+                });
             }
             lucide.createIcons();
         }
