@@ -168,7 +168,7 @@
         <div id="input-area" class="card-base m-4 bg-white">
             <div class="flex items-end gap-3">
                 <div class="flex-1">
-                    <label class="block text-xs font-bold text-gray-400 mb-1.5 ml-1">生年月日を選択</label>
+                    <label class="block text-xs font-bold text-gray-400 mb-1.5 ml-1">生年月日を選択してね</label>
                     <div class="flex gap-2">
                         <select id="year" class="flex-[3]"></select>
                         <select id="month" class="flex-[2]"></select>
@@ -582,15 +582,19 @@
                                     .filter(t => t && t !== ".");
 
                     if (tracks.length > 0) {
-                        // <ol>に変更して番号自動付与
-                        tracksHtml = '<ol class="list-decimal pl-5 space-y-1">';
-                        tracks.forEach(t => {
+                        // <ol>による自動付番をやめ、Flexboxで手動配置して間隔を詰める
+                        tracksHtml = '<div class="flex flex-col gap-1.5">';
+                        tracks.forEach((t, i) => {
                             // もしデータ自体に「1. 曲名」のように番号が付いていたら除去する
-                            // 例: "1. 花火" -> "花火"
                             let cleanTitle = t.replace(/^\d+[\.．]\s*/, ''); 
-                            tracksHtml += `<li>${cleanTitle}</li>`;
+                            // gap-0.5 で番号とタイトルの隙間を極小にする（半角スペースより狭く）
+                            tracksHtml += `
+                                <div class="flex items-baseline gap-0.5">
+                                    <span class="text-gray-400 font-bold text-xs shrink-0 select-none min-w-[1.2rem] text-right">${i + 1}.</span>
+                                    <span>${cleanTitle}</span>
+                                </div>`;
                         });
-                        tracksHtml += '</ol>';
+                        tracksHtml += '</div>';
                     } else {
                         tracksHtml = bestMatch.tracks;
                     }
