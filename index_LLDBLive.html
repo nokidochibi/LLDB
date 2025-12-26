@@ -6,6 +6,17 @@
 <title>Love Like DataBase vol.4.0</title>
 <meta name="theme-color" content="#ef4444">
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0D09G3X4F1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  // iframe内での重複計測を防ぐため、自動PV送信はOFFにし、必要なイベントのみ手動で送る設定
+  gtag('config', 'G-0D09G3X4F1', { 'send_page_view': false });
+</script>
+
 <!-- 外部ライブラリ -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -713,7 +724,7 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
   <!-- 軌跡タブ -->
   <div id="tab-history" class="tab-content" style="display:none">
     <div class="mb-3 px-1">
-      <h3 class="font-bold text-gray-700 text-base flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-aiko-red"></i> Live/CDリリースのタイムライン</h3>
+      <h3 class="font-bold text-gray-700 text-base flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-aiko-red"></i> ライブ/CDリリースのタイムライン</h3>
     </div>
     
     <div class="history-grid-header flex text-[10px] font-bold text-gray-400 pb-2 pt-2 mb-0">
@@ -1937,6 +1948,15 @@ function applyFilters() {
 
   document.getElementById('display-count').textContent = filteredRecords.length;
   document.getElementById('total-count').textContent = allLiveRecords.length;
+  
+  // GA4 Tracking
+  if (filters.search && filters.search.length > 0) {
+    safeTrackEvent('search', {
+      search_term: filters.search,
+      search_category: 'live_search'
+    });
+  }
+
   renderLiveList(filteredRecords);
 }
 
@@ -1969,6 +1989,13 @@ function renderLiveList(records) {
 }
 
 function showLiveDetail(rec) {
+  // GA4 Tracking
+  safeTrackEvent('select_content', {
+    content_type: 'live_detail',
+    item_id: rec.date,
+    item_name: rec.tourName
+  });
+
   document.body.classList.add('detail-view');
   currentDisplayingRecord = rec;
 
@@ -2178,6 +2205,14 @@ function copySetlist() {
     
   navigator.clipboard.writeText(text).then(() => {
       alert('コピーしました！');
+      
+      // GA4 Tracking
+      safeTrackEvent('share', {
+        method: 'clipboard',
+        content_type: 'setlist',
+        item_id: currentDisplayingRecord.tourName
+      });
+
   }).catch(err => {
       console.error(err);
       alert('コピーに失敗しました');
@@ -2484,6 +2519,17 @@ function showModal(song, type) {
 
 function closeModal() {
   document.getElementById('modal-overlay').style.display = 'none';
+}
+
+// GA4送信用の安全なラッパー関数
+function safeTrackEvent(eventName, params) {
+  try {
+    if (typeof gtag === 'function') {
+      gtag('event', eventName, params);
+    }
+  } catch (e) {
+    console.warn('GA4 Tracking Error:', e);
+  }
 }
 </script>
 </body>
