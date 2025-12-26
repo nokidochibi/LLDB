@@ -269,7 +269,7 @@
             <div class="bg-orange-50 border border-orange-100 rounded-xl p-3 mt-3 flex items-start gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0"></i>
                 <p class="text-[11px] text-orange-700 leading-relaxed">
-                    Song Helperがあなたの調査依頼や改善要望にお答えします。楽しく使っていただくために、リクエストを掲載しない場合もあります🌸
+                    Song Helperが調査依頼や改善要望、質問などに答えるよ。楽しく使っていただくために、リクエストを掲載しない場合もあるよ🌸
                 </p>
             </div>
         </div>
@@ -458,7 +458,12 @@
             }
             
             const activeContainer = dom.containers[mode];
-            activeContainer.scrollTop = activeContainer.scrollHeight;
+            // 変更点: リクエストタブの場合は最上部、それ以外（チャット）は最下部へ
+            if (mode === 'request') {
+                activeContainer.scrollTop = 0;
+            } else {
+                activeContainer.scrollTop = activeContainer.scrollHeight;
+            }
         };
 
         window.activateSecretMode = function() {
@@ -590,6 +595,8 @@
             `;
             dom.requestList.insertBefore(card, dom.requestList.firstChild);
             showToast("リクエストを送ったよ！📮");
+            // 追加: 投稿後に最上部へスクロール
+            dom.containers.request.scrollTop = 0;
 
             try {
                 await fetch(`${GAS_API_URL}?action=postRequest&q=${encodeURIComponent(query)}`);
@@ -641,6 +648,9 @@
                     </div>
                 </div>
             `).join('');
+            
+            // 追加: リスト描画後に最上部へスクロール
+            dom.containers.request.scrollTop = 0;
         }
 
         function handleLyricsResults(data) {
