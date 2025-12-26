@@ -201,7 +201,7 @@
                 <div class="h-8"></div>
             </div>
 
-            <!-- 今日の自分タブ (UI一新) -->
+            <!-- 今日の自分タブ -->
             <div id="view-today" class="hidden p-2">
                 
                 <!-- 1. 今日のあなたの日数 -->
@@ -211,8 +211,8 @@
                     </div>
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">今日のあなた</h3>
                     <div class="flex items-baseline justify-center gap-1">
-                        <span id="user-days" class="text-5xl font-black text-[#2A9D8F] tracking-tight">0</span>
-                        <span class="text-sm font-bold text-gray-400">Days</span>
+                        <!-- フォントサイズを調整 (text-5xl -> text-3xl) -->
+                        <span id="user-days" class="text-2xl sm:text-3xl font-black text-[#2A9D8F] tracking-tight">0</span>
                     </div>
                     <p class="text-[10px] text-gray-400 mt-1">あなたが生まれてから今日までの日数</p>
                 </div>
@@ -263,17 +263,14 @@
                         </div>
 
                         <!-- リリース日・aiko年齢 -->
-                        <div class="bg-[#e0f2f1] rounded-xl p-4 flex justify-between items-center text-xs">
-                            <div class="text-center flex-1 border-r border-[#2A9D8F]/20 pr-2">
-                                <div class="text-[#1F7A6F] font-bold opacity-70 mb-1">リリース日</div>
-                                <div id="match-release-date" class="font-bold text-gray-700 text-sm">----/--/--</div>
+                        <div class="bg-[#e0f2f1] rounded-xl p-4 flex flex-col gap-2 text-xs">
+                            <div class="flex justify-between items-center border-b border-[#2A9D8F]/10 pb-2">
+                                <div class="text-[#1F7A6F] font-bold opacity-70">リリース日</div>
+                                <div id="match-release-date" class="font-bold text-gray-700">----/--/--</div>
                             </div>
-                            <div class="text-center flex-1 pl-2">
-                                <div class="text-[#1F7A6F] font-bold opacity-70 mb-1">当時のaiko</div>
-                                <div class="font-black text-[#2A9D8F] text-lg leading-none">
-                                    <span id="match-aiko-days">0</span>
-                                    <span class="text-[10px] font-normal text-gray-500">Days</span>
-                                </div>
+                            <div class="flex justify-between items-center pt-1">
+                                <div class="text-[#1F7A6F] font-bold opacity-70">当時のaiko</div>
+                                <div id="match-aiko-days" class="font-bold text-[#2A9D8F] text-right">0</div>
                             </div>
                         </div>
                     </div>
@@ -341,8 +338,6 @@
             if (tabName === 'today') {
                 if (allData && birthDate) {
                     renderTodayStats();
-                } else if (allData && !birthDate) {
-                     // 誕生日未入力の場合は何もしない（入力待ち）
                 }
             }
             lucide.createIcons();
@@ -378,16 +373,42 @@
             }
 
             renderTimeline();
-            renderTodayStats(); // データの準備ができたら計算しておく
+            renderTodayStats(); 
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('content-area').classList.remove('hidden');
             
-            // 明示的にタブ切り替え（デフォルトは年表だが、必要に応じて変えても良い）
-            const currentTab = document.querySelector('.tab-item.active').dataset.tab;
-            if(currentTab === 'today') renderTodayStats();
+            const currentTabEl = document.querySelector('.tab-item.active');
+            const targetTab = currentTabEl ? currentTabEl.dataset.tab : 'history';
+            switchTab(targetTab);
         }
 
-        // --- 年表ロジック (既存維持) ---
+        // --- 年齢詳細計算ロジック (New) ---
+        function calculateDetailedAge(birthDate, targetDate) {
+            let b = new Date(birthDate);
+            let t = new Date(targetDate);
+            b.setHours(0,0,0,0);
+            t.setHours(0,0,0,0);
+
+            let years = t.getFullYear() - b.getFullYear();
+            let months = t.getMonth() - b.getMonth();
+            let days = t.getDate() - b.getDate();
+
+            if (days < 0) {
+                months--;
+                const prevMonthLastDay = new Date(t.getFullYear(), t.getMonth(), 0).getDate();
+                days += prevMonthLastDay;
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const totalDays = Math.floor((t - b) / msPerDay);
+
+            return `${years}歳${months}カ月${days}日<br><span class="text-sm font-normal text-gray-400">（${totalDays.toLocaleString()}日）</span>`;
+        }
+
         function getLifeStage(targetDate, birth) {
             const getSchoolCohort = (d) => {
                 const y = d.getFullYear();
@@ -491,19 +512,21 @@
         function renderTodayStats() {
             if (!birthDate || !allData.listData) return;
 
-            // 1. 今日の自分の日数を算出
+            // 1. 今日の自分の日数計算
             const today = new Date();
-            today.setHours(0,0,0,0);
-            const userBirthClean = new Date(birthDate);
-            userBirthClean.setHours(0,0,0,0);
-            const msPerDay = 1000 * 60 * 60 * 24;
-            const userDays = Math.floor((today - userBirthClean) / msPerDay);
+            const ageString = calculateDetailedAge(birthDate, today);
             
-            document.getElementById('user-days').innerText = userDays.toLocaleString();
+            // HTMLを挿入
+            document.getElementById('user-days').innerHTML = ageString;
 
             // 2. 最も近いリリース日を探す
             let bestMatch = null;
             let minDiff = Infinity;
+            
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const userBirthClean = new Date(birthDate); userBirthClean.setHours(0,0,0,0);
+            const todayClean = new Date(today); todayClean.setHours(0,0,0,0);
+            const userDays = Math.floor((todayClean - userBirthClean) / msPerDay);
 
             allData.listData.forEach(cd => {
                 if (!cd.releaseDate) return;
@@ -513,14 +536,14 @@
                 // aikoの誕生日からリリース日までの日数
                 const aikoDaysAtRelease = Math.floor((releaseDate - AIKO_BIRTH) / msPerDay);
                 
-                // 差分の絶対値 (ユーザーの日齢 - そのCDが出た時のaikoの日齢)
+                // 差分の絶対値
                 const diff = Math.abs(userDays - aikoDaysAtRelease);
                 
                 if (diff < minDiff) {
                     minDiff = diff;
                     bestMatch = {
                         ...cd,
-                        aikoDaysAtRelease: aikoDaysAtRelease,
+                        releaseDateObj: releaseDate,
                         formattedRelease: `${releaseDate.getFullYear()}/${releaseDate.getMonth() + 1}/${releaseDate.getDate()}`
                     };
                 }
@@ -540,11 +563,22 @@
                 // 収録曲
                 let tracksHtml = '';
                 if (bestMatch.tracks) {
-                    const tracks = String(bestMatch.tracks).split(/\n|、|,/).map(t => t.trim()).filter(t => t);
+                    // 区切り文字で分割し、空白を除去
+                    const tracks = String(bestMatch.tracks)
+                                    .split(/[\n,、]/)
+                                    .map(t => t.trim())
+                                    .filter(t => t && t !== ".");
+
                     if (tracks.length > 0) {
-                        tracksHtml = '<ul class="list-decimal pl-4 space-y-1">';
-                        tracks.forEach(t => tracksHtml += `<li>${t}</li>`);
-                        tracksHtml += '</ul>';
+                        // <ol>に変更して番号自動付与
+                        tracksHtml = '<ol class="list-decimal pl-5 space-y-1">';
+                        tracks.forEach(t => {
+                            // もしデータ自体に「1. 曲名」のように番号が付いていたら除去する
+                            // 例: "1. 花火" -> "花火"
+                            let cleanTitle = t.replace(/^\d+[\.．]\s*/, ''); 
+                            tracksHtml += `<li>${cleanTitle}</li>`;
+                        });
+                        tracksHtml += '</ol>';
                     } else {
                         tracksHtml = bestMatch.tracks;
                     }
@@ -552,8 +586,12 @@
                     tracksHtml = '<span class="text-gray-400">情報なし</span>';
                 }
                 document.getElementById('match-tracks').innerHTML = tracksHtml;
+
                 document.getElementById('match-release-date').innerText = bestMatch.formattedRelease;
-                document.getElementById('match-aiko-days').innerText = bestMatch.aikoDaysAtRelease.toLocaleString();
+                
+                // aikoの当時の年齢・日数詳細
+                const aikoAgeString = calculateDetailedAge(AIKO_BIRTH, bestMatch.releaseDateObj);
+                document.getElementById('match-aiko-days').innerHTML = aikoAgeString;
             }
         }
     </script>
