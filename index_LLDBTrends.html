@@ -453,7 +453,7 @@
         </div>
 
         <!-- 左寄せ (固定ヘッダーから出してスクロールで流れるように変更) -->
-        <span class="subtitle">「視聴回数」などをタップすると並び替えできます</span>
+        <span class="subtitle">「視聴回数」などをタップすると並び替えできるで</span>
         
         <div id="loading">
             <div class="spinner"></div>
@@ -564,6 +564,14 @@
             span.addEventListener('click', () => {
                 checkbox.checked = !checkbox.checked;
                 span.classList.toggle('selected', checkbox.checked);
+                
+                // ★追加: フィルタ操作の計測
+                safeTrackEvent('select_content', {
+                    content_type: 'trends_filter',
+                    item_id: span.dataset.category,
+                    status: checkbox.checked ? 'on' : 'off'
+                });
+
                 filterAndDisplay();
                 setTimeout(updateStickyOffset, 50); 
             });
@@ -645,6 +653,12 @@
             document.getElementById('error').textContent = "通信エラーが発生しました: " + e.message;
             document.getElementById('error').style.display = 'block';
             document.getElementById('loading').style.display = 'none';
+            
+            // ★追加: エラー計測
+            safeTrackEvent('exception', {
+                description: e.message,
+                fatal: true
+            });
         }
     }
 
@@ -664,6 +678,14 @@
                     const dir = (currentSortColumn === h.key && currentSortDirection === 'asc') ? 'desc' :
                                 (currentSortColumn === h.key && currentSortDirection === 'desc') ? 'asc' :
                                 (h.key === 'publishedDate') ? 'asc' : 'desc';
+                    
+                    // ★追加: ソート操作の計測
+                    safeTrackEvent('select_content', {
+                        content_type: 'trends_sort',
+                        item_id: h.key,
+                        item_category: dir
+                    });
+
                     sortTable(h.key, h.type, dir);
                 };
             }
