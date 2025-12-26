@@ -19,7 +19,8 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-0D09G3X4F1');
+      // iframe内での重複計測を防ぐため、自動PV送信はOFFにし、必要なイベントのみ手動で送る設定
+      gtag('config', 'G-0D09G3X4F1', { 'send_page_view': false });
     </script>
 
     <title>LLDB Song Helper</title>
@@ -298,7 +299,7 @@
                 <!-- textarea: rows=1で初期化 -->
                 <textarea id="search-input" rows="1"
                     class="flex-1 bg-transparent border-none focus:outline-none text-[15px] placeholder-gray-400 min-w-0"
-                    placeholder="例：甘い匂いに" required autocomplete="off"></textarea>
+                    placeholder="例：砂山" required autocomplete="off"></textarea>
                 
                 <!-- 送信ボタン: mb-2 で位置調整 -->
                 <button type="submit" id="submit-btn"
@@ -446,7 +447,7 @@
             }
 
             if (mode === 'lyrics') {
-                dom.searchInput.placeholder = "例：甘い匂いに";
+                dom.searchInput.placeholder = "例：砂山";
             } else if (mode === 'title') {
                 dom.searchInput.placeholder = "例：ポニーテール";
             } else if (mode === 'request') {
@@ -485,6 +486,12 @@
             e.preventDefault();
             const query = dom.searchInput.value.trim();
             if (!query) return;
+
+            // GA4 Tracking
+            safeTrackEvent('search', {
+                search_term: query,
+                search_category: currentMode 
+            });
 
             // リクエストモード時の確認ダイアログ
             if (currentMode === 'request') {
@@ -710,8 +717,17 @@
                 messageContent += hintHtml;
             }
 
-            if (data.result === 'unknown_song') addMessage(data.message, 'bot');
-            else addMessage(messageContent, 'bot', true);
+            if (data.result === 'unknown_song') {
+                addMessage(data.message, 'bot');
+                safeTrackEvent('level_end', { level_name: 'shiritori', success: false, method: 'unknown_song' });
+            } else {
+                if (data.result === 'user_win') {
+                    safeTrackEvent('level_end', { level_name: 'shiritori', success: true });
+                } else if (data.result === 'user_lose') {
+                    safeTrackEvent('level_end', { level_name: 'shiritori', success: false });
+                }
+                addMessage(messageContent, 'bot', true);
+            }
         }
 
         function addMessage(content, type, isHtml = false) {
@@ -771,6 +787,17 @@
         function showToast(msg) {
             dom.toast.textContent = msg; dom.toast.classList.remove('opacity-0');
             setTimeout(() => dom.toast.classList.add('opacity-0'), 2000);
+        }
+
+        // GA4送信用の安全なラッパー関数
+        function safeTrackEvent(eventName, params) {
+            try {
+                if (typeof gtag === 'function') {
+                    gtag('event', eventName, params);
+                }
+            } catch (e) {
+                console.warn('GA4 Tracking Error:', e);
+            }
         }
     </script>
 </body>
