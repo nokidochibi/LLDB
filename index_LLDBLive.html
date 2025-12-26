@@ -388,7 +388,7 @@ nav > div {
   color: #ef4444;
   border: 1px solid #ef4444;
   cursor: pointer; /* 詳細へ飛べる */
-   
+    
   /* LIVE名は省略設定 */
   white-space: nowrap;
   overflow: hidden;
@@ -404,7 +404,7 @@ nav > div {
   background-color: #f0f9ff; /* 薄い青背景 */
   color: #0284c7;
   border: 1px solid #bae6fd;
-   
+    
   /* Singleは改行許可 */
   white-space: normal;
   height: auto;
@@ -414,7 +414,7 @@ nav > div {
   background-color: #fefce8; /* 薄い黄背景 */
   color: #854d0e;
   border: 1px solid #fef08a;
-   
+    
   /* Albumも改行許可 */
   white-space: normal;
   height: auto;
@@ -844,7 +844,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let allLiveRecords = [], 
-    songStats = {},              
+    songStats = {},               
     songStatsNoMedley = {},       
     patternStats = {}, 
     lastPlayedStats = {}, 
@@ -1497,9 +1497,9 @@ function startConfetti() {
       ctx.clearRect(0, 0, width, height);
     }
   }
-   
+    
   animate();
-   
+    
   // リサイズ対応
   const resizeHandler = () => {
     width = window.innerWidth;
@@ -2138,11 +2138,18 @@ function showLiveDetail(rec) {
     </div>`;
 
   const summaryHtml = `
-    <div class="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600 font-bold text-center border border-gray-100">
-      <div class="mb-1">📊 このライブの成分表</div>
-      <span class="text-aiko-pink">表題曲: ${typeCounts['表題曲']}</span> / 
-      <span class="text-blue-500">カップリング: ${typeCounts['カップリング曲']}</span> / 
-      <span class="text-yellow-500">アルバム: ${typeCounts['アルバム曲']}</span>
+    <div class="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-between">
+      <div class="flex-1">
+        <div class="mb-2 text-sm font-bold text-gray-600">📊 このライブの成分表</div>
+        <div class="text-xs font-bold leading-relaxed">
+          <div class="text-aiko-pink">● 表題曲: ${typeCounts['表題曲']}</div>
+          <div class="text-blue-500">● カップリング: ${typeCounts['カップリング曲']}</div>
+          <div class="text-yellow-500">● アルバム: ${typeCounts['アルバム曲']}</div>
+        </div>
+      </div>
+      <div style="width: 80px; height: 80px; flex-shrink: 0;">
+        <canvas id="component-chart"></canvas>
+      </div>
     </div>
   `;
 
@@ -2176,6 +2183,53 @@ function showLiveDetail(rec) {
 
   document.getElementById('detail-header-area').onclick = hideDetailView;
   document.getElementById('app').scrollTop = 0;
+
+  // グラフ描画
+  setTimeout(() => renderComponentChart(typeCounts), 0);
+}
+
+function renderComponentChart(counts) {
+  const canvas = document.getElementById('component-chart');
+  if (!canvas) return;
+  
+  if (chartInstances.component) {
+    chartInstances.component.destroy();
+  }
+
+  const data = [
+    counts['表題曲'], 
+    counts['カップリング曲'], 
+    counts['アルバム曲'],
+    counts['その他']
+  ];
+  
+  chartInstances.component = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['表題曲', 'カップリング', 'アルバム', 'その他'],
+      datasets: [{
+        data: data,
+        backgroundColor: [
+          '#FF69B4', // aiko-pink
+          '#3B82F6', // blue-500
+          '#EAB308', // yellow-500
+          '#E5E7EB'  // gray-200
+        ],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        datalabels: { display: false }
+      },
+      cutout: '60%'
+    }
+  });
 }
 
 function hideDetailView() {
@@ -2184,6 +2238,13 @@ function hideDetailView() {
   document.getElementById('back-button-fixed').style.display = 'none';
   // document.getElementById('main-header').style.display = 'flex'; // ヘッダーは親管理なのでここでは触らない
   document.querySelector('nav').style.display = 'flex';
+  
+  // グラフの破棄
+  if (chartInstances.component) {
+    chartInstances.component.destroy();
+    chartInstances.component = null;
+  }
+
   switchToTab(document.querySelector('.tab-item.active').dataset.tab);
   currentDisplayingRecord = null;
 }
