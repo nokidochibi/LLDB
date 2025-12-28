@@ -1878,9 +1878,12 @@ function populateFilters(records, skipApply = false) {
 function applyFilters() {
   const songFilterInput = document.getElementById('song-filter-input');
   let songFilterValue = songFilterInput.value;
-  if (songFilterInput.value.includes('（楽曲タブから選択）')) {
-    songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '');
-  }
+  
+  // ★修正箇所: 文言除去処理のアップデート
+  // 古い表記と新しい表記の両方に対応して削除を行う
+  songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '')
+                                   .replace('　※楽曲タブから選択', '')
+                                   .replace('(メドレー除外)', '');
 
   // ★トグルの状態取得
   const isMedleyIncluded = document.getElementById('medley-toggle').checked;
@@ -2522,7 +2525,19 @@ function setupEventListeners() {
     const songName = document.getElementById('song-search-input').value;
     if (songName) {
       const songInput = document.getElementById('song-filter-input');
-      songInput.value = `${songName}（楽曲タブから選択）`;
+      
+      // ▼▼▼ 修正箇所: トグルの状態取得して文言分岐 ▼▼▼
+      const isMedleyIncluded = document.getElementById('medley-toggle').checked;
+      
+      if (isMedleyIncluded) {
+         // メドレー込みの場合
+         songInput.value = `${songName}　※楽曲タブから選択`;
+      } else {
+         // メドレー除外の場合
+         songInput.value = `${songName}(メドレー除外)　※楽曲タブから選択`;
+      }
+      // ▲▲▲ 修正箇所ここまで ▲▲▲
+
       switchToTab('search');
       applyFilters();
     }
