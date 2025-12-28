@@ -245,31 +245,31 @@
             th:nth-child(6), td:nth-child(6) { width: 12%; text-align: right; padding-right: 2px; }
         }
 
-        /* Mobile (max 480px) */
+         /* Mobile (max 480px) */
         @media (max-width: 480px) {
             /* ベースの文字サイズを統一 */
             th { font-size: 11px; padding: 12px 1px; }
             td { font-size: 12px; padding: 8px 1px; }
 
-            /* ★ 3桁対応のため幅を微増 */
+            /* ★ 3桁対応：幅を広げて改行なしに */
             th:nth-child(1), td:nth-child(1) { 
-                width: 12%; 
+                width: 16%; 
                 text-align: center; 
                 font-weight: bold; 
                 color: #94a3b8; 
                 font-size: 11px; /* 順位は少し小さくてもOK */
             }
             
-            /* タイトル列 */
+            /* タイトル列：幅を調整 */
             th:nth-child(2), td:nth-child(2) { 
-                width: 30%; 
+                width: 28%; 
                 font-size: 13px; /* タイトルは読みやすく少し大きく */
                 line-height: 1.4;
             }
             
             /* 視聴回数列 */
             th:nth-child(3), td:nth-child(3) { 
-                width: 20%; 
+                width: 19%; 
                 font-weight: bold;
             }
             
@@ -457,7 +457,7 @@
         </div>
 
         <!-- 左寄せ (固定ヘッダーから出してスクロールで流れるように変更) -->
-        <span class="subtitle">「視聴回数」などをタップすると並び替えできるで</span>
+        <span class="subtitle">「視聴回数」とかタップしたら、並び替えれるで</span>
         
         <div id="loading">
             <div class="spinner"></div>
