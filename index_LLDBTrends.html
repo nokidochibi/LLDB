@@ -218,8 +218,8 @@
         /* 基本設定：1列目は最低幅を確保 */
         th:nth-child(1), td:nth-child(1) { white-space: nowrap; min-width: 36px; }
 
-        /* PC (>= 769px) */
-        @media (min-width: 769px) {
+        /* PC (>= 1025px) - 境界を変更 */
+        @media (min-width: 1025px) {
             th { font-size: 0.9em; }
             td { font-size: 1em; }
 
@@ -231,38 +231,63 @@
             th:nth-child(6), td:nth-child(6) { width: 12.5%; text-align: right; }
         }
 
-        /* Tablet (max 768px) */
-        @media (max-width: 768px) {
+        /* Tablet & Mobile Landscape (max 1024px) - 範囲を広げて大型スマホ横向きに対応 */
+        @media (max-width: 1024px) {
             .table-container { margin: 25px 2px 0 2px; }
             th { font-size: 0.8em; padding: 8px 1px; }
             td { font-size: 0.9em; }
             
-            th:nth-child(1), td:nth-child(1) { width: 8%; text-align: center; font-weight: bold; color: #94a3b8; }
-            th:nth-child(2), td:nth-child(2) { width: 34%; text-align: left; padding-right: 4px; line-height: 1.4; }
-            th:nth-child(3), td:nth-child(3) { width: 18%; text-align: right; font-weight: bold; padding: 0 4px; white-space: nowrap; }
-            th:nth-child(4), td:nth-child(4) { width: 16%; text-align: center; }
-            th:nth-child(5), td:nth-child(5) { width: 12%; text-align: right; padding-right: 2px; }
-            th:nth-child(6), td:nth-child(6) { width: 12%; text-align: right; padding-right: 2px; }
+            /* # 6% (5%だと厳しいので微増+min-width確保) */
+            th:nth-child(1), td:nth-child(1) { 
+                width: 6%; 
+                min-width: 40px; /* 3桁確保用 */
+                text-align: center; 
+                font-weight: bold; 
+                color: #94a3b8;
+                text-overflow: clip; /* 省略記号回避 */
+            }
+            /* タイトル 34% (35%から微調整) */
+            th:nth-child(2), td:nth-child(2) { 
+                width: 34%; 
+                text-align: left; 
+                padding-right: 4px; 
+                line-height: 1.4; 
+            }
+            /* 視聴回数 30% */
+            th:nth-child(3), td:nth-child(3) { 
+                width: 30%; 
+                text-align: right; 
+                font-weight: bold; 
+                padding: 0 4px; 
+                white-space: nowrap; 
+            }
+            /* 公開日 10% */
+            th:nth-child(4), td:nth-child(4) { width: 10%; text-align: center; }
+            /* 平均/日（全） 10% */
+            th:nth-child(5), td:nth-child(5) { width: 10%; text-align: right; padding-right: 2px; }
+            /* 平均/日（7日） 10% */
+            th:nth-child(6), td:nth-child(6) { width: 10%; text-align: right; padding-right: 2px; }
         }
 
-        /* Mobile (max 480px) */
+        /* Mobile Portrait (max 480px) */
         @media (max-width: 480px) {
             /* ベースの文字サイズを統一 */
             th { font-size: 11px; padding: 12px 1px; }
             td { font-size: 12px; padding: 8px 1px; }
 
-            /* ★ 3桁対応のため幅を微増 */
+            /* ★ 3桁対応：幅を広げて、省略記号(...)を強制無効化 */
             th:nth-child(1), td:nth-child(1) { 
-                width: 17%; 
+                width: 18%; /* 余裕を持って広げる */
                 text-align: center; 
                 font-weight: bold; 
                 color: #94a3b8; 
-                font-size: 11px; /* 順位は少し小さくてもOK */
+                font-size: 11px; 
+                text-overflow: clip; /* ...を表示させない */
             }
             
-            /* タイトル列 */
+            /* タイトル列：幅を調整 */
             th:nth-child(2), td:nth-child(2) { 
-                width: 27%; 
+                width: 26%; /* バランス調整 */
                 font-size: 13px; /* タイトルは読みやすく少し大きく */
                 line-height: 1.4;
             }
@@ -458,7 +483,7 @@
         </div>
 
         <!-- 左寄せ (固定ヘッダーから出してスクロールで流れるように変更) -->
-        <span class="subtitle">「視聴回数」とかタップしたら並び替えれるで</span>
+        <span class="subtitle">「視聴回数」などをタップすると並び替えできるで</span>
         
         <div id="loading">
             <div class="spinner"></div>
