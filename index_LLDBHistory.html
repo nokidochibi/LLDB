@@ -150,6 +150,10 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             background-color: #f1f5f9;
             width: 100%;
+            pointer-events: none;        /* 画像へのタッチ・クリック判定を無効化（これが一番効きます） */
+            -webkit-touch-callout: none; /* iOS Safariで長押しメニューを無効化 */
+            user-select: none;           /* 画像を選択できないようにする */
+            -webkit-user-drag: none;     /* 画像のドラッグを禁止 */
         }
         .jacket-label {
             position: absolute; bottom: 0; left: 0; right: 0;
