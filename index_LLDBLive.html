@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Love Like DataBase vol.4.0</title>
+<title>LLDB Live</title>
 <meta name="theme-color" content="#ef4444">
 
 <!-- Google tag (gtag.js) -->
@@ -32,8 +32,11 @@
   --aiko-bg: #F8F9FA;
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --nav-height: 85px;
+  --accent-light: #fef2f2;
 }
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
+html { height: 100%; } /* htmlにも高さを指定 */
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
@@ -42,25 +45,36 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  min-height: 100vh;
+  height: 100%; /* 100vhから変更して親要素に合わせる */
   margin: 0;
   touch-action: pan-y pinch-zoom;
   user-select: none;
   -webkit-user-select: none;
-  /* フッターの高さ + 余白 */
-  padding-bottom: calc(var(--nav-height) + 20px + env(safe-area-inset-bottom));
+  overflow: hidden; /* Body自体のスクロールを禁止（二重スクロール防止） */
 }
 
 body.detail-view nav { display: none !important; }
-body.detail-view { padding-top: 0; }
+/* body.detail-view { padding-top: 0; }  <- 不要になったので削除または無視でOK */
 
 @media screen and (max-device-width: 1024px) and (orientation: landscape) {
   body.landscape nav { display: none !important; }
-  body.landscape { padding-top: 0; }
-  body.landscape main { padding-bottom: 24px !important; }
+  /* body.landscape { padding-top: 0; } */
+  /* body.landscape main { padding-bottom: 24px !important; } */
 }
 
-.mobile-frame { width: 100%; max-width: 100%; height: 100vh; background-color: #F8F9FA; position: relative; overflow-y: scroll; overflow-x: hidden; }
+/* mobile-frameでスクロールを一元管理 */
+.mobile-frame { 
+  width: 100%; 
+  max-width: 100%; 
+  height: 100%; 
+  background-color: #F8F9FA; 
+  position: relative; 
+  overflow-y: auto; /* scrollからautoに変更（必要な時だけ出す） */
+  overflow-x: hidden; 
+  -webkit-overflow-scrolling: touch; /* iOSでの慣性スクロールを有効化 */
+  /* フッターの高さ + 余白 をここに移動 */
+  padding-bottom: calc(var(--nav-height) + 20px + env(safe-area-inset-bottom));
+}
 
 #confetti-canvas {
   position: fixed;
@@ -76,14 +90,11 @@ body.detail-view { padding-top: 0; }
   background-color: white;
   border-radius: 16px;
   box-shadow: var(--card-shadow);
-  padding: 12px; /* 余白圧縮 */
-  margin-bottom: 12px; /* 余白圧縮 */
+  padding: 12px;
+  margin-bottom: 12px;
   border: 1px solid rgba(0,0,0,0.03);
 }
 
-/* =========================================
-   New Tab Bar Style (統一デザイン)
-   ========================================= */
 nav {
   position: fixed !important;
   bottom: 0;
@@ -130,9 +141,8 @@ nav > div {
   stroke-width: 2.5px;
 }
 
-/* セトリリストのスタイル */
 .setlist-item {
-  padding: 5px 0; /* 余白圧縮 */
+  padding: 5px 0;
   margin-bottom: 0;
   background-color: transparent;
   border-bottom: 1px solid #f3f4f6;
@@ -141,39 +151,34 @@ nav > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 38px; /* 高さ圧縮 */
-  /* 左側のボーダー用スペース確保 */
+  min-height: 38px;
   border-left: 4px solid transparent; 
-  padding-left: 8px; /* 余白圧縮 */
+  padding-left: 8px;
 }
 .setlist-item:last-child { border-bottom: none; }
 
-/* メドレータイトル行（黄色背景＋黄色ライン） */
 .setlist-medley-title {
   border-left-color: var(--aiko-yellow) !important;
-  background-color: #fffbeb !important; /* 薄い黄色背景 */
+  background-color: #fffbeb !important;
 }
 
-/* メドレー内の曲（黄色ラインのみ、背景なし） */
 .setlist-medley {
   border-left-color: var(--aiko-yellow) !important;
   background-color: transparent !important;
 }
 
-/* アンコールヘッダー（拍手などのテキスト） */
 .setlist-encore-header {
-  margin-top: 16px; /* 余白圧縮 */
+  margin-top: 16px;
   margin-bottom: 6px;
-  font-weight: 800; /* 太字 */
+  font-weight: 800;
   color: var(--aiko-red);
-  font-size: 16px; /* フォントサイズ大きく */
+  font-size: 16px;
   padding: 4px 8px;
-  background-color: #fef2f2; /* 薄い赤背景 */
+  background-color: #fef2f2;
   border-left: 4px solid var(--aiko-red);
   border-radius: 0 4px 4px 0;
 }
 
-/* アンコール内の曲（赤ラインのみ、背景なし） */
 .setlist-encore {
   border-left-color: var(--aiko-red) !important;
   background-color: transparent !important;
@@ -201,7 +206,6 @@ nav > div {
   overflow-wrap: break-word;
 }
 
-/* タイムラインバー（楽曲詳細用） */
 .timeline-container {
   flex: 1;
   height: 30px;
@@ -265,7 +269,6 @@ nav > div {
   opacity: 1;
 }
 
-/* 軌跡（年表）グリッドレイアウト - Vol.3.0 新規 */
 .history-grid-container {
   display: flex;
   flex-direction: column;
@@ -284,12 +287,11 @@ nav > div {
 
 .history-row {
   display: grid;
-  grid-template-columns: 48px 1fr 1fr 1fr; /* 年月, LIVE, SINGLE, ALBUM */
-  min-height: 40px; /* 高さ圧縮 */
+  grid-template-columns: 48px 1fr 1fr 1fr;
+  min-height: 40px;
   border-bottom: 1px dashed #f1f5f9;
   position: relative;
 }
-/* 年変わりの境界線 */
 .history-row.year-start {
   border-top: 2px solid #cbd5e1;
   margin-top: -1px;
@@ -321,129 +323,74 @@ nav > div {
   justify-content: center;
   align-items: center;
   padding: 4px 2px;
-  overflow: hidden; /* コンテンツがはみ出ないように */
+  overflow: hidden;
 }
 .col-single, .col-album {
   border-left: 1px dashed #f1f5f9;
 }
 
-/* ツアー期間のライン */
-.tour-line {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  background-color: #fca5a5; /* 淡い赤 */
-  z-index: 0;
-}
-.tour-line.start {
-  top: 50%;
-  bottom: -1px; /* 隙間防止 */
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-.tour-line.middle {
-  top: -1px;
-  bottom: -1px;
-}
-.tour-line.end {
-  top: -1px;
-  height: 50%; /* 行の半分まで */
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-/* 単発または同月内完結のツアー */
-.tour-dot {
-  width: 10px;
-  height: 10px;
-  background-color: var(--aiko-red);
-  border-radius: 50%;
-  z-index: 1;
-  box-shadow: 0 0 0 2px white;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-/* イベントチップ（ラベル） */
-.event-chip {
-  font-size: 10px;
-  font-weight: bold;
-  padding: 2px 6px; /* 余白圧縮 */
-  border-radius: 6px;
-  text-align: center;
-  z-index: 2;
-  width: 92%;
-  max-width: 100%;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  line-height: 1.2;
-  margin-bottom: 2px;
-  cursor: default;
-}
-
-/* LIVEチップ: ツアーラインの上に乗る */
-.event-chip.live {
-  background-color: white;
-  color: #ef4444;
-  border: 1px solid #ef4444;
-  cursor: pointer; /* 詳細へ飛べる */
-    
-  /* LIVE名は省略設定 */
+.history-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.history-table th {
+  position: sticky;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #334155;
+  border-bottom: 2px solid var(--accent-light);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 12px 2px;
+  z-index: 20;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
+  text-align: center;
 }
-/* ライン上のチップは少し浮かせる */
-.tour-line + .event-chip.live {
-  margin-top: 0;
-}
+.history-table th:first-child { border-top-left-radius: 12px; }
+.history-table th:last-child { border-top-right-radius: 12px; }
 
-.event-chip.single {
-  background-color: #f0f9ff; /* 薄い青背景 */
-  color: #0284c7;
-  border: 1px solid #bae6fd;
-    
-  /* Singleは改行許可 */
-  white-space: normal;
-  height: auto;
+.history-table td {
+  padding: 10px 4px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 11px;
+  height: 44px;
   word-wrap: break-word;
+  background-color: white;
 }
-.event-chip.album {
-  background-color: #fefce8; /* 薄い黄背景 */
-  color: #854d0e;
-  border: 1px solid #fef08a;
-    
-  /* Albumも改行許可 */
-  white-space: normal;
-  height: auto;
-  word-wrap: break-word;
-}
+.history-table tr:last-child td:first-child { border-bottom-left-radius: 12px; }
+.history-table tr:last-child td:last-child { border-bottom-right-radius: 12px; }
+.history-table tr:nth-child(even) td { background-color: #fcfcfc; } 
 
-/* タップ操作を改善するためのCSS（ズーム防止・タップ遅延解消） */
+.lifestage-text { font-size: 10px; color: #64748b; font-weight: bold; text-align: center; display: block; }
+.lifestage-highlight { background-color: var(--accent-light); border-radius: 4px; padding: 2px 4px; color: var(--aiko-red); }
+
+.event-chip { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; margin-bottom: 3px; line-height: 1.3; border: 1px solid transparent; max-width: 100%; cursor: pointer; }
+.chip-live { background-color: #fef2f2; color: #ef4444; border-color: #fecaca; }
+.chip-single { background-color: #f0f9ff; color: #0284c7; border-color: #bae6fd; cursor: default; }
+.chip-album { background-color: #fefce8; color: #854d0e; border-color: #fef08a; cursor: default; }
+
 .tap-trigger {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
 }
 
-main { padding: 12px; } /* 余白圧縮 */
+main { padding: 12px; }
 body.detail-view main { padding-top: 16px; padding-bottom: 32px; }
 
 input, select { 
-    font-size: 14px !important; /* 文字サイズ調整 */
-    padding: 10px 12px !important; /* 余白圧縮 */
+    font-size: 14px !important;
+    padding: 10px 12px !important;
     border-radius: 12px !important; 
     border: 1px solid #cbd5e1 !important; background-color: #fff !important; 
 }
-button { font-size: 13px !important; } /* 文字サイズ調整 */
+button { font-size: 13px !important; }
 
 .clickable-item { cursor: pointer; transition: background-color 0.2s; }
 .clickable-item:hover { background-color: #f8fafc; }
 
 .action-btn {
-  padding: 8px 12px; /* 余白圧縮 */
+  padding: 8px 12px;
   border-radius: 10px;
   font-size: 12px;
   font-weight: bold;
@@ -461,14 +408,13 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
     position: sticky; top: 0px; background: #F8F9FA; z-index: 40; padding-top: 8px;
 }
 .venue-tab { 
-    flex: 1; padding: 10px; /* 余白圧縮 */
+    flex: 1; padding: 10px;
     text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; 
     color: #94a3b8; border-bottom: 2px solid transparent; 
     margin-bottom: -2px; transition: all 0.2s; 
 }
 .venue-tab.active { color: var(--aiko-red); border-bottom-color: var(--aiko-red); }
 
-/* トグルスイッチ用スタイル */
 .toggle-checkbox {
   position: absolute;
   opacity: 0;
@@ -476,8 +422,8 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
   height: 0;
 }
 .toggle-label {
-  width: 40px; /* サイズ圧縮 */
-  height: 22px; /* サイズ圧縮 */
+  width: 40px;
+  height: 22px;
   background-color: #e2e8f0;
   border-radius: 9999px;
   position: relative;
@@ -490,8 +436,8 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 18px; /* サイズ圧縮 */
-  height: 18px; /* サイズ圧縮 */
+  width: 18px;
+  height: 18px;
   background-color: white;
   border-radius: 50%;
   transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -501,18 +447,17 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
   background-color: var(--aiko-red);
 }
 .toggle-checkbox:checked + .toggle-label:before {
-  transform: translateX(18px); /* 位置調整 */
+  transform: translateX(18px);
 }
 
 .back-button-circle {
-  width: 44px; height: 44px; /* サイズ圧縮 */
+  width: 44px; height: 44px;
   border-radius: 50%; background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
   cursor: pointer; position: fixed; top: 16px; left: 16px; z-index: 1001; backdrop-filter: blur(4px); border: 1px solid #f1f5f9;
 }
 .back-button-circle svg { width: 22px; height: 22px; stroke: var(--aiko-red); stroke-width: 2.5; }
 
-/* モーダル */
 .modal-overlay { 
     position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); z-index: 2000; 
     display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); 
@@ -526,9 +471,8 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
     display: flex; align-items: center; justify-content: center; font-size: 18px; color: #64748b; cursor: pointer; 
 }
 
-/* ランキング */
 .rank-number { display: inline-block; min-width: 28px; text-align: right; margin-right: 10px; flex-shrink: 0; font-size: 16px; font-weight: 800; font-style: italic; }
-.song-title, .venue-name { flex: 1; word-break: break-word; font-size: 14px; font-weight: 700; line-height: 1.4; }
+.song-title, .venue-name { flex: 1; word-break: break-word; font-size: 16px; font-weight: 700; line-height: 1.4; }
 .song-count { white-space: nowrap; flex-shrink: 0; font-size: 15px; font-weight: bold; color: #64748b; }
 .song-count span { font-size: 10px; font-weight: normal; margin-left: 2px; }
 
@@ -561,7 +505,6 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
   pointer-events: none;
 }
 
-/* おみくじ回転アニメーション */
 .spin-once {
   animation: spin 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -570,7 +513,6 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
   100% { transform: rotate(360deg); }
 }
 
-/* ダルブルタップ用エフェクト */
 .tap-highlight {
     animation: highlight 0.3s ease-out;
 }
@@ -596,14 +538,13 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
     <div class="card-base bg-white border-0">
       <div class="flex gap-2 mb-2 items-center">
         <div class="relative flex-1">
-            <!-- 虫眼鏡アイコン削除 & 余白調整 -->
             <input type="text" id="search-input" placeholder="フリーワードで検索" class="w-full px-3 py-2 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-red-200 focus:border-red-400 transition">
         </div>
         <button id="clear-all-btn" class="action-btn clear-btn">クリア</button>
       </div>
 
       <div class="flex flex-col gap-2 mb-2">
-        <select id="tour-select" class="w-full text-gray-700 bg-gray-50 border-gray-200"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のライブ</option></select>
+        <select id="tour-select" class="w-full text-gray-700 bg-gray-50 border-gray-200"><option value="">すべてのライブ</option><option value="pop">Love Like Pop</option><option value="rock">Love Like Rock</option><option value="aloha">Love Like Aloha</option><option value="other">その他のEvent</option></select>
         <div class="flex gap-2">
           <select id="year-select" class="flex-1 text-gray-700 bg-gray-50 border-gray-200"><option value="">すべての年</option></select>
           <select id="region-select" class="flex-1 text-gray-700 bg-gray-50 border-gray-200"><option value="">すべての都道府県</option></select>
@@ -619,7 +560,6 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
       <h3 class="font-bold text-base flex items-center justify-center gap-2">
         <span id="omikuji-icon" class="inline-block text-lg">🎫</span>
         <span>
-          <!-- テキスト変更 -->
           <span id="display-count-text">表示中の公演数</span>: 
           <span id="display-count" class="text-lg text-aiko-red">0</span> / <span id="total-count">0</span>
         </span>
@@ -641,7 +581,6 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
     <div class="card-base bg-white border-0 mb-4">
       <div class="flex gap-2 mb-3 items-center">
         <div class="relative flex-1">
-            <!-- 音楽アイコン削除 & 余白調整 -->
             <input type="text" id="song-search-input" placeholder="楽曲名で検索" class="w-full px-3 bg-gray-50 border-gray-200">
         </div>
         <button id="song-clear-btn" class="action-btn clear-btn">クリア</button>
@@ -657,7 +596,6 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
 
     <div class="flex justify-between items-center mt-6 mb-3 px-1">
       <h3 id="song-ranking-header" class="font-bold text-gray-700 text-lg cursor-pointer select-none tap-trigger flex items-center gap-2">
-        <!-- ギターアイコンに変更 -->
         <span id="song-ranking-icon" class="inline-block">🎸</span> 演奏回数ランキング
       </h3>
       <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-full shadow-sm border border-gray-100">
@@ -683,7 +621,6 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
     <div class="card-base bg-white border-0 mb-0 rounded-b-none pb-4">
       <div class="flex gap-2 items-center">
         <div class="relative flex-1">
-            <!-- ピンアイコン削除 & 余白調整 -->
             <input type="text" id="venue-search-input" placeholder="会場 / 都道府県で検索" class="w-full px-3 bg-gray-50 border-gray-200">
         </div>
         <button id="venue-clear-btn" class="action-btn clear-btn">クリア</button>
@@ -721,17 +658,29 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
     <div id="last-songs" class="card-base bg-white p-2"></div></div>
   </div>
 
-  <!-- 軌跡タブ (メンテナンス中) -->
+  <!-- 軌跡タブ (Historyアプリ移植デザイン) -->
   <div id="tab-history" class="tab-content" style="display:none">
-    <div class="flex flex-col items-center justify-center h-[60vh] text-center p-6">
-      <div class="bg-gray-100 p-4 rounded-full mb-4">
-        <i data-lucide="wrench" class="w-8 h-8 text-gray-400"></i>
-      </div>
-      <h3 class="font-bold text-gray-700 text-lg mb-2">ただいまメンテナンス中です</h3>
-      <p class="text-sm text-gray-500 leading-relaxed">
-        軌跡データの表示を調整しています。<br>
-        復旧までしばらくお待ちください🙇
-      </p>
+    <div class="mb-3 px-1">
+      <h3 class="font-bold text-gray-700 text-base flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-aiko-red"></i> LIVE/CDタイムライン</h3>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th style="width: 15%;">年月</th>
+            <th style="width: 10%;">年齢</th>
+            <th style="width: 40%;">LIVE</th>
+            <th style="width: 35%;">CD</th>
+          </tr>
+        </thead>
+        <tbody id="timeline-body">
+          <!-- JSで自動生成 -->
+        </tbody>
+      </table>
+    </div>
+    <div class="text-center mt-6 mb-4 text-gray-400 text-xs tracking-widest">
+      <p>〜 FUTURE 〜</p>
     </div>
   </div>
 
@@ -789,7 +738,8 @@ button { font-size: 13px !important; } /* 文字サイズ調整 */
 <script>
 // GASのAPIエンドポイント
 const API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
-const CACHE_KEY = 'lldb_data_v4_0_update2';
+const CACHE_KEY = 'lldb_data_v4_1_update_history_v6'; // キャッシュキー変更
+const AIKO_BIRTH = new Date(1975, 10, 22); // 1975/11/22
 
 let appInitializedResolver;
 const appInitializedPromise = new Promise(resolve => {
@@ -1002,175 +952,124 @@ function formatTourName(name) {
   return n.trim();
 }
 
+// -----------------------------------------------------------
+// ライフステージ・年齢計算用関数 (from History App)
+// -----------------------------------------------------------
+function getLifeStage(targetDate, birth) {
+  // ライフステージ列削除に伴い未使用になりましたが、計算ロジック自体は保持
+  const getSchoolCohort = (d) => {
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    return (m <= 3 || (m === 4 && d.getDate() === 1)) ? y - 1 : y;
+  };
+  const getFiscalYear = (d) => {
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    return (m <= 3) ? y - 1 : y;
+  }
+  const birthYearCohort = getSchoolCohort(birth);
+  const targetYearFiscal = getFiscalYear(targetDate);
+  const grade = targetYearFiscal - birthYearCohort;
+  
+  if (grade < 7) return '未就学';
+  if (grade === 7) return '小学1年';
+  if (grade === 8) return '小学2年';
+  if (grade === 9) return '小学3年';
+  if (grade === 10) return '小学4年';
+  if (grade === 11) return '小学5年';
+  if (grade === 12) return '小学6年';
+  if (grade === 13) return '中学1年';
+  if (grade === 14) return '中学2年';
+  if (grade === 15) return '中学3年';
+  if (grade === 16) return '高校1年';
+  if (grade === 17) return '高校2年';
+  if (grade === 18) return '高校3年';
+  if (grade === 19) return '大学1年';
+  if (grade === 20) return '大学2年';
+  if (grade === 21) return '大学3年';
+  if (grade === 22) return '大学4年';
+  if (grade > 22) return 'aiko';
+  return '';
+}
+
 function renderHistoryTab() {
-    const container = document.getElementById('history-grid-container');
-    if (!container) return;
+    const tbody = document.getElementById('timeline-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
-    if (historyData.length === 0) return;
-
-    let minDate = new Date();
-    let maxDate = new Date(0);
-    const tourRanges = {}; 
-
-    historyData.forEach(event => {
-        if (!event.date) return;
-        const d = new Date(event.date);
-        if (d < minDate) minDate = d;
-        if (d > maxDate) maxDate = d;
-
-        if (event.type === 'live') {
-            const shortName = formatTourName(event.title);
-            const ym = `${d.getFullYear()}/${('0' + (d.getMonth() + 1)).slice(-2)}`;
-            
-            if (shortName.match(/^(Pop|Rock|Aloha)/)) {
-                if (!tourRanges[shortName]) {
-                    tourRanges[shortName] = { start: ym, end: ym };
-                } else {
-                    if (ym < tourRanges[shortName].start) tourRanges[shortName].start = ym;
-                    if (ym > tourRanges[shortName].end) tourRanges[shortName].end = ym;
-                }
-            }
-        }
-    });
-
-    const timelineData = {}; 
-    
-    let current = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
-
-    while (current <= end) {
-        const ym = `${current.getFullYear()}/${('0' + (current.getMonth() + 1)).slice(-2)}`;
-        timelineData[ym] = { live: [], single: [], album: [] };
-        current.setMonth(current.getMonth() + 1);
+    // データがない場合のフォールバック表示を追加
+    if (!historyData || historyData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-400 text-xs">データ読込中...<br>表示されない場合はリロードしてください</td></tr>';
+        return;
     }
 
-    historyData.forEach(event => {
-        if (!event.date) return;
-
-        if (event.title === '深夜2時「寒いね」って彼とスーパー行ったじゃん。') return;
-
-        let title = event.title;
-        if (event.type === 'album' && title.startsWith('まとめ')) {
-            title = 'まとめ';
+    // イベントマップの作成
+    const eventsMap = {}; 
+    historyData.forEach(row => {
+        if (!row.date) return;
+        const d = new Date(row.date);
+        const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+        if (!eventsMap[key]) eventsMap[key] = { lives: new Set(), singles: [], albums: [] };
+        
+        // パターンA: 新方式 (App_Live.gsで自動生成: type + title)
+        if (row.type) {
+            if (row.type === 'live') eventsMap[key].lives.add(formatTourName(row.title));
+            if (row.type === 'single') eventsMap[key].singles.push(row.title);
+            if (row.type === 'album') eventsMap[key].albums.push(row.title);
         }
-
-        const d = new Date(event.date);
-        const ym = `${d.getFullYear()}/${('0' + (d.getMonth() + 1)).slice(-2)}`;
-        if (timelineData[ym]) {
-            if (event.type === 'live') {
-                const tourId = formatTourName(event.title);
-                
-                let displayName = tourId;
-                const matchedRecord = allLiveRecords.find(r => r.tourName === event.title);
-                if (matchedRecord && matchedRecord.shortTourName) {
-                    displayName = matchedRecord.shortTourName;
-                }
-
-                if (!timelineData[ym].live.some(e => e.tourId === tourId)) {
-                    timelineData[ym].live.push({ 
-                        name: displayName, 
-                        tourId: tourId,       
-                        rawName: event.title,
-                        rawDate: event.date 
-                    });
-                }
-            } else if (event.type === 'single') {
-                timelineData[ym].single.push({ name: title, dateObj: d });
-            } else if (event.type === 'album') {
-                if (!timelineData[ym].album.some(a => a.name === title)) {
-                    timelineData[ym].album.push({ name: title });
-                }
-            }
+        // パターンB: 旧方式 (App_History.gs / history_年表シート: live, single, albumプロパティ)
+        // Historyアプリと同じデータを読み込む場合はこちらが使われる可能性があります
+        else {
+            if (row.live) eventsMap[key].lives.add(formatTourName(row.live));
+            if (row.single) eventsMap[key].singles.push(row.single);
+            if (row.album) eventsMap[key].albums.push(row.album);
         }
     });
 
-    let html = '';
-    const sortedKeys = Object.keys(timelineData).sort();
-    let lastYear = null;
+    // 表示開始：1996年8月 (インディーズ活動期)
+    // 計算基準：1975年 (aiko誕生日)
+    let current = new Date(1996, 7, 1);
+    const end = new Date(); // 現在まで
+    let prevYear = -1;
 
-    sortedKeys.forEach(ym => {
-        const [year, month] = ym.split('/');
-        const data = timelineData[ym];
+    while (current <= end) {
+        const y = current.getFullYear();
+        const m = current.getMonth() + 1;
+        const key = `${y}-${m}`;
         
-        let tourLineClass = '';
-        let activeTourId = null;
-
-        for (const [id, range] of Object.entries(tourRanges)) {
-            if (ym >= range.start && ym <= range.end) {
-                activeTourId = id;
-                if (range.start === range.end) {
-                    tourLineClass = 'dot'; 
-                } else if (ym === range.start) {
-                    tourLineClass = 'start';
-                } else if (ym === range.end) {
-                    tourLineClass = 'end';
-                } else {
-                    tourLineClass = 'middle';
-                }
-                break;
-            }
-        }
-
-        const rowClass = (year !== lastYear) ? 'year-start' : '';
-        const displayYear = (year !== lastYear) ? year : '';
-        lastYear = year;
-
+        // 年齢計算
+        let age = y - AIKO_BIRTH.getFullYear();
+        if (m < (AIKO_BIRTH.getMonth() + 1)) age--;
+        
         let liveHtml = '';
-        if (activeTourId && tourLineClass && tourLineClass !== 'dot') {
-            liveHtml += `<div class="tour-line ${tourLineClass}"></div>`;
-        }
+        let cdHtml = '';
         
-        if (data.live.length > 0) {
-            data.live.forEach(l => {
-                const isTourLive = activeTourId && l.tourId === activeTourId;
-                
-                if (!activeTourId && l.tourId.match(/^(Pop|Rock|Aloha)/)) {
-                      liveHtml += `<div class="tour-dot"></div>`;
-                }
-
-                const safeName = l.rawName.replace(/'/g, "\\'");
-                const safeDate = l.rawDate;
-                liveHtml += `<div class="event-chip live" onclick="findAndShowLive('${safeDate}', '${safeName}')">${l.name}</div>`;
+        if (eventsMap[key]) {
+            eventsMap[key].lives.forEach(liveName => { 
+                const safeName = liveName.replace(/'/g, "\\'");
+                // Live名をクリックしたら検索できるようにする
+                liveHtml += `<div class="event-chip chip-live" onclick="findAndShowLive('${y}/${m}/01', '${safeName}')">${liveName}</div>`; 
             });
+            eventsMap[key].singles.forEach(s => { cdHtml += `<div class="event-chip chip-single">S: ${s}</div>`; });
+            eventsMap[key].albums.forEach(a => { cdHtml += `<div class="event-chip chip-album">Al: ${a}</div>`; });
         }
 
-        let singleHtml = '';
-        if (data.single.length > 0) {
-            const groupedByDate = {};
-            data.single.forEach(s => {
-                const dateKey = s.dateObj.getDate(); 
-                if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
-                groupedByDate[dateKey].push(s.name);
-            });
-            
-            Object.keys(groupedByDate).sort((a,b) => a - b).forEach(d => {
-                 const combinedName = groupedByDate[d].join('/');
-                 singleHtml += `<div class="event-chip single">${combinedName}</div>`;
-            });
-        }
+        const yearDisplay = (y !== prevYear) ? `<span class="text-xs font-bold block text-gray-500">${y}</span>` : '';
+        prevYear = y;
 
-        let albumHtml = data.album.map(a => `<div class="event-chip album">${a.name}</div>`).join('');
-
-        html += `
-        <div class="history-row ${rowClass}">
-            <div class="col-date">
-                ${displayYear ? `<span class="year">${displayYear}</span>` : ''}
-                <span class="month">${Number(month)}月</span>
-            </div>
-            <div class="col-live">
-                ${liveHtml}
-            </div>
-            <div class="col-single">
-                ${singleHtml}
-            </div>
-            <div class="col-album">
-                ${albumHtml}
-            </div>
-        </div>
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="text-center text-gray-400 font-mono border-r border-gray-100">
+                ${yearDisplay}
+                <span class="text-[10px] text-gray-300">${m}月</span>
+            </td>
+            <td class="text-center font-bold text-aiko-red border-r border-gray-100">${age >= 0 ? age : ''}</td>
+            <td class="pl-1">${liveHtml}</td>
+            <td class="pl-1">${cdHtml}</td>
         `;
-    });
-
-    container.innerHTML = html;
+        tbody.appendChild(tr);
+        current.setMonth(current.getMonth() + 1);
+    }
 }
 
 window.findAndShowLive = function(dateStr, tourName) {
@@ -1338,7 +1237,7 @@ function showOmikujiResult(rec) {
     });
 
     const tourNameLower = rec.tourName.toLowerCase();
-    let labelType = 'other', labelText = 'その他';
+    let labelType = 'other', labelText = 'Event';
     if (tourNameLower.includes('love like pop')) { labelType = 'pop'; labelText = 'POP'; }
     else if (tourNameLower.includes('love like rock')) { labelType = 'rock'; labelText = 'ROCK'; }
     else if (tourNameLower.includes('love like aloha')) { labelType = 'aloha'; labelText = 'ALOHA'; }
@@ -1866,7 +1765,25 @@ function populateFilters(records, skipApply = false) {
   };
 
   createOptions(yearSelect, yearSelect.value, Array.from(years).sort((a, b) => b - a), '年');
-  createOptions(regionSelect, regionSelect.value, Array.from(regions).sort(), '都道府県');
+  // 都道府県リストを北海道〜沖縄順にソートして表示
+  const prefectureOrder = [
+    "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
+    "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県",
+    "新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県",
+    "静岡県", "愛知県", "三重県", "滋賀県", "京都府", "大阪府", "兵庫県",
+    "奈良県", "和歌山県", "鳥取県", "島根県", "岡山県", "広島県", "山口県",
+    "徳島県", "香川県", "愛媛県", "高知県", "福岡県", "佐賀県", "長崎県",
+    "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県", "オンライン"
+  ];
+
+  createOptions(regionSelect, regionSelect.value, Array.from(regions).sort((a, b) => {
+      let ia = prefectureOrder.indexOf(a);
+      let ib = prefectureOrder.indexOf(b);
+      // リストにないものは末尾へ
+      if (ia === -1) ia = 999;
+      if (ib === -1) ib = 999;
+      return ia - ib;
+  }), '都道府県');
   if (!skipApply) applyFilters();
 }
 
@@ -1984,7 +1901,7 @@ function renderLiveList(records) {
 
   records.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(rec => {
     const tourNameLower = rec.tourName.toLowerCase();
-    let labelType = 'other', labelText = 'その他';
+    let labelType = 'other', labelText = 'Event';
     if (tourNameLower.includes('love like pop')) { labelType = 'pop'; labelText = 'POP'; }
     else if (tourNameLower.includes('love like rock')) { labelType = 'rock'; labelText = 'ROCK'; }
     else if (tourNameLower.includes('love like aloha')) { labelType = 'aloha'; labelText = 'ALOHA'; }
@@ -2168,7 +2085,7 @@ function showLiveDetail(rec) {
     : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed bg-white">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
 
   detailContainer.innerHTML = `
-    <div id="detail-header-area" class="pt-2 -mt-2 cursor-pointer">
+    <div id="detail-header-area" class="pt-2 -mt-2 cursor-pointer pl-[70px]">
       <h2 class="font-extrabold mb-2 text-aiko-pink text-2xl leading-tight">${rec.tourName}</h2>
     </div>
     <div class="card-base mb-6 bg-white">
