@@ -344,7 +344,8 @@
         }
         // --- 追加機能: ヘッダータップでスクロールトップ ---
         document.addEventListener('DOMContentLoaded', () => {
-            // ★自動キャッシュクリア: バージョンが変わっていたらStorageをクリア
+            // ★順序変更: バージョンチェックを最優先に実行
+            // これにより、iframeの読み込み開始前に確実にキャッシュ状態を整えます
             const savedVer = localStorage.getItem('lldb_version');
             if (savedVer !== APP_VERSION) {
                 localStorage.clear();
