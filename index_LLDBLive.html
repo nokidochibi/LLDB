@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -520,6 +521,28 @@ button { font-size: 13px !important; }
     0% { transform: scale(1); }
     50% { transform: scale(1.05); color: var(--aiko-red); }
     100% { transform: scale(1); }
+} 
+
+/* Loading Placeholder */
+.loading-placeholder {
+    animation: pulse-bg 1.5s infinite;
+    background-color: #f3f4f6;
+    height: 80px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center; /* テキスト自体を中央揃え */
+    padding: 0 16px;    /* 左右に余白を持たせて窮屈さを防ぐ */
+    color: #cbd5e1;
+    font-weight: bold;
+    font-size: 14px;
+}
+@keyframes pulse-bg {
+    0% { background-color: #f3f4f6; }
+    50% { background-color: #e5e7eb; }
+    100% { background-color: #f3f4f6; }
 }
 </style>
 </head>
@@ -566,7 +589,12 @@ button { font-size: 13px !important; }
       </h3>
     </div>
 
-    <div id="live-list-container" class="space-y-3"></div>
+    <div id="live-list-container" class="space-y-3">
+        <!-- 初期プレースホルダー -->
+        <div class="loading-placeholder">今日も</div>
+        <div class="loading-placeholder">都合よく</div>
+        <div class="loading-placeholder">生きる</div>
+    </div>
   </div>
 
   <!-- 楽曲タブ -->
@@ -837,20 +865,9 @@ function saveToCache(data) {
   }
 }
 
-async function loadAllData(isAlreadyDisplayed) {
-  // キャッシュ読み込み済みの場合は、初期化Promiseを即解決
-  if (isAlreadyDisplayed) {
-      try {
-          const cached = localStorage.getItem(CACHE_KEY);
-          if (cached) {
-              const data = JSON.parse(cached);
-              initializeApp(data);
-              appInitializedResolver();
-          }
-      } catch(e) { console.error(e); }
-  }
-
-  // バックグラウンドまたは初回データ取得
+// 修正後: Promise制御を削除し、純粋なデータ取得のみを行う関数にします
+async function loadAllData() {
+  // バックグラウンドデータ取得
   try {
     const response = await fetch(`${API_URL}?action=getAllData`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -861,38 +878,36 @@ async function loadAllData(isAlreadyDisplayed) {
     }
 
     saveToCache(data);
+    initializeApp(data);
 
-    // まだ表示していなければ初期化
-    if (!isAlreadyDisplayed) {
-        initializeApp(data);
-        appInitializedResolver();
-    }
   } catch (error) {
-    if (!isAlreadyDisplayed) {
       handleError(error); 
-      // エラーでも解決しないとローディングが終わらない
-      appInitializedResolver();
-    } else {
-      console.log("Background update failed, keeping cached data.");
-    }
   }
 }
 
+// ▼▼▼ 変更箇所: 関数全体を差し替え（見切り発車ロジック追加） ▼▼▼
 function startLoadingAnimation(mode) {
-  const loadingTexts = (mode === 'fast') 
-    ? [{ id: 'loading-text-1', delay: 0 }, { id: 'loading-text-2', delay: 500 }, { id: 'loading-text-3', delay: 1000 }, { id: 'loading-text-4', delay: 1500 }, { id: 'loading-text-5', delay: 2000 }]
-    : [{ id: 'loading-text-1', delay: 100 }, { id: 'loading-text-2', delay: 900 }, { id: 'loading-text-3', delay: 1700 }, { id: 'loading-text-4', delay: 2500 }, { id: 'loading-text-5', delay: 3000 }];
+  // 'smart' (キャッシュあり): 1.2秒程度で完了する高速版
+  // 'normal' (キャッシュなし): 3.8秒程度のリズム重視版
   
-  loadingTexts.forEach(item => {
+  const delays = (mode === 'smart') 
+    // Smart: 全体で1200ms程度
+    ? [{ id: 'loading-text-1', delay: 0 }, { id: 'loading-text-2', delay: 200 }, { id: 'loading-text-3', delay: 400 }, { id: 'loading-text-4', delay: 600 }, { id: 'loading-text-5', delay: 800 }]
+    // Normal: 全体で3000ms程度
+    : [{ id: 'loading-text-1', delay: 1000 }, { id: 'loading-text-2', delay: 1900 }, { id: 'loading-text-3', delay: 2800 }, { id: 'loading-text-4', delay: 3800 }, { id: 'loading-text-5', delay: 4600 }];
+  
+  delays.forEach(item => {
     setTimeout(() => {
       const element = document.getElementById(item.id);
       if (element) element.classList.remove('opacity-0');
     }, item.delay);
   });
 
+  // アニメーション完了予定時間に合わせて画面を開放（見切り発車）
+  // データが未到着でも、HTML側で用意した「歌詞フレーズ」が表示される
   setTimeout(() => {
-    animationFinishedResolver();
-  }, (mode === 'fast' ? 2500 : 3800));
+    finishLoading();
+  }, (mode === 'smart' ? 1200 : 5500));
 }
 
 function finishLoading() {
