@@ -752,6 +752,26 @@ const animationFinishedPromise = new Promise(resolve => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    // アプリのバージョン定数（ここを更新するだけで全ユーザーに強制リロードがかかります）
+    const CURRENT_VERSION = 'v4.1'; 
+    const VERSION_KEY = 'lldb_installed_version';
+    
+    // 保存されているバージョンを確認
+    const savedVersion = localStorage.getItem(VERSION_KEY);
+
+    // バージョンが違う（古い、または初回）場合
+    if (savedVersion !== CURRENT_VERSION) {
+        console.log(`Version Updated: ${savedVersion} -> ${CURRENT_VERSION}`);
+        
+        // 1. 古いキャッシュを一掃する
+        localStorage.clear();
+        
+        // 2. 新しいバージョン情報を保存する
+        localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+        
+        // ※これでキャッシュが無い状態になるため、この下の処理で
+        // 自動的に「データ取得(長ロード)」へと分岐します。
+    }
   // まずキャッシュがあるか確認 (try-catchで安全に)
   let isCachedLoaded = false;
   try {
