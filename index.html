@@ -62,7 +62,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v4.1"; /* Major Update for Renewal */
+        const APP_VERSION = "v4.2"; /* Major Update for Renewal */
     </script>
 </head>
 <body class="bg-gray-50">
@@ -160,17 +160,26 @@
             <div class="noren-item bg-gray-50/50" onclick="openAboutModal()">
                 <div class="noren-icon bg-gray-400"><i data-lucide="info" class="w-6 h-6"></i></div>
                 <div class="flex-1">
-                    <div class="font-bold text-gray-600 text-lg">About</div>
-                    <div class="text-xs text-gray-400 mt-0.5">このアプリについて</div>
-                </div>
-                <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+                <div class="font-bold text-gray-600 text-lg">About</div>
+              <div class="text-xs text-gray-400 mt-0.5">このアプリについて</div>
             </div>
-        </div>
-        
-        <div class="py-4 flex justify-center cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition rounded-b-[24px]" onclick="toggleNoren()">
-            <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-        </div>
+            <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+          </div>
+    
+    <div class="noren-item bg-gray-50/50" onclick="forceReloadApp()">
+            <div class="noren-icon bg-gray-600"><i data-lucide="refresh-cw" class="w-6 h-6"></i></div>
+            <div class="flex-1">
+              <div class="font-bold text-gray-600 text-lg">Reload</div>
+              <div class="text-xs text-gray-400 mt-0.5">強制再起動（挙動が変なとき）</div>
+            </div>
+            <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+          </div>
     </div>
+
+    <div class="py-4 flex justify-center cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition rounded-b-[24px]" onclick="toggleNoren()">
+      <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+    </div>
+  </div>
 
     <!-- 共通ヘッダー -->
     <header id="main-app-header" class="bg-[#E63946] text-white transition-colors duration-300">
@@ -188,7 +197,7 @@
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="text-center mb-6">
                 <h2 class="font-bold text-xl text-gray-800">Love Like DataBase</h2>
-                <p class="text-xs text-gray-400 font-mono mt-1">Ver 4.1</p>
+                <p id="about-version-display" class="text-xs text-gray-400 font-mono mt-1"></p>
             </div>
             
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
@@ -215,28 +224,28 @@
            ========================================================================== -->
     <div id="app-live" class="app-screen active">
         <!-- Liveアプリは独自のUI/UXを持つため全画面表示 -->
-        <iframe src="./index_LLDBLive.html?v=4.1" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBLive.html" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
            【3. APP: LLDB Trends】
            ========================================================================== -->
     <div id="app-trends" class="app-screen">
-        <iframe src="./index_LLDBTrends.html?v=4.1" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBTrends.html" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
            【4. APP: LLDB Song Helper】
            ========================================================================== -->
     <div id="app-songHelper" class="app-screen">
-        <iframe src="./index_LLDBSongHelper.html?v=4.1" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBSongHelper.html" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
            【5. APP: LLDB History】
            ========================================================================== -->
     <div id="app-history" class="app-screen">
-        <iframe src="./index_LLDBHistory.html?v=4.1" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBHistory.html" class="w-full h-full border-none"></iframe>
     </div>
 
 
@@ -246,7 +255,7 @@
     <script>
         // アプリ定義 (タイトル更新)
         const apps = {
-            'live': { title: 'Love Like DataBase vol.4.1', color: 'bg-[#E63946]' }, /* Red */
+            'live': { title: `Love Like DataBase ${APP_VERSION}`, color: 'bg-[#E63946]' }, /* Red */
             'trends': { title: 'LLDB Trends', color: 'bg-[#1D3557]' },       /* Navy */
             'songHelper': { title: 'LLDB Song Helper', color: 'bg-[#F4A261]' }, /* Orange */
             'history': { title: 'LLDB History', color: 'bg-[#2A9D8F]' }       /* Teal */
@@ -322,9 +331,36 @@
             const modal = document.getElementById('about-modal');
             modal.classList.remove('open');
         }
-
+// 強制再起動機能
+        function forceReloadApp() {
+          if (!confirm('キャッシュを削除してアプリを再起動しますか？\n（表示がおかしい時などにお使いください）')) return;
+          
+          toggleNoren(); // 暖簾を閉じる
+          localStorage.clear(); // キャッシュ削除
+    
+          setTimeout(() => {
+            window.location.reload(); // ページリロード -> 長いローディング発動
+          }, 300);
+        }
         // --- 追加機能: ヘッダータップでスクロールトップ ---
         document.addEventListener('DOMContentLoaded', () => {
+            // ★自動キャッシュクリア: バージョンが変わっていたらStorageをクリア
+            const savedVer = localStorage.getItem('lldb_version');
+            if (savedVer !== APP_VERSION) {
+                localStorage.clear();
+                localStorage.setItem('lldb_version', APP_VERSION);
+                console.log(`Version updated to ${APP_VERSION}. Cache cleared.`);
+            }
+
+            // バージョン番号の一括反映処理
+            document.querySelectorAll('iframe').forEach(iframe => {
+                const currentSrc = iframe.getAttribute('src');
+                const separator = currentSrc.includes('?') ? '&' : '?';
+                iframe.setAttribute('src', `${currentSrc}${separator}v=${APP_VERSION}`);
+            });
+            const aboutVerEl = document.getElementById('about-version-display');
+            if(aboutVerEl) aboutVerEl.textContent = APP_VERSION;
+
             lucide.createIcons();
             // デフォルトアプリ: LLDB Live
             switchApp('live');
