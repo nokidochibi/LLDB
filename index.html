@@ -62,7 +62,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v4.2"; /* Major Update for Renewal */
+        const APP_VERSION = "v4.2.1"; /* Major Update for Renewal */
     </script>
 </head>
 <body class="bg-gray-50">
@@ -253,9 +253,22 @@
            【6. ROUTING】 共通ルーティング制御
            ========================================================================== -->
     <script>
+        // ▼ バージョン文字列の整形ロジック (New) ▼
+        // 1. "vX.X.X" から "X.X.X" を抽出
+        const versionNum = APP_VERSION.replace('v', '');
+        const versionParts = versionNum.split('.');
+        
+        // 2. ヘッダー用: 2桁表示 & vol. 表記 (例: vol.4.2)
+        const headerVersion = `vol.${versionParts[0]}.${versionParts[1]}`;
+
+        // 3. About用: 3桁表示 & vol. 表記 (例: vol.4.2.1)
+        const aboutVersion = `vol.${versionNum}`;
+
+
         // アプリ定義 (タイトル更新)
         const apps = {
-            'live': { title: `Love Like DataBase ${APP_VERSION}`, color: 'bg-[#E63946]' }, /* Red */
+            // ヘッダータイトルには2桁の headerVersion を使用
+            'live': { title: `Love Like DataBase ${headerVersion}`, color: 'bg-[#E63946]' }, /* Red */
             'trends': { title: 'LLDB Trends', color: 'bg-[#1D3557]' },       /* Navy */
             'songHelper': { title: 'LLDB Song Helper', color: 'bg-[#F4A261]' }, /* Orange */
             'history': { title: 'LLDB History', color: 'bg-[#2A9D8F]' }       /* Teal */
@@ -359,8 +372,9 @@
                 const separator = currentSrc.includes('?') ? '&' : '?';
                 iframe.setAttribute('src', `${currentSrc}${separator}v=${APP_VERSION}`);
             });
+            
             const aboutVerEl = document.getElementById('about-version-display');
-            if(aboutVerEl) aboutVerEl.textContent = APP_VERSION;
+            if(aboutVerEl) aboutVerEl.textContent = aboutVersion;
 
             lucide.createIcons();
             // デフォルトアプリ: LLDB Live
