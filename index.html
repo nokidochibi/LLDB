@@ -62,7 +62,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v4.0"; /* Major Update for Renewal */
+        const APP_VERSION = "v4.1"; /* Major Update for Renewal */
     </script>
 </head>
 <body class="bg-gray-50">
@@ -95,6 +95,8 @@
             position: fixed; top: 0; z-index: 60;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: all 0.3s;
+            /* タップ可能であることを示唆 */
+            cursor: pointer; 
         }
 
         .flower-icon {
@@ -173,7 +175,7 @@
     <!-- 共通ヘッダー -->
     <header id="main-app-header" class="bg-[#E63946] text-white transition-colors duration-300">
         <!-- Live App Header as Default -->
-        <h1 class="font-black text-[22px] tracking-wide flex-1 truncate pr-2" id="header-title">Love Like DataBase vol.4.0</h1>
+        <h1 class="font-black text-[22px] tracking-wide flex-1 truncate pr-2" id="header-title">Love Like DataBase vol.4.1</h1>
         
         <!-- 🌸 Menu Button -->
         <button id="header-menu-btn" onclick="toggleNoren()" class="p-2 rounded-full hover:bg-white/20 transition active:scale-90 flex items-center justify-center w-10 h-10">
@@ -186,7 +188,7 @@
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="text-center mb-6">
                 <h2 class="font-bold text-xl text-gray-800">Love Like DataBase</h2>
-                <p class="text-xs text-gray-400 font-mono mt-1">Ver 4.0</p>
+                <p class="text-xs text-gray-400 font-mono mt-1">Ver 4.1</p>
             </div>
             
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
@@ -213,28 +215,28 @@
            ========================================================================== -->
     <div id="app-live" class="app-screen active">
         <!-- Liveアプリは独自のUI/UXを持つため全画面表示 -->
-        <iframe src="./index_LLDBLive.html?v=4.0" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBLive.html?v=4.1" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
            【3. APP: LLDB Trends】
            ========================================================================== -->
     <div id="app-trends" class="app-screen">
-        <iframe src="./index_LLDBTrends.html?v=4.0" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBTrends.html?v=4.1" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
            【4. APP: LLDB Song Helper】
            ========================================================================== -->
     <div id="app-songHelper" class="app-screen">
-        <iframe src="./index_LLDBSongHelper.html?v=4.0" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBSongHelper.html?v=4.1" class="w-full h-full border-none"></iframe>
     </div>
 
     <!-- ==========================================================================
            【5. APP: LLDB History】
            ========================================================================== -->
     <div id="app-history" class="app-screen">
-        <iframe src="./index_LLDBHistory.html?v=4.0" class="w-full h-full border-none"></iframe>
+        <iframe src="./index_LLDBHistory.html?v=4.1" class="w-full h-full border-none"></iframe>
     </div>
 
 
@@ -244,7 +246,7 @@
     <script>
         // アプリ定義 (タイトル更新)
         const apps = {
-            'live': { title: 'Love Like DataBase vol.4.0', color: 'bg-[#E63946]' }, /* Red */
+            'live': { title: 'Love Like DataBase vol.4.1', color: 'bg-[#E63946]' }, /* Red */
             'trends': { title: 'LLDB Trends', color: 'bg-[#1D3557]' },       /* Navy */
             'songHelper': { title: 'LLDB Song Helper', color: 'bg-[#F4A261]' }, /* Orange */
             'history': { title: 'LLDB History', color: 'bg-[#2A9D8F]' }       /* Teal */
@@ -321,11 +323,54 @@
             modal.classList.remove('open');
         }
 
-        // 初期化
+        // --- 追加機能: ヘッダータップでスクロールトップ ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             // デフォルトアプリ: LLDB Live
             switchApp('live');
+
+            const header = document.getElementById('main-app-header');
+            if(header) {
+                header.addEventListener('click', (e) => {
+                    // メニューボタン(🌸)のクリックは除外
+                    if (e.target.closest('#header-menu-btn')) return;
+
+                    const activeScreen = document.querySelector('.app-screen.active');
+                    if (!activeScreen) return;
+
+                    // 1. Hub自体のコンテナをスクロール
+                    activeScreen.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    // 2. iframe内のコンテンツをスクロール
+                    const iframe = activeScreen.querySelector('iframe');
+                    if (iframe && iframe.contentWindow) {
+                        try {
+                            const doc = iframe.contentDocument || iframe.contentWindow.document;
+                            
+                            // 標準的なウィンドウ/ボディのスクロール
+                            iframe.contentWindow.scrollTo({ top: 0, behavior: 'smooth' });
+                            doc.body.scrollTo({ top: 0, behavior: 'smooth' });
+                            doc.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+
+                            // LLDB Live用 (.mobile-frame)
+                            const mobileFrame = doc.querySelector('.mobile-frame');
+                            if (mobileFrame) mobileFrame.scrollTo({ top: 0, behavior: 'smooth' });
+
+                            // LLDB Song Helper用 (表示中のチャットコンテナ)
+                            const chatContainers = doc.querySelectorAll('main[id^="chat-container-"]');
+                            chatContainers.forEach(el => {
+                                // hiddenクラスがない(=表示されている)コンテナをスクロール
+                                if (!el.classList.contains('hidden')) {
+                                    el.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            });
+
+                        } catch(err) {
+                            console.log("Scroll interaction failed (likely cross-origin restriction if deployed differently):", err);
+                        }
+                    }
+                });
+            }
         });
     </script>
 
