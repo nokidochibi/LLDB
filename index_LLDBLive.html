@@ -2555,6 +2555,15 @@ function safeTrackEvent(eventName, params) {
     console.warn('GA4 Tracking Error:', e);
   }
 }
+// 親画面からの検索指示を受け取って実行する
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'execLiveSearch') {
+    if (typeof window.findAndShowLive === 'function') {
+      // 既存の検索連携関数を利用（日付は空、ツアー名のみ指定）
+      window.findAndShowLive('', event.data.tourName);
+    }
+  }
+});
 </script>
 </body>
 </html>
