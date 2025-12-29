@@ -845,7 +845,7 @@
                     let emoji = '';
                     if (h.key === 'avgDailyViews' && num === maxDaily && num > 0) emoji = '👑';
                     if (h.key === 'avgViews7Days' && num === max7Days && num > 0) emoji = '🔥';
-                    if (val === "(集計中)") {
+                    if (val === "(集計中)" || (h.key === 'avgViews7Days' && num === 0)) {
                         td.innerHTML = `<span style="font-size:0.8em; color:#94a3b8;">(集計中)</span>`;
                     } else {
                         td.innerHTML = `<div class="emoji-number-container">${emoji ? `<div class="emoji">${emoji}</div>` : ''}<span class="number-value">${Math.round(num).toLocaleString()}</span></div>`;
