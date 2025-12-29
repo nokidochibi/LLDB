@@ -389,6 +389,13 @@
             const targetTab = currentTabEl ? currentTabEl.dataset.tab : 'history';
             switchTab(targetTab);
         }
+        // 親画面へライブ検索のリクエストを送信する
+        function requestSearchInLive(tourName) {
+          window.parent.postMessage({
+            type: 'requestLiveSearch',
+            tourName: tourName
+          }, '*');
+        }
 
         // --- 年齢詳細計算ロジック (New) ---
         function calculateDetailedAge(birthDate, targetDate) {
@@ -492,7 +499,10 @@
                 let cdHtml = '';
                 
                 if (eventsMap[key]) {
-                    eventsMap[key].lives.forEach(liveName => { liveHtml += `<div class="event-chip chip-live">${liveName}</div>`; });
+                    eventsMap[key].lives.forEach(liveName => { 
+                          const safeName = liveName.replace(/'/g, "\\'");
+                          liveHtml += `<div class="event-chip chip-live cursor-pointer active:scale-95 transition-transform" onclick="requestSearchInLive('${safeName}')">${liveName}</div>`; 
+                        });
                     eventsMap[key].singles.forEach(s => { cdHtml += `<div class="event-chip chip-single">S: ${s}</div>`; });
                     eventsMap[key].albums.forEach(a => { cdHtml += `<div class="event-chip chip-album">Al: ${a}</div>`; });
                 }
