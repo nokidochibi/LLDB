@@ -372,6 +372,25 @@
                 });
             }
         });
+    // 子iframeからのメッセージを待ち受け、Liveアプリへ橋渡しする
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'requestLiveSearch') {
+        // 1. まず親側でアプリをLiveに切り替える
+        switchApp('live'); 
+        
+        // 2. Liveアプリのiframeへ検索指示を転送する
+        const liveIframe = document.querySelector('#app-live iframe');
+        if (liveIframe && liveIframe.contentWindow) {
+          // 切り替えアニメーション等を考慮し、100ms待ってから送信
+          setTimeout(() => {
+            liveIframe.contentWindow.postMessage({
+              type: 'execLiveSearch',
+              tourName: event.data.tourName
+            }, '*');
+          }, 100);
+        }
+      }
+    });
     </script>
 
 </body>
