@@ -62,7 +62,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v4.2.2"; /* Major Update for Renewal */
+        const APP_VERSION = "v4.3.0"; /* Major Update for Renewal */
     </script>
 </head>
 <body class="bg-gray-50">
@@ -74,6 +74,10 @@
         /* 暖簾メニュー & ヘッダー用スタイル */
         #noren-menu {
             position: fixed; top: 60px; left: 0; width: 100%;
+            max-height: calc(100vh - 80px); /* 画面下端に少し余裕を持たせる */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* iOSでの慣性スクロール */
+
             background-color: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1); z-index: 50;
             transform: translateY(-120%); 
@@ -155,13 +159,23 @@
                 </div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
-            
+ 
+        <!-- ★追加機能: セトリ投稿フォーム -->
+        <div class="noren-item bg-gray-50/50" onclick="openSetlistForm()">
+            <div class="noren-icon bg-blue-500"><i data-lucide="send" class="w-6 h-6"></i></div>
+            <div class="flex-1">
+                <div class="font-bold text-gray-600 text-lg">セトリ投稿</div>
+                <div class="text-xs text-gray-400 mt-0.5">セトリの情報提供の協力（遠慮せず！）</div>
+            </div>
+            <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
+        </div>
+           
             <!-- About Menu -->
             <div class="noren-item bg-gray-50/50" onclick="openAboutModal()">
                 <div class="noren-icon bg-gray-400"><i data-lucide="info" class="w-6 h-6"></i></div>
                 <div class="flex-1">
-                <div class="font-bold text-gray-600 text-lg">About</div>
-              <div class="text-xs text-gray-400 mt-0.5">このアプリについて</div>
+                <div class="font-bold text-gray-600 text-lg">このアプリについて</div>
+              <div class="text-xs text-gray-400 mt-0.5">アプリの説明 / 開発者情報</div>
             </div>
             <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
           </div>
@@ -169,7 +183,7 @@
     <div class="noren-item bg-gray-50/50" onclick="forceReloadApp()">
             <div class="noren-icon bg-gray-600"><i data-lucide="refresh-cw" class="w-6 h-6"></i></div>
             <div class="flex-1">
-              <div class="font-bold text-gray-600 text-lg">Reload</div>
+              <div class="font-bold text-gray-600 text-lg">最新版を読み込み</div>
               <div class="text-xs text-gray-400 mt-0.5">強制再起動（挙動が変なとき）</div>
             </div>
             <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
@@ -344,6 +358,18 @@
             const modal = document.getElementById('about-modal');
             modal.classList.remove('open');
         }
+
+        // ★追加機能: セトリ投稿フォームへの遷移処理
+        function openSetlistForm() {
+            // ダイアログで確認
+            if (confirm('セトリ投稿フォームに移動しますか？')) {
+                // 暖簾メニューを閉じる
+                toggleNoren();
+                // 外部サイトへ遷移
+                window.location.href = 'https://nokidochibi.github.io/LLDB_SetoriForm/';
+            }
+        }
+
 // 強制再起動機能
         function forceReloadApp() {
           if (!confirm('キャッシュを削除してアプリを再起動しますか？\n（表示がおかしい時などにお使いください）')) return;
