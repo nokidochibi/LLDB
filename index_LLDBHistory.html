@@ -162,6 +162,117 @@
             border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
             backdrop-filter: blur(2px);
         }
+/* ---------------------------------------------------------
+           ★NEW: マップ（グリッド）機能用のスタイル追加
+           --------------------------------------------------------- */
+        :root {
+            /* 既存変数に追加 */
+            --cell-gap: 2px;
+            --border-album: #FF69B4; /* aiko Pink */
+            --border-single: #F97316; /* Orange-500 */
+            --border-other: #94A3B8; /* Slate-400 */
+        }
+
+        .disco-grid {
+            display: grid;
+            grid-template-columns: 36px repeat(12, 1fr);
+            gap: var(--cell-gap);
+            width: 100%;
+            padding: 0 4px;
+        }
+        .header-row {
+            position: sticky; top: 0; z-index: 30;
+            background-color: rgba(248, 249, 250, 0.95);
+            backdrop-filter: blur(4px);
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px; padding-top: 2px;
+            margin-bottom: 4px;
+        }
+        .header-cell { 
+            text-align: center; font-size: 9px; font-weight: bold; color: #94a3b8; 
+            height: 32px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 2px;
+        }
+        .birth-cake { font-size: 10px; margin-bottom: -2px; display: block; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+
+        .year-cell {
+            font-size: 10px; font-weight: 900; color: #cbd5e1;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            line-height: 1;
+            writing-mode: horizontal-tb; 
+            transform: none;
+        }
+        .year-label { display: block; }
+        .age-label { 
+            font-size: 8px; color: var(--accent-color); margin-top: 1px; 
+            font-weight: bold; opacity: 0.8; white-space: nowrap; transform: scale(0.9);
+        }
+
+        .jacket-cell {
+            aspect-ratio: 1 / 1; background-color: #e2e8f0; border-radius: 3px;
+            position: relative; overflow: hidden; transition: transform 0.1s;
+        }
+        .jacket-cell:active { transform: scale(0.9); }
+        
+        .jacket-img-base {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            box-sizing: border-box;
+        }
+
+        /* 枠線スタイル */
+        .border-album { border: 2px solid var(--border-album); }
+        .border-single { border: 2px solid var(--border-single); }
+        .border-other { border: 2px solid var(--border-other); }
+
+        /* 重ね合わせスタイル */
+.stacked-1 {
+    position: absolute; top: 2px; left: 2px; /* 少し内側に配置 */
+    width: 60%; height: 60%; z-index: 1;     /* サイズを縮小 */
+    border-radius: 2px;
+}
+.stacked-2 {
+    position: absolute; bottom: 2px; right: 2px; /* 少し内側に配置 */
+    width: 60%; height: 60%; z-index: 2;         /* サイズを縮小 */
+    border-radius: 2px;
+    box-shadow: -1px -1px 2px rgba(0,0,0,0.2);
+}
+
+        /* 季節の背景色 */
+        .season-winter { background-color: #eff6ff; }
+        .season-spring { background-color: #fff1f2; }
+        .season-summer { background-color: #ecfeff; }
+        .season-autumn { background-color: #fff7ed; }
+
+        /* 季節の絵文字（透かし） */
+        .empty-cell {
+            border-radius: 2px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .empty-cell::after {
+            font-size: 14px; opacity: 0.15; pointer-events: none; filter: grayscale(30%);
+        }
+        .empty-cell.season-winter::after { content: '❄️'; }
+        .empty-cell.season-spring::after { content: '🌸'; }
+        .empty-cell.season-summer::after { content: '🌻'; }
+        .empty-cell.season-autumn::after { content: '🍁'; }
+
+        .future-cell { border: 1px dashed rgba(0,0,0,0.05); }
+        .birth-month-header { color: var(--accent-color); font-weight: 900; }
+
+        /* モーダル拡張 */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+            opacity: 0; transition: opacity 0.2s; padding: 16px;
+        }
+        .modal-overlay.open { display: flex; opacity: 1; }
+        .modal-card-expanded {
+            background: white; width: 100%; max-width: 360px; border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: scale(0.95); transition: transform 0.2s;
+            max-height: 85vh; overflow-y: auto; overflow-x: hidden;
+        }
+        .modal-overlay.open .modal-card-expanded { transform: scale(1); }
     </style>
 </head>
 <body>
@@ -205,7 +316,13 @@
                 </div>
                 <div class="h-8"></div>
             </div>
-
+<!-- ★NEW: マップ（グリッド）タブ -->
+            <div id="view-map" class="hidden">
+                <div id="grid-container" class="disco-grid bg-white rounded-2xl shadow-sm border border-gray-100 pb-4 pt-1">
+                    <!-- JSで生成 -->
+                </div>
+            </div>
+            
             <!-- 今日の自分タブ -->
             <div id="view-today" class="hidden p-2">
                 
@@ -296,12 +413,60 @@
                 <i data-lucide="scroll" class="w-6 h-6"></i>
                 <span class="text-[10px] font-bold">年表</span>
             </div>
+            <!-- 追加ここから -->
+            <div onclick="switchTab('map')" class="tab-item" data-tab="map">
+                <i data-lucide="grid" class="w-6 h-6"></i>
+                <span class="text-[10px] font-bold">マップ</span>
+            </div>
+            <!-- 追加ここまで -->
             <div onclick="switchTab('today')" class="tab-item" data-tab="today">
                 <i data-lucide="user" class="w-6 h-6"></i>
                 <span class="text-[10px] font-bold">今日の自分</span>
             </div>
         </div>
     </nav>
+    <!-- ★NEW: グリッド詳細モーダル -->
+    <div id="detail-modal" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-card-expanded" onclick="event.stopPropagation()">
+            <!-- ヘッダー (年月) -->
+            <div class="bg-[#2A9D8F] p-4 text-white text-center sticky top-0 z-10 shadow-sm">
+                 <h2 id="modal-header-date" class="text-xl font-black leading-tight tracking-widest font-mono">YYYY.MM</h2>
+            </div>
+
+            <div class="p-5">
+                <!-- CD情報リストコンテナ -->
+                <div id="modal-cd-list" class="space-y-12">
+                    <!-- JSで動的生成 -->
+                </div>
+
+                <!-- 共通情報（自分・ライブ） -->
+                <div id="modal-common-info" class="space-y-4 pt-8 mt-8 border-t-2 border-dashed border-gray-100">
+                     <!-- あなたの情報 -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-gray-400 flex items-center gap-1 border-b border-gray-100 pb-1">
+                            <i data-lucide="user" class="w-3 h-3"></i> 当時のあなた
+                        </h4>
+                        <div class="bg-gray-50 rounded-xl p-3 text-xs flex justify-between items-center border border-gray-100">
+                            <div class="font-bold text-gray-500">年齢: <span id="modal-user-age" class="text-gray-800 text-sm ml-1"></span></div>
+                            <div class="font-bold text-[#2A9D8F] bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100" id="modal-user-stage"></div>
+                        </div>
+                    </div>
+
+                    <!-- ライブ情報 -->
+                    <div id="modal-live-section" class="space-y-2 hidden">
+                        <h4 class="text-xs font-bold text-gray-400 flex items-center gap-1 border-b border-gray-100 pb-1">
+                            <i data-lucide="mic-2" class="w-3 h-3 text-red-400"></i> この月のLIVE
+                        </h4>
+                        <div id="modal-live-list" class="space-y-2"></div>
+                    </div>
+                </div>
+                
+                <div class="pt-6">
+                     <button onclick="closeModal()" class="w-full py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 rounded-xl border border-gray-200">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
@@ -310,10 +475,14 @@
 
         let allData = null;
         let birthDate = null;
+        let loadingPromise = null; // ★追加
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             populateDates();
+            
+            // ★追加: 即時読み込み開始
+            startDataLoading();
             
             const savedBirth = localStorage.getItem('lldb_user_birth');
             if (savedBirth) {
@@ -323,6 +492,39 @@
                 document.getElementById('day').value = parseInt(d);
             }
         });
+
+        // ★追加: データ読み込み関数
+        function startDataLoading() {
+            loadingPromise = new Promise(async (resolve) => {
+                // すでにデータがあれば即終了
+                if (allData) {
+                    resolve(allData);
+                    return;
+                }
+
+                // 1. キャッシュ確認
+                try {
+                    const cache = localStorage.getItem(CACHE_KEY);
+                    if (cache) {
+                        allData = JSON.parse(cache);
+                        resolve(allData);
+                        return;
+                    }
+                } catch (e) { console.error("Cache Error", e); }
+
+                // 2. APIフェッチ
+                try {
+                    const res = await fetch(`${GAS_API_URL}?action=getHistoryData`);
+                    const json = await res.json();
+                    allData = json;
+                    try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)); } catch(e){}
+                    resolve(allData);
+                } catch (e) {
+                    console.error(e);
+                    resolve(null); // エラー時はnull
+                }
+            });
+        }
 
         function populateDates() {
             const yEl = document.getElementById('year'), mEl = document.getElementById('month'), dEl = document.getElementById('day');
@@ -337,18 +539,16 @@
                 el.classList.toggle('active', el.dataset.tab === tabName);
             });
             document.getElementById('view-history').classList.toggle('hidden', tabName !== 'history');
+            document.getElementById('view-map').classList.toggle('hidden', tabName !== 'map');
             document.getElementById('view-today').classList.toggle('hidden', tabName !== 'today');
             
             if (tabName === 'today') {
-                if (allData && birthDate) {
-                    renderTodayStats();
-                }
-                
-                // ★追加: 「今日の自分」タブ切り替え計測
-                safeTrackEvent('screen_view', {
-                    screen_name: 'History_TodayMe',
-                    app_name: 'LLDB_History'
-                });
+                if (allData && birthDate) renderTodayStats();
+                safeTrackEvent('screen_view', { screen_name: 'History_TodayMe' });
+            } 
+            else if (tabName === 'map') {
+                if (allData && birthDate) renderGrid(allData.listData);
+                safeTrackEvent('screen_view', { screen_name: 'History_Map' });
             }
             lucide.createIcons();
         }
@@ -368,19 +568,12 @@
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('content-area').classList.add('hidden');
 
+            // ★修正: データ読み込み待ちロジック
             if (!allData) {
-                try {
-                    const cache = localStorage.getItem(CACHE_KEY);
-                    if (cache) {
-                          allData = JSON.parse(cache);
-                    } else {
-                        const res = await fetch(`${GAS_API_URL}?action=getHistoryData`);
-                        const json = await res.json();
-                        allData = json;
-                        try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)); } catch(e){}
-                    }
-                } catch (e) {
-                    console.error(e);
+                // バックグラウンド読み込みの完了を待つ
+                await loadingPromise;
+                
+                if (!allData) {
                     alert('データの読み込みに失敗しました。');
                     document.getElementById('loading').classList.add('hidden');
                     return;
@@ -388,6 +581,7 @@
             }
 
             renderTimeline();
+            renderGrid(allData.listData);
             renderTodayStats(); 
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('content-area').classList.remove('hidden');
@@ -396,7 +590,7 @@
             const targetTab = currentTabEl ? currentTabEl.dataset.tab : 'history';
             switchTab(targetTab);
         }
-        // 親画面へライブ検索のリクエストを送信する
+
         function requestSearchInLive(tourName) {
           window.parent.postMessage({
             type: 'requestLiveSearch',
@@ -404,7 +598,6 @@
           }, '*');
         }
 
-        // --- 年齢詳細計算ロジック (New) ---
         function calculateDetailedAge(birthDate, targetDate) {
             let b = new Date(birthDate);
             let t = new Date(targetDate);
@@ -533,18 +726,14 @@
             }
         }
 
-        // --- 今日の自分 ロジック ---
         function renderTodayStats() {
             if (!birthDate || !allData.listData) return;
 
-            // 1. 今日の自分の日数計算
             const today = new Date();
             const ageString = calculateDetailedAge(birthDate, today);
             
-            // HTMLを挿入
             document.getElementById('user-days').innerHTML = ageString;
 
-            // 2. 最も近いリリース日を探す
             let bestMatch = null;
             let minDiff = Infinity;
             
@@ -558,10 +747,8 @@
                 const releaseDate = new Date(cd.releaseDate);
                 releaseDate.setHours(0,0,0,0);
                 
-                // aikoの誕生日からリリース日までの日数
                 const aikoDaysAtRelease = Math.floor((releaseDate - AIKO_BIRTH) / msPerDay);
                 
-                // 差分の絶対値
                 const diff = Math.abs(userDays - aikoDaysAtRelease);
                 
                 if (diff < minDiff) {
@@ -574,42 +761,26 @@
                 }
             });
 
-            // 3. UIに反映
             if (bestMatch) {
                 document.getElementById('match-cd-title').innerText = bestMatch.title || 'Unknown Title';
                 document.getElementById('match-cd-type').innerText = bestMatch.type || 'CD';
                 
-                // 画像URL
                 const img1 = document.getElementById('match-img-first');
                 const img2 = document.getElementById('match-img-regular');
                 img1.src = bestMatch.img1 || '';
                 img2.src = bestMatch.img2 || '';
 
-                // 収録曲
                 let tracksHtml = '';
                 if (bestMatch.tracks) {
-                    // 区切り文字で分割し、空白を除去
-                    const tracks = String(bestMatch.tracks)
-                                    .split(/[\n,、]/)
-                                    .map(t => t.trim())
-                                    .filter(t => t && t !== ".");
-
+                    const tracks = String(bestMatch.tracks).split(/[\n]/).map(t => t.trim()).filter(t => t);
                     if (tracks.length > 0) {
-                        // <ol>による自動付番をやめ、Flexboxで手動配置して間隔を詰める
-                        tracksHtml = '<div class="flex flex-col gap-1.5">';
-                        tracks.forEach((t, i) => {
-                            // もしデータ自体に「1. 曲名」のように番号が付いていたら除去する
-                            let cleanTitle = t.replace(/^\d+[\.．]\s*/, ''); 
-                            // gap-0.5 で番号とタイトルの隙間を極小にする（半角スペースより狭く）
-                            tracksHtml += `
-                                <div class="flex items-baseline gap-0.5">
-                                    <span class="shrink-0 select-none min-w-[1.2rem] text-right">${i + 1}.</span>
-                                    <span>${cleanTitle}</span>
-                                </div>`;
+                        tracksHtml = '<div class="flex flex-col gap-1">';
+                        tracks.forEach(t => {
+                            tracksHtml += `<div class="text-gray-700 leading-normal">${t}</div>`;
                         });
                         tracksHtml += '</div>';
                     } else {
-                        tracksHtml = bestMatch.tracks;
+                        tracksHtml = `<div class="text-gray-700 leading-normal">${bestMatch.tracks}</div>`;
                     }
                 } else {
                     tracksHtml = '<span class="text-gray-400">情報なし</span>';
@@ -618,13 +789,242 @@
 
                 document.getElementById('match-release-date').innerText = bestMatch.formattedRelease;
                 
-                // aikoの当時の年齢・日数詳細
                 const aikoAgeString = calculateDetailedAge(AIKO_BIRTH, bestMatch.releaseDateObj);
                 document.getElementById('match-aiko-days').innerHTML = aikoAgeString;
             }
         }
 
-        // GA4送信用の安全なラッパー関数
+        function renderGrid(listData) {
+            const container = document.getElementById('grid-container');
+            if(!listData) return;
+
+            const releaseMap = {};
+            listData.forEach(item => {
+                if(!item.releaseDate) return;
+                const d = new Date(item.releaseDate);
+                const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+                if (!releaseMap[key]) releaseMap[key] = [];
+                releaseMap[key].push(item);
+            });
+
+            Object.keys(releaseMap).forEach(key => {
+                releaseMap[key].sort((a, b) => new Date(a.releaseDate) - new Date(b.releaseDate));
+            });
+
+            const startYear = 1998;
+            const currentYear = new Date().getFullYear();
+            const endYear = currentYear; 
+            const birthMonth = birthDate.getMonth() + 1;
+
+            let html = '';
+            html += `<div class="header-row col-span-full grid grid-cols-[36px_repeat(12,1fr)] gap-[2px]">`;
+            html += `<div></div>`;
+            for (let m = 1; m <= 12; m++) {
+                const isBirthMonth = (m === birthMonth);
+                const cakeHtml = isBirthMonth ? '<span class="birth-cake">🎂</span>' : '';
+                html += `<div class="header-cell ${isBirthMonth ? 'birth-month-header' : ''}">${cakeHtml}${m}</div>`;
+            }
+            html += `</div>`;
+
+            for (let y = startYear; y <= endYear; y++) {
+                let ageLabel = '';
+                const birthYear = birthDate.getFullYear();
+                if (y >= birthYear) {
+                    const age = y - birthYear;
+                    ageLabel = `<span class="age-label">${age}歳</span>`;
+                }
+
+                html += `<div class="year-cell"><span class="year-label">${y}</span>${ageLabel}</div>`;
+
+                for (let m = 1; m <= 12; m++) {
+                    const key = `${y}-${m}`;
+                    const items = releaseMap[key];
+                    const isFuture = new Date(y, m-1) > new Date();
+                    
+                    let colClass = '';
+                    if (m === 12 || m === 1 || m === 2) colClass = 'season-winter';
+                    else if (m >= 3 && m <= 5) colClass = 'season-spring';
+                    else if (m >= 6 && m <= 8) colClass = 'season-summer';
+                    else if (m >= 9 && m <= 11) colClass = 'season-autumn';
+
+                    if (items && items.length > 0) {
+                        const dataJson = JSON.stringify(items).replace(/"/g, '&quot;');
+                        
+                        let contentHtml = '';
+                        if (items.length === 1) {
+                            const item = items[0];
+                            const imgUrl = item.img2 || item.img1 || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=No+Image';
+                            const borderClass = getBorderClass(item.type);
+                            contentHtml = `<img src="${imgUrl}" loading="lazy" class="jacket-img-base ${borderClass}">`;
+                        } else {
+                            const first = items[0];
+                            const last = items[items.length - 1];
+                            const img1 = first.img2 || first.img1 || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=No+Image';
+                            const img2 = last.img2 || last.img1 || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=No+Image';
+                            const border1 = getBorderClass(first.type);
+                            const border2 = getBorderClass(last.type);
+                            
+                            contentHtml = `
+                                <img src="${img1}" class="jacket-img-base stacked-1 ${border1}">
+                                <img src="${img2}" class="jacket-img-base stacked-2 ${border2}">
+                            `;
+                        }
+
+                        html += `
+                            <div class="jacket-cell cursor-pointer shadow-sm" onclick="openModal(this)" data-items="${dataJson}">
+                                ${contentHtml}
+                            </div>
+                        `;
+                    } else {
+                        if (isFuture) {
+                            html += `<div class="future-cell ${colClass}"></div>`;
+                        } else {
+                            html += `<div class="empty-cell ${colClass}"></div>`;
+                        }
+                    }
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function getBorderClass(type) {
+            if (!type) return 'border-other';
+            const t = type.toLowerCase();
+            if (t.includes('album') || t.includes('アルバム')) return 'border-album';
+            if (t.includes('single') || t.includes('シングル')) return 'border-single';
+            return 'border-other';
+        }
+
+        function openModal(el) {
+            const items = JSON.parse(el.dataset.items);
+            if (!items || items.length === 0) return;
+
+            const firstDate = new Date(items[0].releaseDate);
+            const dateStr = `${firstDate.getFullYear()}.${firstDate.getMonth() + 1}`;
+            document.getElementById('modal-header-date').textContent = dateStr;
+
+            const listContainer = document.getElementById('modal-cd-list');
+            listContainer.innerHTML = '';
+
+            items.forEach(data => {
+                const d = new Date(data.releaseDate);
+                const fullDateStr = `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
+                const aikoAge = calculateDetailedAge(AIKO_BIRTH, d);
+                
+                let tracksHtml = '';
+                if (data.tracks) {
+                    const tracks = String(data.tracks).split(/[\n]/).map(t => t.trim()).filter(t => t);
+                    if (tracks.length > 0) {
+                        tracksHtml = '<div class="flex flex-col gap-1">';
+                        tracks.forEach(t => {
+                            tracksHtml += `<div class="text-gray-700 leading-normal">${t}</div>`;
+                        });
+                        tracksHtml += '</div>';
+                    } else {
+                        tracksHtml = `<div class="text-gray-700 leading-normal">${data.tracks}</div>`;
+                    }
+                } else { tracksHtml = '<span class="text-gray-400">情報なし</span>'; }
+
+                const cardHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <span class="text-xs font-bold bg-white px-2 py-1 rounded border border-gray-200">${data.type || 'CD'}</span>
+                            <span class="text-xs font-mono text-gray-400">${fullDateStr}</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-lg font-bold text-gray-800 leading-tight mb-4 text-center">${data.title}</h3>
+                            
+                            <div class="flex gap-3 mb-5">
+                                <div class="flex-1">
+                                    <div class="relative group w-full">
+                                        <img src="${data.img1 || 'https://placehold.co/200x200/e2e8f0/94a3b8?text=No+Image'}" class="cd-jacket" alt="初回盤" onerror="this.src='https://placehold.co/200x200/e2e8f0/94a3b8?text=No+Image'">
+                                        <div class="jacket-label">初回限定盤</div>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="relative group w-full">
+                                        <img src="${data.img2 || 'https://placehold.co/200x200/e2e8f0/94a3b8?text=No+Image'}" class="cd-jacket" alt="通常盤" onerror="this.src='https://placehold.co/200x200/e2e8f0/94a3b8?text=No+Image'">
+                                        <div class="jacket-label">通常盤</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-[#e0f2f1]/50 rounded-lg p-3 text-xs flex justify-between items-center mb-4">
+                                <span class="font-bold text-[#1F7A6F] opacity-70">当時のaiko</span>
+                                <span class="font-bold text-[#2A9D8F] text-right">${aikoAge}</span>
+                            </div>
+
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-400 flex items-center gap-1 border-b border-gray-100 pb-1 mb-2">
+                                    <i data-lucide="music" class="w-3 h-3"></i> 収録曲
+                                </h4>
+                                <div class="text-sm text-gray-600 leading-relaxed font-medium bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200">
+                                    ${tracksHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            const userAge = calculateAgeAtDate(birthDate, firstDate);
+            const userStage = getLifeStage(firstDate, birthDate);
+            document.getElementById('modal-user-age').textContent = `${userAge}歳`;
+            document.getElementById('modal-user-stage').textContent = userStage;
+
+            const liveListEl = document.getElementById('modal-live-list');
+            const liveSection = document.getElementById('modal-live-section');
+            liveListEl.innerHTML = '';
+            
+            const targetKey = `${firstDate.getFullYear()}-${firstDate.getMonth() + 1}`;
+            const addedLives = new Set();
+            let liveFound = false;
+            
+            if (allData && allData.historyData) {
+                allData.historyData.forEach(row => {
+                    if (!row.date) return;
+                    const rd = new Date(row.date);
+                    if (`${rd.getFullYear()}-${rd.getMonth() + 1}` === targetKey && row.live) {
+                        if (!addedLives.has(row.live)) {
+                            addedLives.add(row.live);
+                            liveFound = true;
+                            const safeName = row.live.replace(/'/g, "\\'");
+                            const div = document.createElement('div');
+                            div.className = 'p-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100 flex justify-between items-center cursor-pointer active:scale-95 transition-transform';
+                            div.innerHTML = `<span>${row.live}</span> <i data-lucide="chevron-right" class="w-3 h-3"></i>`;
+                            div.onclick = () => { closeModal(); requestSearchInLive(safeName); };
+                            liveListEl.appendChild(div);
+                        }
+                    }
+                });
+            }
+            
+            if (liveFound) {
+                liveSection.classList.remove('hidden');
+                lucide.createIcons();
+            } else {
+                liveSection.classList.add('hidden');
+            }
+
+            const overlay = document.getElementById('detail-modal');
+            overlay.classList.add('open');
+            document.querySelector('.modal-card-expanded').scrollTop = 0;
+            
+            safeTrackEvent('select_content', { content_type: 'map_detail', item_name: items[0].title });
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('open');
+        }
+
+        function calculateAgeAtDate(birth, target) {
+            let age = target.getFullYear() - birth.getFullYear();
+            const m = target.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && target.getDate() < birth.getDate())) age--;
+            return age;
+        }
+        
         function safeTrackEvent(eventName, params) {
             try {
                 if (typeof gtag === 'function') {
