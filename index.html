@@ -62,7 +62,7 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v4.3.0"; /* Major Update for Renewal */
+        const APP_VERSION = "v4.4.0"; /* Major Update for Renewal */
     </script>
 </head>
 <body class="bg-gray-50">
@@ -206,18 +206,22 @@
         </button>
     </header>
 
-    <!-- About Modal -->
+
+    <!-- ==========================================================================
+           【COMMON UI】 About Modal (このアプリについて)
+           ========================================================================== -->
     <div id="about-modal" onclick="closeAboutModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="text-center mb-6">
                 <h2 class="font-bold text-xl text-gray-800">Love Like DataBase</h2>
                 <p id="about-version-display" class="text-xs text-gray-400 font-mono mt-1"></p>
             </div>
-            
-            <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[50vh]">
+           
+            <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[30vh]">
                 <p>このアプリは、個人開発者が趣味で作った、非公式のファンアプリです。データの誤りを含んでいる可能性があります。</p>
-                <p>不具合報告や、「ここ間違ってるよ！」というご指摘は、X (旧Twitter) までお寄せいただけると嬉しいです。</p>
+                <p>不具合や「ここ間違ってるよ！」というご指摘は、X までお寄せいただけると嬉しいです。</p>
             </div>
+
 
             <div class="mt-8 flex justify-center">
                 <a href="https://twitter.com/noki_dochibi" target="_blank" class="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-full text-xs font-bold hover:bg-gray-800 transition shadow-lg active:scale-95">
@@ -225,7 +229,19 @@
                     開発者 @noki_dochibi
                 </a>
             </div>
-            
+           
+            <!-- ★追加: 更新履歴エリア -->
+            <div class="history-list">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="history" class="w-4 h-4 text-gray-400"></i>
+                    <h3 class="font-bold text-gray-600 text-xs">更新履歴</h3>
+                </div>
+                <div id="update-history-content" class="max-h-[150px] overflow-y-auto no-scrollbar">
+                    <div class="text-center py-4 text-gray-400 text-xs animate-pulse">読み込み中...</div>
+                </div>
+            </div>
+
+
             <div class="mt-6 pt-4 border-t border-gray-100 text-center">
                  <button onclick="closeAboutModal()" class="text-gray-400 text-sm font-bold hover:text-gray-600 px-4 py-2">閉じる</button>
             </div>
@@ -233,7 +249,10 @@
     </div>
 
 
+
+
     <!-- ==========================================================================
+
            【2. APP: LLDB Live】 
            ========================================================================== -->
     <div id="app-live" class="app-screen active">
@@ -347,18 +366,64 @@
         }
 
         function openAboutModal() {
-            toggleNoren();
-            setTimeout(() => {
-                const modal = document.getElementById('about-modal');
-                modal.classList.add('open');
-            }, 300);
-        }
+        toggleNoren();
+        setTimeout(() => {
+            const modal = document.getElementById('about-modal');
+            modal.classList.add('open');
+            // ここに loadUpdateHistory() は書かなくてOKです（起動時に済ませるため）
+        }, 300);
+    }
 
         function closeAboutModal() {
             const modal = document.getElementById('about-modal');
             modal.classList.remove('open');
         }
+let isUpdateHistoryLoaded = false; // 読み込み完了フラグ
 
+    async function loadUpdateHistory() {
+        // すでに読み込み済みなら何もしない
+        if (isUpdateHistoryLoaded) return;
+
+        const container = document.getElementById('update-history-content');
+        
+        try {
+            console.log("Start loading update history in background...");
+            
+            // APIへリクエスト
+            const response = await fetch(`${GAS_API_URL}?action=getUpdateHistory`);
+            const json = await response.json();
+
+            if (json.status === 'success' && json.data.length > 0) {
+                // HTMLを生成
+                let html = '<div class="flex flex-col gap-3">';
+                json.data.forEach(item => {
+                    html += `
+                        <div class="border-b border-gray-100 pb-2 last:border-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-mono text-gray-400">${item.date}</span>
+                                <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${item.version}</span>
+                            </div>
+                            <p class="text-xs text-gray-600 leading-relaxed">${item.content}</p>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                // 画面に反映 (ユーザーが見ていなくても裏側で書き換わる)
+                if (container) {
+                    container.innerHTML = html;
+                    isUpdateHistoryLoaded = true;
+                    console.log("Update history loaded successfully.");
+                }
+            } else {
+                if (container) container.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">更新履歴はありません</p>';
+            }
+        } catch (e) {
+            console.error("Update history load failed:", e);
+            // 失敗した場合、ユーザーがモーダルを開いたときに「読み込み失敗」と見えるようにする
+            if (container) container.innerHTML = '<p class="text-center text-red-400 text-xs py-4">読み込みに失敗しました</p>';
+        }
+    }
         // ★追加機能: セトリ投稿フォームへの遷移処理
         function openSetlistForm() {
             // ダイアログで確認
@@ -383,14 +448,18 @@
         }
         // --- 追加機能: ヘッダータップでスクロールトップ ---
         document.addEventListener('DOMContentLoaded', () => {
-            // ★順序変更: バージョンチェックを最優先に実行
-            // これにより、iframeの読み込み開始前に確実にキャッシュ状態を整えます
-            const savedVer = localStorage.getItem('lldb_version');
-            if (savedVer !== APP_VERSION) {
-                localStorage.clear();
-                localStorage.setItem('lldb_version', APP_VERSION);
-                console.log(`Version updated to ${APP_VERSION}. Cache cleared.`);
-            }
+        // ★順序変更: バージョンチェックを最優先に実行
+        // これにより、iframeの読み込み開始前に確実にキャッシュ状態を整えます
+        const savedVer = localStorage.getItem('lldb_version');
+        if (savedVer !== APP_VERSION) {
+            localStorage.clear();
+            localStorage.setItem('lldb_version', APP_VERSION);
+            console.log(`Version updated to ${APP_VERSION}. Cache cleared.`);
+        }
+
+        /* ▼▼▼ ここ（358行目の直後）に挿入してください ▼▼▼ */
+        // 裏側で更新履歴を読み込み開始（並走させる）
+        loadUpdateHistory();
 
             // バージョン番号の一括反映処理
             document.querySelectorAll('iframe').forEach(iframe => {
@@ -485,3 +554,5 @@
 
 </body>
 </html>
+
+
