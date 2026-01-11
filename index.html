@@ -6,7 +6,6 @@
     <title>Love Like DataBase</title>
     <meta name="theme-color" content="#E63946">
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0D09G3X4F1"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -16,16 +15,14 @@
       gtag('config', 'G-0D09G3X4F1');
     </script>
 
-    <!-- アイコン設定 -->
     <link rel="icon" type="image/png" href="./icon.png">
     <link rel="apple-touch-icon" href="./icon.png">
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Love Like DataBase","short_name":"LLDB","start_url":".","display":"standalone","background_color":"#F8F8F8","theme_color":"#ef4444","icons":[{"src":"./icon.png","sizes":"192x192 512x512","type":"image/png"}]}'>
-
-    <!-- 外部ライブラリ (共通) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Love Like DataBase","short_name":"LLDB","start_url":".","display":"standalone","background_color":"%23F8F8F8","theme_color":"%23ef4444","icons":[{"src":"./icon.png","sizes":"192x192%20512x512","type":"image/png"}]}'>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
@@ -62,14 +59,11 @@
         // ==========================================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec";
         const ICON_URL = "https://unavatar.io/twitter/noki_dochibi";
-        const APP_VERSION = "v4.6.0"; /* Major Update for Renewal */
+        const APP_VERSION = "v4.7.1"; /* Major Update for Renewal */
     </script>
 </head>
 <body class="bg-gray-50">
 
-    <!-- ==========================================================================
-           【1. COMMON UI】 ヘッダー & 暖簾メニュー
-           ========================================================================== -->
     <style>
         /* 暖簾メニュー & ヘッダー用スタイル */
         #noren-menu {
@@ -116,11 +110,9 @@
         #about-modal.open .modal-card { transform: scale(1); }
     </style>
 
-    <!-- 暖簾メニューHTML -->
     <div id="noren-overlay" onclick="toggleNoren()"></div>
     <div id="noren-menu">
         <div class="flex flex-col">
-            <!-- 1. LLDB Live (#E63946) -->
             <div class="noren-item" onclick="switchApp('live')">
                 <div class="noren-icon bg-[#E63946]"><i data-lucide="mic-2" class="w-6 h-6"></i></div>
                 <div class="flex-1">
@@ -130,7 +122,6 @@
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
 
-            <!-- 2. LLDB Trends (#1D3557) -->
             <div class="noren-item" onclick="switchApp('trends')">
                 <div class="noren-icon bg-[#1D3557]"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
                 <div class="flex-1">
@@ -140,7 +131,6 @@
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
 
-            <!-- 3. LLDB Song Helper (#F4A261) -->
             <div class="noren-item" onclick="switchApp('songHelper')">
                 <div class="noren-icon bg-[#F4A261]"><i data-lucide="music" class="w-6 h-6"></i></div>
                 <div class="flex-1">
@@ -150,7 +140,6 @@
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
 
-            <!-- 4. LLDB History (#2A9D8F) -->
             <div class="noren-item" onclick="switchApp('history')">
                 <div class="noren-icon bg-[#2A9D8F]"><i data-lucide="heart-handshake" class="w-6 h-6"></i></div>
                 <div class="flex-1">
@@ -159,8 +148,16 @@
                 </div>
                 <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
             </div>
+
+            <div class="noren-item" onclick="openMyLLDBModal()">
+                <div class="noren-icon bg-indigo-600"><i data-lucide="database" class="w-6 h-6"></i></div>
+                <div class="flex-1">
+                    <div class="font-bold text-gray-800 text-lg">My LLDB</div>
+                    <div class="text-xs text-gray-400 mt-0.5">参戦記録 / データバックアップ</div>
+                </div>
+                <i data-lucide="settings-2" class="text-gray-300 w-5 h-5"></i>
+            </div>
  
-        <!-- ★追加機能: セトリ投稿フォーム -->
         <div class="noren-item bg-gray-50/50" onclick="openSetlistForm()">
             <div class="noren-icon bg-blue-500"><i data-lucide="send" class="w-6 h-6"></i></div>
             <div class="flex-1">
@@ -169,8 +166,7 @@
             </div>
             <i data-lucide="chevron-right" class="text-gray-300 w-5 h-5"></i>
         </div>
-           
-            <!-- About Menu -->
+            
             <div class="noren-item bg-gray-50/50" onclick="openAboutModal()">
                 <div class="noren-icon bg-gray-400"><i data-lucide="info" class="w-6 h-6"></i></div>
                 <div class="flex-1">
@@ -195,48 +191,40 @@
     </div>
   </div>
 
-    <!-- 共通ヘッダー -->
     <header id="main-app-header" class="bg-[#E63946] text-white transition-colors duration-300">
-        <!-- Live App Header as Default -->
-        <h1 class="font-black text-[22px] tracking-wide flex-1 truncate pr-2" id="header-title">Love Like DataBase vol.4.1</h1>
+        <h1 class="font-black text-[22px] tracking-wide flex-1 truncate pr-2" id="header-title"><span id="header-title-text">Love Like DataBase</span> <span id="display-version">vol. </span></h1>
         
-        <!-- 🌸 Menu Button -->
         <button id="header-menu-btn" onclick="toggleNoren()" class="p-2 rounded-full hover:bg-white/20 transition active:scale-90 flex items-center justify-center w-10 h-10">
             <span class="flower-icon select-none">🌸</span>
         </button>
     </header>
 
 
-    <!-- ==========================================================================
-           【COMMON UI】 About Modal (このアプリについて)
-           ========================================================================== -->
     <div id="about-modal" onclick="closeAboutModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="text-center mb-6">
                 <h2 class="font-bold text-xl text-gray-800">Love Like DataBase</h2>
-                <p id="about-version-display" class="text-xs text-gray-400 font-mono mt-1"></p>
-            </div>
-           
+              </div>
+            
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[30vh]">
                 <p>このアプリは、個人開発者が趣味で作った、非公式のファンアプリです。データの誤りを含んでいる可能性があります。</p>
                 <p>不具合や「ここ間違ってるよ！」というご指摘は、X までお寄せいただけると嬉しいです。</p>
             </div>
 
 
-            <div class="mt-8 flex justify-center">
+            <div class="mt-4 flex justify-center">
                 <a href="https://twitter.com/noki_dochibi" target="_blank" class="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-full text-xs font-bold hover:bg-gray-800 transition shadow-lg active:scale-95">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     開発者 @noki_dochibi
                 </a>
             </div>
-           
-            <!-- ★追加: 更新履歴エリア -->
-            <div class="history-list">
+            
+            <div class="history-list mt-6">
                 <div class="flex items-center gap-2 mb-3">
                     <i data-lucide="history" class="w-4 h-4 text-gray-400"></i>
                     <h3 class="font-bold text-gray-600 text-xs">更新履歴</h3>
                 </div>
-                <div id="update-history-content" class="max-h-[150px] overflow-y-auto no-scrollbar">
+                <div id="update-history-content" class="max-h-[300px] overflow-y-auto no-scrollbar">
                     <div class="text-center py-4 text-gray-400 text-xs animate-pulse">読み込み中...</div>
                 </div>
             </div>
@@ -248,53 +236,137 @@
         </div>
     </div>
 
+    <div id="mylldb-modal" class="fixed inset-0 bg-black/50 z-[100] hidden items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeMyLLDBModal()">
+          <div class="bg-white w-[95%] max-w-md rounded-xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+        
+            <div class="bg-[#4F46E5] px-5 py-4 flex items-center justify-between">
+              <div class="flex items-center gap-2 text-white">
+                <i data-lucide="database" class="w-5 h-5"></i>
+                <h2 class="font-bold text-lg">My LLDB 設定</h2>
+              </div>
+              <button onclick="closeMyLLDBModal()" class="text-white/80 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+              </button>
+            </div>
+        
+            <div class="p-6 overflow-y-auto max-h-[75vh] text-gray-600">
+              
+              <p class="text-sm mb-5 font-bold text-gray-500">
+            参戦メモや誕生日を保存できます。<br>
+            ※重要※<br>
+            参戦メモは保存され続ける保証はありません。<br>
+            消えても問題がない情報のみを記載することを<br>
+            お勧めします。
+            </p>
+        
+              <h3 class="text-sm font-bold text-gray-700 mb-3">▼データ保存方法（①か②のどちらかを選んでね）</h3>
+        
+              <div class="mb-6">
+                <p class="text-sm text-gray-600 mb-2 leading-relaxed">
+                  ①クラウド保存：自動で同期されます。<br>
+                  <span class="text-gray-400 text-[12px]">　※情報は暗号化され、クラウド上に保存されます。<br>　(暗号化の例→è¾mì»‘Èå…ç”·åF&amp;å€¼è¾©å®ç¨¿)</span>
+                </p>
+        
+                <div id="sync-setup-area" class="bg-indigo-50 rounded-lg p-4 border border-indigo-100 text-center">
+                    <button onclick="UserDataManager.generateSyncId()" class="w-full bg-[#4F46E5] text-white font-bold py-3 rounded-lg text-sm shadow hover:bg-indigo-600 transition flex items-center justify-center gap-2 mb-3">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                        LLDB IDを発行する
+                    </button>
+                    <button onclick="document.getElementById('sync-input-area').classList.toggle('hidden')" class="text-xs text-[#4F46E5] underline hover:text-indigo-700">
+                        すでにIDを持っている方はこちら
+                    </button>
+        
+                    <div id="sync-input-area" class="hidden mt-3 flex gap-2">
+                        <input type="text" id="manual-sync-id" placeholder="IDを入力" class="flex-1 text-xs border border-gray-300 rounded px-2 py-2">
+                        <button onclick="UserDataManager.setSyncIdManual()" class="bg-gray-800 text-white text-xs px-3 rounded font-bold">設定</button>
+                    </div>
+                </div>
+        
+                <div id="sync-active-area" class="hidden bg-green-50 rounded-lg p-4 border border-green-100">
+                    <div class="flex justify-between items-end mb-2">
+                        <div onclick="UserDataManager.logout()" class="flex items-center gap-2 text-green-700 font-bold text-sm cursor-pointer hover:underline" title="ログアウト">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i> 自動同期中 <span class="text-[10px] font-normal">(解除)</span>
+                        </div>
+                        <div id="last-sync-time" class="text-[10px] text-gray-400"></div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-white rounded border border-green-200 px-3 py-2">
+                        <div>
+                            <div class="text-[10px] text-gray-400">あなたのID</div>
+                            <div id="current-sync-id" class="font-mono font-bold text-sm text-gray-700">Loading...</div>
+                        </div>
+                        <button onclick="navigator.clipboard.writeText(document.getElementById('current-sync-id').textContent); alert('コピーしました')" class="text-gray-400 hover:text-green-600">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-2 text-center">
+                         <button onclick="UserDataManager.loadFromCloud()" class="text-[10px] text-green-600/70 underline hover:text-green-800">データを再読み込み</button>
+                    </div>
+                </div>
+              </div>
+        
+              <div class="mb-8">
+                <p class="text-sm text-gray-600 mb-2 leading-relaxed">
+                  ②ローカル保存：手動でスマホに保存してください。<br>
+                  <span class="text-gray-400 text-[12px]">　※データはあなたのスマホにしか保存されません</span>
+                </p>
+                <div class="grid grid-cols-2 gap-3">
+                  <button onclick="UserDataManager.backupToFile()" class="bg-gray-100 text-gray-600 py-3 rounded-xl text-xs font-bold hover:bg-gray-200 flex flex-col items-center gap-1 border border-gray-200">
+                    <i data-lucide="save" class="w-5 h-5 mb-1"></i>
+                    ファイルに保存
+                  </button>
+                  <button onclick="document.getElementById('file-upload').click()" class="bg-gray-100 text-gray-600 py-3 rounded-xl text-xs font-bold hover:bg-gray-200 flex flex-col items-center gap-1 border border-gray-200">
+                    <i data-lucide="folder-open" class="w-5 h-5 mb-1"></i>
+                    ファイルから復元
+                  </button>
+                  <input type="file" id="file-upload" accept=".json" class="hidden" onchange="UserDataManager.restoreFromFile(this)">
+                </div>
+              </div>
+        
+              <div>
+                <h3 class="text-sm font-bold text-gray-700 mb-3">▼データ書き出し（パソコン等で記録を見たいとき用）</h3>
+                <p class="text-[12px] text-gray-400 mb-2">　※必要がなければやる必要はありません。<br>　</p>
+                <button onclick="UserDataManager.exportCSV()" class="w-full border border-gray-300 text-gray-600 py-3 rounded-xl text-sm font-bold hover:bg-gray-50 flex items-center justify-center gap-2">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                  参戦履歴をCSVで出力
+                </button>
+                <p class="text-[12px] text-gray-400 mt-2 text-center leading-tight">
+                  参戦メモをExcelで開ける形式でダウンロードします。<br>
+                  アプリが使えなくなっても、あなたのデータを残せます。
+                </p>
+              </div>
+        
+            </div>
+          </div>
+        </div>
 
 
-
-    <!-- ==========================================================================
-
-           【2. APP: LLDB Live】 
-           ========================================================================== -->
     <div id="app-live" class="app-screen active">
-        <!-- Liveアプリは独自のUI/UXを持つため全画面表示 -->
         <iframe src="./index_LLDBLive.html" class="w-full h-full border-none"></iframe>
     </div>
 
-    <!-- ==========================================================================
-           【3. APP: LLDB Trends】
-           ========================================================================== -->
     <div id="app-trends" class="app-screen">
         <iframe src="./index_LLDBTrends.html" class="w-full h-full border-none"></iframe>
     </div>
 
-    <!-- ==========================================================================
-           【4. APP: LLDB Song Helper】
-           ========================================================================== -->
     <div id="app-songHelper" class="app-screen">
         <iframe src="./index_LLDBSongHelper.html" class="w-full h-full border-none"></iframe>
     </div>
 
-    <!-- ==========================================================================
-           【5. APP: LLDB History】
-           ========================================================================== -->
     <div id="app-history" class="app-screen">
         <iframe src="./index_LLDBHistory.html" class="w-full h-full border-none"></iframe>
     </div>
 
 
-    <!-- ==========================================================================
-           【6. ROUTING】 共通ルーティング制御
-           ========================================================================== -->
     <script>
         // ▼ バージョン文字列の整形ロジック (New) ▼
-        // 1. "vX.X.X" から "X.X.X" を抽出
         const versionNum = APP_VERSION.replace('v', '');
         const versionParts = versionNum.split('.');
         
-        // 2. ヘッダー用: 2桁表示 & vol. 表記 (例: vol.4.2)
+        // ヘッダー用: 2桁表示 & vol. 表記 (例: vol.4.2)
         const headerVersion = `vol.${versionParts[0]}.${versionParts[1]}`;
-
-        // 3. About用: 3桁表示 & vol. 表記 (例: vol.4.2.1)
+        // About用: 3桁表示 & vol. 表記 (例: vol.4.2.1)
         const aboutVersion = `vol.${versionNum}`;
 
         // ★追加: アプリ名（Configシート）と内部IDのマッピング
@@ -307,12 +379,417 @@
 
         // アプリ定義 (タイトル更新)
         const apps = {
-            // ヘッダータイトルには2桁の headerVersion を使用
-            'live': { title: `Love Like DataBase ${headerVersion}`, color: 'bg-[#E63946]' }, /* Red */
+            'live': { title: 'Love Like DataBase', color: 'bg-[#E63946]' }, /* Red */
             'trends': { title: 'LLDB Trends', color: 'bg-[#1D3557]' },       /* Navy */
             'songHelper': { title: 'LLDB Song Helper', color: 'bg-[#F4A261]' }, /* Orange */
-            'history': { title: 'LLDB History', color: 'bg-[#2A9D8F]' }       /* Teal */
+            'history': { title: 'LLDB History', color: 'bg-[#2A9D8F]' }      /* Teal */
         };
+
+        // ==========================================================================
+        // 【My LLDB】 ユーザーデータ管理マネージャー
+        // ==========================================================================
+        const UserDataManager = {
+            DATA_KEY: 'lldb_user_data_v1', // localStorage key
+            
+            // データ構造の初期値
+            data: {
+                version: 1,
+                profile: { birthday: '' },
+                attendedLives: {}, // ID: { memo: '', link: '', timestamp: ... }
+                settings: { syncId: null, lastSync: null }
+            },
+
+            // 1. 初期化 & ロード
+            init: function() {
+                const saved = localStorage.getItem(this.DATA_KEY);
+                if (saved) {
+                    try {
+                        // LZString圧縮されているかチェック（簡易判定: '{' で始まらなければ圧縮データ）
+                        let parsed;
+                        if (saved.trim().startsWith('{')) {
+                            parsed = JSON.parse(saved);
+                        } else {
+                            const decompressed = LZString.decompressFromUTF16(saved);
+                            parsed = JSON.parse(decompressed);
+                        }
+                        // マージ (新項目が増えた場合に対応)
+                        this.data = { ...this.data, ...parsed };
+                    } catch (e) {
+                        console.error('Data Load Error:', e);
+                        alert('データの読み込みに失敗しました。');
+                    }
+                }
+                this.updateUI();
+                this.broadcastData(); // 各アプリへデータを配信
+                lucide.createIcons();
+            },
+
+           // 2. 保存 (Local Storage & Auto Cloud Sync)
+            save: function(skipSync = false) { // ★引数追加
+                try {
+                    const stringified = JSON.stringify(this.data);
+                    // 圧縮して保存
+                    const compressed = LZString.compressToUTF16(stringified);
+                    localStorage.setItem(this.DATA_KEY, compressed);
+            
+                    this.broadcastData();
+                    console.log('User data saved locally.');
+            
+                    // ★追加: ID設定済みなら自動でクラウド同期（サイレント実行）
+                    if (!skipSync && this.data.settings.syncId) {
+                        this.syncToCloud(true);
+                    }
+                } catch (e) {
+            console.error('Save Error:', e);
+            alert('容量不足のため保存できませんでした。');
+            }
+            },
+
+            // 3. データ配信 (各iframeへ)
+            broadcastData: function() {
+                const frames = document.querySelectorAll('iframe');
+                frames.forEach(frame => {
+                    if (frame.contentWindow) {
+                        frame.contentWindow.postMessage({
+                            type: 'userDataUpdated',
+                            data: this.data
+                        }, '*');
+                    }
+                });
+            },
+
+            // 4. データ更新用API (子フレームから呼ばれる)
+            updateAttendedLive: function(liveId, info) {
+                // info: { attended: boolean, memo: string, link: string }
+                if (info.attended) {
+                    this.data.attendedLives[liveId] = {
+                        memo: info.memo || '',
+                        link: info.link || '',
+                        timestamp: Date.now()
+                    };
+                } else {
+                    delete this.data.attendedLives[liveId];
+                }
+                this.save();
+            },
+
+            // --------------------------------------------------
+            // Cloud Sync Logic
+            // --------------------------------------------------
+            generateSyncId: async function() {
+                if(!confirm('新しい「LLDB ID」を発行しますか？\n(以前のデータがある場合、上書きされる可能性があります)')) return;
+                
+                try {
+                    // GASで確実に受け取れるよう form-urlencoded で送信
+                    const params = new URLSearchParams();
+                    params.append('action', 'generate_sync_id');
+
+                    const res = await fetch(GAS_API_URL, {
+                        method: 'POST',
+                        body: params
+                    });
+                    const json = await res.json();
+                    if (json.status === 'success') {
+                        this.data.settings.syncId = json.syncId;
+                        this.save();
+                        this.updateUI();
+                        // 即座に空データでも保存しておく
+                        this.syncToCloud(true); 
+                        alert(`発行しました！\nLLDB ID: ${json.syncId}\n\nこのIDを必ず控えてください。`);
+                    } else {
+                        throw new Error(json.message || 'Error');
+                    }
+                } catch(e) {
+                    console.error(e);
+                    alert('通信エラー: ID発行に失敗しました');
+                }
+            },
+
+            setSyncIdManual: async function() { // asyncを追加
+                const input = document.getElementById('manual-sync-id');
+                const val = input.value.trim();
+                if (!val) return;
+                if (!confirm(`LLDB ID「${val}」を設定しますか。\n\n※OKを押した後、数秒お待ちください。\n　データをこの端末に復元します。`)) return;
+            
+                this.data.settings.syncId = val;
+                this.save(true); // 一旦保存(同期はしない)
+                
+                // 直ちに復元を実行
+                const success = await this.loadFromCloud(true); // true=silent mode (new)
+                if (success) {
+                    alert('設定しました。');
+                }
+            },
+
+            syncToCloud: async function(silent = false) {
+                if (!this.data.settings.syncId) return;
+                if (!silent && !confirm('現在のデータをクラウドに保存しますか？')) return;
+
+                try {
+                    // 圧縮された文字列をそのまま送る
+                    const compressed = LZString.compressToUTF16(JSON.stringify(this.data));
+                    
+                    const params = new URLSearchParams();
+                    params.append('action', 'save_user_data');
+                    params.append('syncId', this.data.settings.syncId);
+                    params.append('data', compressed);
+
+                    const res = await fetch(GAS_API_URL, {
+                        method: 'POST',
+                        body: params
+                    });
+                    const json = await res.json();
+                    if (json.status === 'success') {
+                    this.data.settings.lastSync = new Date().toLocaleString();
+                    this.save(true); // LastSync更新のため(再同期はしない)
+                    this.updateUI();
+                    if(!silent) alert('クラウドに保存しました！');
+                    } else {
+                        throw new Error(json.message);
+                    }
+                } catch(e) {
+                    if(!silent) alert('保存に失敗しました: ' + e);
+                }
+            },
+
+            loadFromCloud: async function(silent = false) {
+                if (!this.data.settings.syncId) return false;
+                if (!silent && !confirm('クラウドからデータを読み込みますか？\n※現在の端末のデータは上書きされます。')) return false;
+            
+                try {
+                    const params = new URLSearchParams();
+                    params.append('action', 'load_user_data');
+                    params.append('syncId', this.data.settings.syncId);
+            
+                    const res = await fetch(GAS_API_URL, {
+                        method: 'POST',
+                        body: params
+                    });
+                    const json = await res.json();
+            
+                    if (json.status === 'success' && json.data) {
+                        const decompressed = LZString.decompressFromUTF16(json.data);
+                        const loadedData = JSON.parse(decompressed);
+            
+                        this.data = loadedData;
+                        this.save(true); // ローカルに反映(再同期はしない)
+                        this.updateUI();
+                        this.broadcastData();
+                        if(!silent) alert('復元が完了しました！');
+                        return true;
+                    } else {
+                        alert('データが見つかりませんでした。IDを確認してください。');
+                        return false;
+                    }
+                        } catch(e) {
+                alert('読み込みに失敗しました: ' + e);
+            }
+        },
+        
+        // ★追加: ログアウト（データ初期化）機能
+        logout: function() {
+            if (!confirm('ログアウトしますか？\n※参戦メモなどは一度削除されます。\n　再度同じIDを設定したら再度表示されます。')) return;
+        
+            // データを初期状態にリセット
+            this.data = {
+                version: 1,
+                profile: { birthday: '' },
+                attendedLives: {},
+                settings: { syncId: null, lastSync: null }
+            };
+        
+            // ローカルに保存
+            this.save();
+            
+            // 画面と子画面を更新
+            this.updateUI();
+            this.broadcastData();
+        
+            alert('ログアウトしました。');
+        },
+        
+        // --------------------------------------------------
+        // File Backup / Restore
+        // --------------------------------------------------
+            backupToFile: function() {
+                const blob = new Blob([JSON.stringify(this.data, null, 2)], {type: "application/json"});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `lldb_backup_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            },
+
+            restoreFromFile: function(input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const loaded = JSON.parse(e.target.result);
+                        if (!confirm('ファイルを読み込み、現在のデータを上書きしますか？')) return;
+                        
+                        this.data = loaded;
+                        this.save();
+                        this.updateUI();
+                        this.broadcastData();
+                        alert('復元しました！');
+                    } catch(err) {
+                        alert('不正なファイル形式です');
+                    }
+                };
+                reader.readAsText(file);
+                // Reset input
+                input.value = '';
+            },
+
+            // --------------------------------------------------
+            // CSV Export (Exit Strategy)
+            // --------------------------------------------------
+            exportCSV: async function() {
+                if (Object.keys(this.data.attendedLives).length === 0) {
+                    alert('参戦記録がありません。');
+                    return;
+                }
+
+                if(!confirm('参戦記録をCSVとしてダウンロードしますか？\n(公演タイトル情報を取得するため少し時間がかかります)')) return;
+
+                try {
+                    // 公演名などを解決するために簡易リストを取得
+                    const res = await fetch(`${GAS_API_URL}?action=getLiveBasicData`);
+                    const json = await res.json();
+                    
+                    // ID -> Title Map作成
+                    const liveMap = {};
+                    if(json.data) {
+                        json.data.forEach(t => {
+                            // APIのレスポンス構造に合わせて調整 (liveRecords: json.liveRecords または json.data)
+                            // getLiveBasicDataのレスポンスは {status, liveRecords, version}
+                            const records = json.liveRecords || json.data;
+                            if(records) {
+                                records.forEach(l => {
+                                    // l: {date, tourName, venue...}
+                                    // IDは date を使用している
+                                    liveMap[l.date] = { title: l.tourName, date: l.date, venue: l.venue };
+                                });
+                            }
+                        });
+                    }
+                    
+                    // 修正: getLiveBasicDataのレスポンス構造がフラットな配列の場合の対応
+                    if (json.liveRecords) {
+                        json.liveRecords.forEach(l => {
+                            liveMap[l.date] = { title: l.tourName, date: l.date, venue: l.venue };
+                        });
+                    }
+
+                    // CSV生成
+                    let csvContent = "\uFEFF"; // BOM
+                    csvContent += "日付,ツアー,会場,メモ,リンク\n";
+
+                    const attendedIds = Object.keys(this.data.attendedLives).sort();
+                    
+                    attendedIds.forEach(id => {
+                        const rec = this.data.attendedLives[id];
+                        const info = liveMap[id] || { title: 'Unknown Live', date: id, venue: '-' };
+                        
+                        // CSVエスケープ処理
+                        const escape = (txt) => `"${(txt || '').replace(/"/g, '""')}"`;
+                        
+                        const row = [
+                            escape(info.date),
+                            escape(info.title),
+                            escape(info.venue),
+                            escape(rec.memo),
+                            escape(rec.link)
+                        ];
+                        csvContent += row.join(",") + "\n";
+                    });
+
+                    // ダウンロード
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `lldb_attended_list.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                } catch(e) {
+                    console.error(e);
+                    alert('CSV作成に失敗しました。通信環境を確認してください。');
+                }
+            },
+
+            // UI更新
+            updateUI: function() {
+                const syncId = this.data.settings.syncId;
+                const setupArea = document.getElementById('sync-setup-area');
+                const activeArea = document.getElementById('sync-active-area');
+                const idDisplay = document.getElementById('current-sync-id');
+                const lastSyncDisplay = document.getElementById('last-sync-time');
+
+                if (syncId) {
+                    setupArea.classList.add('hidden');
+                    activeArea.classList.remove('hidden');
+                    idDisplay.textContent = syncId;
+                    lastSyncDisplay.textContent = this.data.settings.lastSync 
+                        ? `最終保存: ${this.data.settings.lastSync}` 
+                        : '未同期';
+                } else {
+                    setupArea.classList.remove('hidden');
+                    activeArea.classList.add('hidden');
+                }
+            }
+        };
+
+        // モーダル制御
+        function openMyLLDBModal() {
+            toggleNoren(); // メニュー閉じる
+            const modal = document.getElementById('mylldb-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex'); // for flexbox centering
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            
+            UserDataManager.init(); // 念の為UI最新化
+        }
+
+        function closeMyLLDBModal() {
+            const modal = document.getElementById('mylldb-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        // 初期化実行 (DOM Load時)
+        document.addEventListener('DOMContentLoaded', () => {
+            UserDataManager.init();
+            
+            // 子フレームからの更新要求を受け取る
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'updateUserLiveRecord') {
+                    // { id, attended, memo, link }
+                    UserDataManager.updateAttendedLive(
+                        event.data.id, 
+                        event.data
+                    );
+                }
+                // ★追加: 誕生日更新の受け取り
+                else if (event.data.type === 'updateUserBirth') {
+                UserDataManager.data.profile.birthday = event.data.birthday;
+                UserDataManager.save();
+                console.log('Birthday updated via History App:', event.data.birthday);
+                }
+                // ★追加: Liveアプリからのモーダル起動要求
+                else if (event.data.type === 'openMyLLDB') {
+                openMyLLDBModal();
+                }
+                });
+        });
 
         // アプリ切り替え
         function switchApp(appName) {
@@ -326,7 +803,14 @@
             if(apps[appName]) {
                 // TailwindのJITカラークラス(bg-[#...])を動的に適用するため、style属性ではなくclassNameを更新
                 header.className = `${apps[appName].color} text-white transition-colors duration-300 flex items-center justify-between px-4 fixed top-0 z-30 shadow-sm w-full h-[60px]`;
-                title.textContent = apps[appName].title;
+                
+                // タイトルテキストのみを更新し、バージョン表示用のspanは消さないようにする
+                const titleText = document.getElementById('header-title-text');
+                if (titleText) titleText.textContent = apps[appName].title;
+
+                // バージョン番号は「Live」アプリの時だけ表示し、他では隠す
+                const versionEl = document.getElementById('display-version');
+                if (versionEl) versionEl.style.display = (appName === 'live') ? 'inline' : 'none';
             }
 
             // 暖簾を閉じる
@@ -373,245 +857,207 @@
         }
 
         function openAboutModal() {
-        toggleNoren();
-        setTimeout(() => {
-            const modal = document.getElementById('about-modal');
-            modal.classList.add('open');
-            // ここに loadUpdateHistory() は書かなくてOKです（起動時に済ませるため）
-        }, 300);
-    }
+            toggleNoren();
+            setTimeout(() => {
+                const modal = document.getElementById('about-modal');
+                modal.classList.add('open');
+            }, 300);
+        }
 
         function closeAboutModal() {
             const modal = document.getElementById('about-modal');
             modal.classList.remove('open');
         }
-let isUpdateHistoryLoaded = false; // 読み込み完了フラグ
 
-    async function loadUpdateHistory() {
-        // すでに読み込み済みなら何もしない
-        if (isUpdateHistoryLoaded) return;
+        let isUpdateHistoryLoaded = false; // 読み込み完了フラグ
 
-        const container = document.getElementById('update-history-content');
-        
-        try {
-            console.log("Start loading update history in background...");
+        async function loadUpdateHistory() {
+            // すでに読み込み済みなら何もしない
+            if (isUpdateHistoryLoaded) return;
+
+            const container = document.getElementById('update-history-content');
             
-            // APIへリクエスト
-            const response = await fetch(`${GAS_API_URL}?action=getUpdateHistory`);
-            const json = await response.json();
+            try {
+                console.log("Start loading update history in background...");
+                // APIへリクエスト
+                const response = await fetch(`${GAS_API_URL}?action=getUpdateHistory`);
+                const json = await response.json();
 
-            if (json.status === 'success' && json.data.length > 0) {
-                // HTMLを生成
-                let html = '<div class="flex flex-col gap-3">';
-                json.data.forEach(item => {
-                    html += `
-                        <div class="border-b border-gray-100 pb-2 last:border-0">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-[10px] font-mono text-gray-400">${item.date}</span>
-                                <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${item.version}</span>
-                            </div>
-                            <p class="text-xs text-gray-600 leading-relaxed">${item.content}</p>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                
-                // 画面に反映 (ユーザーが見ていなくても裏側で書き換わる)
-                if (container) {
-                    container.innerHTML = html;
-                    isUpdateHistoryLoaded = true;
-                    console.log("Update history loaded successfully.");
+                // スプレッドシートの最新バージョン（B2セル）を真っ先に反映（履歴の有無に関わらず）
+                if (json.version_all) {
+                    const versionElement = document.getElementById('display-version');
+                    if (versionElement) {
+                        versionElement.textContent = 'vol.' + json.version_all;
+                    }
                 }
-            } else {
-                if (container) container.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">更新履歴はありません</p>';
+
+                if (json.status === 'success' && json.data && json.data.length > 0) {
+                    // HTMLを生成
+                    let html = '<div class="flex flex-col gap-3">';
+                    json.data.forEach(item => {
+                        html += `
+                            <div class="border-b border-gray-100 pb-2 last:border-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-[10px] font-mono text-gray-400">${item.date}</span>
+                                    <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${item.version}</span>
+                                </div>
+                                <p class="text-xs text-gray-600 leading-relaxed">${item.content}</p>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    if (container) {
+                        container.innerHTML = html;
+                        isUpdateHistoryLoaded = true;
+                    }
+                } else {
+                    if (container) container.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">更新履歴はありません</p>';
+                }
+            } catch (e) {
+                console.error("Update history load failed:", e);
+                if (container) container.innerHTML = '<p class="text-center text-red-400 text-xs py-4">読み込みに失敗しました</p>';
             }
-        } catch (e) {
-            console.error("Update history load failed:", e);
-            // 失敗した場合、ユーザーがモーダルを開いたときに「読み込み失敗」と見えるようにする
-            if (container) container.innerHTML = '<p class="text-center text-red-400 text-xs py-4">読み込みに失敗しました</p>';
         }
-    }
-        // ★追加機能: セトリ投稿フォームへの遷移処理
+
+        // セトリ投稿フォームへの遷移処理
         function openSetlistForm() {
-            // ダイアログで確認
             if (confirm('セトリ投稿フォームに移動しますか？')) {
-                // 暖簾メニューを閉じる
                 toggleNoren();
-                // 外部サイトへ遷移
                 window.location.href = 'https://nokidochibi.github.io/LLDB_SetoriForm/';
             }
         }
 
-// 強制再起動機能
+        // 強制再起動機能
         function forceReloadApp() {
           if (!confirm('アプリを再起動しますか？\n（表示がおかしい時などにお使いください）')) return;
-          
-          toggleNoren(); // 暖簾を閉じる
-          localStorage.clear(); // キャッシュ削除
-    
+          toggleNoren();
+          localStorage.clear();
           setTimeout(() => {
-            window.location.reload(); // ページリロード -> 長いローディング発動
+            window.location.reload();
           }, 300);
         }
 
-        // ★追加機能: 裏側でConfigをチェックして更新があればiframeへ通知する
+        // Config更新チェック
         async function checkRemoteConfig() {
             try {
                 console.log("Checking remote config...");
-                // Configシートの情報を取得（軽量）
                 const response = await fetch(`${GAS_API_URL}?action=getAppVersions`);
                 const json = await response.json();
                 
-                // ローカルの保存済みバージョンと比較
                 const localVersions = JSON.parse(localStorage.getItem('lldb_data_versions') || '{}');
                 let hasUpdate = false;
                 
-                // Configシートの各行についてチェック
                 Object.keys(json).forEach(appName => {
-                    const remoteId = json[appName]; // "46022-0" など
-                    const appKey = APP_ID_MAP[appName]; // "live" など
-                    
+                    const remoteId = json[appName];
+                    const appKey = APP_ID_MAP[appName];
                     if (!appKey) return;
 
                     const localId = localVersions[appKey];
-
-                    // 差分がある場合（または初回）
                     if (localId !== remoteId) {
                         console.log(`Update found for ${appName}: ${localId} -> ${remoteId}`);
-                        
-                        // 1. 新しいIDをローカルに保存予約
                         localVersions[appKey] = remoteId;
                         hasUpdate = true;
-                        
-                        // 2. 対象のiframeに「更新せよ」と指令を送る
                         const iframe = document.querySelector(`#app-${appKey} iframe`);
                         if (iframe && iframe.contentWindow) {
                             iframe.contentWindow.postMessage({
-                                type: 'forceUpdateData', // 更新指令
+                                type: 'forceUpdateData',
                                 newVersion: remoteId
                             }, '*');
                         }
                     }
                 });
 
-                // 最新のバージョン情報を保存
                 if (hasUpdate) {
                     localStorage.setItem('lldb_data_versions', JSON.stringify(localVersions));
                 }
-
             } catch (e) {
                 console.error("Config check failed:", e);
             }
         }
 
-        // --- 追加機能: ヘッダータップでスクロールトップ ---
+        // --- DOMContentLoaded ---
         document.addEventListener('DOMContentLoaded', () => {
-        // ★順序変更: バージョンチェックを最優先に実行
-        // これにより、iframeの読み込み開始前に確実にキャッシュ状態を整えます
-        const savedVer = localStorage.getItem('lldb_version');
-        if (savedVer !== APP_VERSION) {
-            localStorage.clear();
-            localStorage.setItem('lldb_version', APP_VERSION);
-            console.log(`Version updated to ${APP_VERSION}. Cache cleared.`);
-        }
+            // 1. キャッシュクリアチェック
+            const savedVer = localStorage.getItem('lldb_version');
+            if (savedVer !== APP_VERSION) {
+                localStorage.clear();
+                localStorage.setItem('lldb_version', APP_VERSION);
+                console.log(`Version updated to ${APP_VERSION}. Cache cleared.`);
+            }
 
-        /* ▼▼▼ ここ（358行目の直後）に挿入してください ▼▼▼ */
-        // 裏側で更新履歴を読み込み開始（並走させる）
-        loadUpdateHistory();
-        
-        // ★追加: 裏側でデータ更新チェックを開始（並走させる）
-        checkRemoteConfig();
-
-            // バージョン番号の一括反映処理
+            // 2. IframeのURLを設定して読み込みを開始させる（優先度①：ライブ情報取得の開始）
             document.querySelectorAll('iframe').forEach(iframe => {
                 const currentSrc = iframe.getAttribute('src');
-                const separator = currentSrc.includes('?') ? '&' : '?';
-                iframe.setAttribute('src', `${currentSrc}${separator}v=${APP_VERSION}`);
+                if (currentSrc) {
+                    const separator = currentSrc.includes('?') ? '&' : '?';
+                    iframe.setAttribute('src', `${currentSrc}${separator}v=${APP_VERSION}`);
+                }
             });
+
+            // 3. アプリの初期画面を表示する（ハッシュルーティング）
+            const hash = window.location.hash;
+            if (hash === '#song') { switchApp('songHelper'); } 
+            else if (hash === '#trends') { switchApp('trends'); } 
+            else if (hash === '#history') { switchApp('history'); } 
+            else { switchApp('live'); }
+
+            // 4. バックグラウンド処理を開始（優先度②：スプシの4.6取得など）
+            loadUpdateHistory();
+            checkRemoteConfig();
             
             const aboutVerEl = document.getElementById('about-version-display');
             if(aboutVerEl) aboutVerEl.textContent = aboutVersion;
 
             lucide.createIcons();
-            
-            // ▼▼▼ ここを修正しました ▼▼▼
-            // URLハッシュ(#)を見て初期アプリを切り替える処理
-            const hash = window.location.hash;
-
-            if (hash === '#song') {
-                switchApp('songHelper');
-            } else if (hash === '#trends') {
-                switchApp('trends');
-            } else if (hash === '#history') {
-                switchApp('history');
-            } else {
-                // デフォルトは Live
-                switchApp('live');
-            }
 
             const header = document.getElementById('main-app-header');
             if(header) {
                 header.addEventListener('click', (e) => {
-                    // メニューボタン(🌸)のクリックは除外
                     if (e.target.closest('#header-menu-btn')) return;
 
                     const activeScreen = document.querySelector('.app-screen.active');
                     if (!activeScreen) return;
 
-                    // 1. Hub自体のコンテナをスクロール
                     activeScreen.scrollTo({ top: 0, behavior: 'smooth' });
-
-                    // 2. iframe内のコンテンツをスクロール
                     const iframe = activeScreen.querySelector('iframe');
                     if (iframe && iframe.contentWindow) {
                         try {
                             const doc = iframe.contentDocument || iframe.contentWindow.document;
-                            
-                            // 標準的なウィンドウ/ボディのスクロール
                             iframe.contentWindow.scrollTo({ top: 0, behavior: 'smooth' });
                             doc.body.scrollTo({ top: 0, behavior: 'smooth' });
                             doc.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-
-                            // LLDB Live用 (.mobile-frame)
+                            
                             const mobileFrame = doc.querySelector('.mobile-frame');
                             if (mobileFrame) mobileFrame.scrollTo({ top: 0, behavior: 'smooth' });
-
-                            // LLDB Song Helper用 (表示中のチャットコンテナ)
+                            
                             const chatContainers = doc.querySelectorAll('main[id^="chat-container-"]');
                             chatContainers.forEach(el => {
-                                // hiddenクラスがない(=表示されている)コンテナをスクロール
                                 if (!el.classList.contains('hidden')) {
                                     el.scrollTo({ top: 0, behavior: 'smooth' });
                                 }
                             });
-
-                        } catch(err) {
-                            console.log("Scroll interaction failed (likely cross-origin restriction if deployed differently):", err);
-                        }
+                        } catch(err) {}
                     }
                 });
             }
         });
-    // 子iframeからのメッセージを待ち受け、Liveアプリへ橋渡しする
-    window.addEventListener('message', (event) => {
-      if (event.data.type === 'requestLiveSearch') {
-        // 1. まず親側でアプリをLiveに切り替える
-        switchApp('live'); 
-        
-        // 2. Liveアプリのiframeへ検索指示を転送する
-        const liveIframe = document.querySelector('#app-live iframe');
-        if (liveIframe && liveIframe.contentWindow) {
-          // 切り替えアニメーション等を考慮し、100ms待ってから送信
-          setTimeout(() => {
-            liveIframe.contentWindow.postMessage({
-              type: 'execLiveSearch',
-              tourName: event.data.tourName
-            }, '*');
-          }, 100);
-        }
-      }
-    });
-    </script>
 
+        // 子iframeからのメッセージ待ち受け
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'requestLiveSearch') {
+                switchApp('live'); 
+                const liveIframe = document.querySelector('#app-live iframe');
+                if (liveIframe && liveIframe.contentWindow) {
+                    setTimeout(() => {
+                        liveIframe.contentWindow.postMessage({
+                            type: 'execLiveSearch',
+                            tourName: event.data.tourName
+                        }, '*');
+                    }, 100);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
