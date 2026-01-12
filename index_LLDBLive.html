@@ -1629,7 +1629,9 @@ function renderLiveCountChart() {
   const songToSearch = document.getElementById('song-search-input').value.trim();
   const isMedleyIncluded = document.getElementById('medley-toggle').checked;
 
-  const songPlaysByYear = {};
+  const songPlaysByYear = {}; // 選択曲の全演奏回数
+  const attendedSongPlaysByYear = {}; // 選択曲かつ参戦した回数
+
   if (songToSearch) {
     allLiveRecords.forEach(rec => {
       if (!rec.year) return;
@@ -1650,39 +1652,86 @@ function renderLiveCountChart() {
         }
       });
 
-      if (count > 0) songPlaysByYear[rec.year] = (songPlaysByYear[rec.year] || 0) + count;
+      if (count > 0) {
+          // 年ごとの演奏回数を加算
+          songPlaysByYear[rec.year] = (songPlaysByYear[rec.year] || 0) + count;
+          
+          // ★追加: 参戦判定
+          const isAttended = userUserData.attendedLives && userUserData.attendedLives[rec.date];
+          if (isAttended) {
+              attendedSongPlaysByYear[rec.year] = (attendedSongPlaysByYear[rec.year] || 0) + count;
+          }
+      }
     });
   }
 
   const years = Object.keys(liveCountsByYear).sort((a, b) => a - b);
   const totalLiveData = years.map(year => liveCountsByYear[year]);
-  const songPlayData = years.map(year => songPlaysByYear[year] || 0);
+  
+  // 各スタックのデータ計算
+  const attendedData = years.map(year => attendedSongPlaysByYear[year] || 0); // 参戦した演奏
+  const notAttendedData = years.map(year => (songPlaysByYear[year] || 0) - (attendedSongPlaysByYear[year] || 0)); // 参戦してない演奏
+  const otherData = years.map((year, i) => Math.max(0, liveCountsByYear[year] - (attendedData[i] + notAttendedData[i]))); // その他
 
-  const datasets = [{
-    label: '楽曲演奏',
-    data: songPlayData,
-    backgroundColor: 'rgba(255, 105, 180, 0.8)',
-    borderColor: 'rgba(255, 105, 180, 1)',
-    borderWidth: 1,
-    stack: 'stack1',
-    datalabels: {
-      display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-      color: 'gray',
-      anchor: 'end',
-      align: 'end',
-      offset: -2,
-      font: { size: 10, weight: 'bold' },
-      formatter: val => val
+  const datasets = [
+    {
+        label: '参戦済',
+        data: attendedData,
+        backgroundColor: '#FF69B4', // 濃いピンク
+        borderColor: '#FF69B4',
+        borderWidth: 1,
+        stack: 'stack1',
+        datalabels: { display: false } // 個別の値は表示しない
+    },
+    {
+        label: '未参戦',
+        data: notAttendedData,
+        backgroundColor: 'rgba(255, 105, 180, 0.3)', // 薄いピンク
+        borderColor: '#FF69B4',
+        borderWidth: 1,
+        stack: 'stack1',
+        datalabels: { display: false } // 個別の値は表示しない
+    },
+    {
+        label: 'その他',
+        data: otherData,
+        backgroundColor: 'rgba(229, 231, 235, 0.8)',
+        borderColor: 'rgba(229, 231, 235, 1)',
+        borderWidth: 1,
+        stack: 'stack1',
+        datalabels: { display: false }
     }
-  }, {
-    label: 'その他',
-    data: totalLiveData.map((total, i) => Math.max(0, total - songPlayData[i])),
-    backgroundColor: 'rgba(229, 231, 235, 0.8)',
-    borderColor: 'rgba(229, 231, 235, 1)',
-    borderWidth: 1,
-    stack: 'stack1',
-    datalabels: { display: false }
-  }];
+  ];
+
+  // 合計値を表示するための設定
+  // 参戦データがある場合のみ、合計を表示するデータセットの表示条件などを調整
+  const hasSelection = songToSearch !== '';
+
+  if (hasSelection) {
+      // 一番上のスタック（その他）に合計値を表示させるロジックに変更するか、
+      // 既存のロジックで「演奏回数」の合計を表示させるか。
+      // ここでは、薄いピンク（未参戦）の上に合計を表示したいが、積み上げなので難しい。
+      // 妥協案として、一番上のスタックにラベルを出すのではなく、
+      // 既存のロジックを流用し、「未参戦」のバーにラベル設定を行う。
+      
+      // 未参戦データのデータラベル設定を上書き
+      datasets[1].datalabels = {
+          display: ctx => {
+              // 参戦＋未参戦の合計が0より大きい場合に表示
+              const i = ctx.dataIndex;
+              return (attendedData[i] + notAttendedData[i]) > 0;
+          },
+          color: 'gray',
+          anchor: 'end',
+          align: 'end',
+          offset: -2,
+          font: { size: 10, weight: 'bold' },
+          formatter: (val, ctx) => {
+              const i = ctx.dataIndex;
+              return attendedData[i] + notAttendedData[i]; // 合計を表示
+          }
+      };
+  }
 
   chartInstances.liveCount = new Chart(canvas, {
     type: 'bar',
@@ -2335,12 +2384,23 @@ function searchRegion(region) {
 }
 
 function selectSong(songName) {
-  document.getElementById('song-search-input').value = songName;
-  // 楽曲タブへ移動してからランキング描画
-  switchToTab('song'); 
-  renderSongRanking();
-  renderLiveCountChart();
-  document.getElementById('show-setlist-btn').style.display = 'inline-block';
+  // ★改修: 楽曲タブではなく、公演タブへ遷移して参戦フィルタONで検索する
+  
+  // 1. 検索用テキストの生成（メドレー考慮）
+  const isMedleyIncluded = document.getElementById('medley-toggle').checked;
+  const songFilterText = isMedleyIncluded ? `${songName}　※楽曲タブから選択` : `${songName}(メドレー除外)　※楽曲タブから選択`;
+  
+  // 2. 検索ボックスにセット
+  document.getElementById('song-filter-input').value = songFilterText;
+  
+  // 3. 参戦フィルタをONにする
+  document.getElementById('attended-filter-toggle').checked = true;
+  
+  // 4. 公演タブへ切り替え
+  switchToTab('search');
+  
+  // 5. 検索実行
+  applyFilters();
 }
 
 function selectVenue(fullVenueName) {
