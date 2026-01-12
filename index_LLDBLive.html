@@ -659,23 +659,30 @@ button { font-size: 13px !important; }
         <button id="song-clear-btn" class="action-btn clear-btn">クリア</button>
         <button id="show-setlist-btn" class="action-btn setlist-btn" style="display: none;">公演表示</button>
       </div>
-      <div class="flex justify-between items-center text-lg font-semibold">
-        <span class="text-gray-500">全楽曲: <span id="total-songs" class="font-bold text-gray-800">-</span> 曲</span>
-        <select id="song-sort" class="text-aiko-red font-bold border-none bg-transparent focus:ring-0" style="padding:0!important; width:auto!important; border:none!important;">
-          <option value="count-desc">演奏回数 降順</option><option value="count-asc">演奏回数 昇順</option>
-        </select>
+      <div class="flex justify-between items-center">
+        <span class="text-gray-500 text-sm">全楽曲: <span id="total-songs" class="font-bold text-gray-800">-</span> 曲</span>
+        <div class="flex items-center gap-2">
+            <span class="text-[12px] font-bold text-gray-500">メドレー込み</span>
+            <div class="relative inline-block align-middle select-none shrink-0">
+                <input type="checkbox" name="toggle" id="medley-toggle" class="toggle-checkbox" checked/>
+                <label for="medley-toggle" class="toggle-label" style="transform: scale(0.85); display:block;"></label>
+            </div>
+        </div>
       </div>
     </div>
 
-    <div class="flex justify-between items-center mt-6 mb-3 px-1">
-      <h3 id="song-ranking-header" class="font-bold text-gray-700 text-lg cursor-pointer select-none tap-trigger flex items-center gap-2">
-        <span id="song-ranking-icon" class="inline-block">🎸</span> 演奏回数ランキング
+    <div class="flex items-center mt-6 mb-3 px-1 gap-1">
+      <h3 id="song-ranking-header" class="font-bold text-gray-700 text-[15px] flex-1 cursor-pointer select-none tap-trigger flex items-center gap-1">
+        <span id="song-ranking-icon" class="inline-block">🎸</span> ランキング
       </h3>
-      <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-full shadow-sm border border-gray-100">
-        <span class="text-[10px] font-bold text-gray-500">メドレー<br>込み</span>
-        <div class="relative inline-block align-middle select-none">
-            <input type="checkbox" name="toggle" id="medley-toggle" class="toggle-checkbox" checked/>
-            <label for="medley-toggle" class="toggle-label"></label>
+      <div class="flex gap-1 items-center shrink-0">
+        <div onclick="updateSongSort('count')" class="flex items-center gap-0.5 bg-white px-2 py-1.5 rounded-lg shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-all">
+            <span class="text-[11px] font-bold text-gray-600">演奏回数</span>
+            <i id="sort-icon-count" data-lucide="chevron-down" class="w-3 h-3 text-aiko-red"></i>
+        </div>
+        <div onclick="updateSongSort('year')" class="flex items-center gap-0.5 bg-white px-2 py-1.5 rounded-lg shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-all">
+            <span class="text-[11px] font-bold text-gray-600">(最終演奏年)</span>
+            <i id="sort-icon-year" data-lucide="chevrons-up-down" class="w-3 h-3 text-gray-300"></i>
         </div>
       </div>
     </div>
@@ -715,12 +722,6 @@ button { font-size: 13px !important; }
       <div class="card-base bg-white p-2">
         <canvas id="album-chart" style="height:300px; max-height:300px"></canvas>
       </div>
-    </div>
-
-    <div class="mb-5">
-        <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-gray-400"></i> 最近演奏されていない曲 TOP 10</h3>
-        <p class="text-gray-400 mb-2 ml-1 text-xs">※過去に1度でも演奏された曲が対象</p>
-        <div id="not-played-recently-songs" class="card-base bg-white p-2"></div>
     </div>
 
     <div class="mb-5"><h3 class="font-bold mb-2 text-gray-700 text-base">🎬 オープニング曲 TOP 10</h3>
@@ -902,11 +903,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-let allLiveRecords = [], 
-    songStats = {},                   
-    songStatsNoMedley = {},         
-    patternStats = {}, 
-    lastPlayedStats = {}, 
+let allLiveRecords = [],
+    songStats = {},
+    songStatsNoMedley = {},
+    songLastYears = {},
+    songLastYearsNoMedley = {},
+    songSortState = 'count-desc', 
+    patternStats = {},
     albumData = [], 
     songData = {}, 
     historyData = [], 
@@ -1051,7 +1054,6 @@ function initializeApp(data) {
 
   analyzeSongStats(allLiveRecords);
   analyzePatterns(allLiveRecords);
-  analyzeLastPlayed(allLiveRecords);
   populateFilters(allLiveRecords);
   
   if (historyData.length > 0) {
@@ -1072,7 +1074,6 @@ function initializeApp(data) {
   renderAlbumChart();
   renderSongRanking(); 
   renderPatternStats();
-  renderLastPlayedRanking();
   renderVenueRanking();
   renderVenueLiveCountChart();
 
@@ -1773,39 +1774,50 @@ function renderVenueLiveCountChart() {
 }
 
 function analyzeSongStats(records) {
-  songStats = {};
-  songStatsNoMedley = {};
+songStats = {};
+songStatsNoMedley = {};
+songLastYears = {};
+songLastYearsNoMedley = {};
 
-  // 楽曲データにある全曲を0回で初期化
-  if (songData) {
-    Object.keys(songData).forEach(songName => {
-      // カギカッコ付き（カバー曲など）は初期化もしない（除外）
-      if (!songName.includes('[') && !songName.includes(']')) {
-          songStats[songName] = 0;
-          songStatsNoMedley[songName] = 0;
-      }
-    });
-  }
+// 楽曲データにある全曲を0回で初期化
+if (songData) {
+Object.keys(songData).forEach(songName => {
+if (!songName.includes('[') && !songName.includes(']')) {
+songStats[songName] = 0;
+songStatsNoMedley[songName] = 0;
+songLastYears[songName] = 0;
+songLastYearsNoMedley[songName] = 0;
+}
+});
+}
 
-  records.forEach(rec => {
-    let inMedley = false;
-    rec.setlist.forEach(s => {
-      if (s === '__MEDLEY_START__') { inMedley = true; return; }
-      if (s === '__MEDLEY_END__') { inMedley = false; return; }
+records.forEach(rec => {
+let inMedley = false;
+const currentYear = parseInt(rec.year);
 
-      const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
-      
-      // 除外判定: メドレー文字、または [] を含む曲
-      if (clean && clean !== 'メドレー' && !clean.includes('[') && !clean.includes(']')) {
-        // 全集計（メドレー込み）
-        songStats[clean] = (songStats[clean] || 0) + 1;
-        // メドレー除外集計
-        if (!inMedley) {
-            songStatsNoMedley[clean] = (songStatsNoMedley[clean] || 0) + 1;
-        }
-      }
-    });
-  });
+rec.setlist.forEach(s => {
+if (s === '__MEDLEY_START__') { inMedley = true; return; }
+if (s === '__MEDLEY_END__') { inMedley = false; return; }
+
+const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
+
+if (clean && clean !== 'メドレー' && !clean.includes('[') && !clean.includes(']')) {
+// 全集計（メドレー込み）
+songStats[clean] = (songStats[clean] || 0) + 1;
+if (!songLastYears[clean] || currentYear > songLastYears[clean]) {
+songLastYears[clean] = currentYear;
+}
+
+// メドレー除外集計
+if (!inMedley) {
+songStatsNoMedley[clean] = (songStatsNoMedley[clean] || 0) + 1;
+if (!songLastYearsNoMedley[clean] || currentYear > songLastYearsNoMedley[clean]) {
+songLastYearsNoMedley[clean] = currentYear;
+}
+}
+}
+});
+});
 }
 
 function analyzePatterns(records) {
@@ -1849,53 +1861,6 @@ function analyzePatterns(records) {
     });
   });
   patternStats = { openingSongs: o, encoreSongs: e, lastSongs: l };
-}
-
-function analyzeLastPlayed(records) {
-  lastPlayedStats = {};
-  records.forEach(rec => {
-    const recDate = new Date(rec.date);
-    
-    rec.setlist.forEach(s => {
-      if (s.startsWith('__MEDLEY_') || s === 'メドレー') return;
-      
-      const cleanName = s.replace(/_アンコール(?: #\d+)?/g, '').trim();
-      if (!cleanName) return;
-      // カギカッコ付きを除外
-      if (cleanName.includes('[') || cleanName.includes(']')) return;
-      if (!songData[cleanName]) return;
-
-      if (!lastPlayedStats[cleanName] || recDate > lastPlayedStats[cleanName].dateObj) {
-        lastPlayedStats[cleanName] = {
-          dateObj: recDate,
-          tourName: rec.tourName,
-          year: rec.year
-        };
-      }
-    });
-  });
-}
-
-function renderLastPlayedRanking() {
-  const container = document.getElementById('not-played-recently-songs');
-  if (!container) return;
-
-  const sorted = Object.entries(lastPlayedStats)
-    .sort((a, b) => a[1].dateObj - b[1].dateObj)
-    .slice(0, 10);
-
-  container.innerHTML = sorted.map(([song, data], i) => {
-    const rankColor = i < 3 ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][i] : 'text-gray-300';
-    const borderClass = i !== sorted.length - 1 ? 'border-b border-gray-100' : '';
-    
-    return `<div class="p-3 clickable-item flex items-center ${borderClass}" onclick="selectSong('${song.replace(/'/g, "\\'")}')">
-      <span class="rank-number ${rankColor}">${i + 1}</span>
-      <div class="flex-1 min-w-0">
-        <div class="song-title text-gray-700 truncate">${song}</div>
-        <div class="text-xs text-gray-400 mt-0.5 truncate">(${data.year}) ${data.tourName}</div>
-      </div>
-    </div>`;
-  }).join('');
 }
 
 function populateFilters(records, skipApply = false) {
@@ -2429,46 +2394,94 @@ function switchToTab(tabId) {
 }
 
 function renderSongRanking() {
-  const container = document.getElementById('song-ranking-container');
-  if (!container) return;
-  const sortOrder = document.getElementById('song-sort').value;
-  const searchTerm = document.getElementById('song-search-input').value.toLowerCase();
-  
-  // トグルの状態を確認
-  const isMedleyIncluded = document.getElementById('medley-toggle').checked;
-  const targetStats = isMedleyIncluded ? songStats : songStatsNoMedley;
+const container = document.getElementById('song-ranking-container');
+if (!container) return;
+const sortOrder = songSortState; // ★ここを変更
+const searchTerm = document.getElementById('song-search-input').value.toLowerCase();
 
-  const sortedSongs = Object.entries(targetStats)
-    .filter(([song]) => song.toLowerCase().startsWith(searchTerm))
-    .map(([song, count]) => ({ song, count }))
-    .sort((a, b) => sortOrder === 'count-desc' ? b.count - a.count : a.count - b.count);
+// アイコンの状態を更新
+updateSortIcons();
 
-  document.getElementById('total-songs').textContent = Object.keys(songStats).length;
-  
-  let currentRank = 0;
-  let lastCount = -1;
-  let skip = 1;
+const isMedleyIncluded = document.getElementById('medley-toggle').checked;
+const targetStats = isMedleyIncluded ? songStats : songStatsNoMedley;
+const targetYears = isMedleyIncluded ? songLastYears : songLastYearsNoMedley;
 
-  container.innerHTML = sortedSongs.map((item, index) => {
-    if (item.count !== lastCount) {
-        if (lastCount !== -1) {
-            currentRank += skip;
-            skip = 1;
-        } else {
-            currentRank = 1;
-        }
-        lastCount = item.count;
+const sortedSongs = Object.entries(targetStats)
+.filter(([song]) => song.toLowerCase().startsWith(searchTerm))
+.map(([song, count]) => ({ song, count, year: targetYears[song] || 0 }))
+.sort((a, b) => {
+if (sortOrder === 'count-desc') return b.count - a.count || b.year - a.year;
+if (sortOrder === 'count-asc') return a.count - b.count || a.year - b.year;
+if (sortOrder === 'year-desc') return b.year - a.year || b.count - a.count;
+if (sortOrder === 'year-asc') {
+// 一度も演奏されていない(year=0)は常に最後に送る
+if (a.year === 0) return 1;
+if (b.year === 0) return -1;
+return a.year - b.year || b.count - a.count;
+}
+return 0;
+});
+
+document.getElementById('total-songs').textContent = Object.keys(songStats).length;
+
+let currentRank = 0;
+let lastVal = -1;
+let skip = 1;
+
+container.innerHTML = sortedSongs.map((item, index) => {
+// 順位は「回数」を基準にする
+if (item.count !== lastVal) {
+if (lastVal !== -1) {
+currentRank += skip;
+skip = 1;
+} else {
+currentRank = 1;
+}
+lastVal = item.count;
+} else {
+skip++;
+}
+
+const rankColor = currentRank <= 3 && searchTerm === '' ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][currentRank-1] : 'text-gray-300';
+const yearText = item.year > 0 ? `(${item.year}年)` : '(ー)';
+
+return `
+<div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100 bg-white" onclick="selectSong('${item.song.replace(/'/g, "\\'")}')">
+<span class="rank-number ${rankColor}">${currentRank}</span>
+<span class="song-title text-gray-700">${item.song}</span>
+<span class="song-count">${item.count} <span>回</span></span>
+<span class="text-[11px] text-gray-400 ml-2 w-14 text-right">${yearText}</span>
+</div>`}).join('');
+}
+
+function updateSongSort(key) {
+    if (songSortState.startsWith(key)) {
+        songSortState = songSortState.endsWith('desc') ? key + '-asc' : key + '-desc';
     } else {
-        skip++;
+        songSortState = key + '-desc';
     }
+    renderSongRanking();
+}
 
-    const rankColor = currentRank <= 3 && searchTerm === '' ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][currentRank-1] : 'text-gray-300';
-    return `
-      <div class="card-base p-3 mb-2 clickable-item flex items-center border border-gray-100 bg-white" onclick="selectSong('${item.song.replace(/'/g, "\\'")}')">
-        <span class="rank-number ${rankColor}">${currentRank}</span>
-        <span class="song-title text-gray-700">${item.song}</span>
-        <span class="song-count">${item.count} <span>回</span></span>
-      </div>`}).join('');
+function updateSortIcons() {
+    const countIcon = document.getElementById('sort-icon-count');
+    const yearIcon = document.getElementById('sort-icon-year');
+    if (!countIcon || !yearIcon) return;
+
+    // 一旦すべての色とアイコンをリセット
+    [countIcon, yearIcon].forEach(icon => {
+        icon.setAttribute('data-lucide', 'chevrons-up-down');
+        icon.classList.remove('text-aiko-red');
+        icon.classList.add('text-gray-300');
+    });
+
+    // 現在のソート状態に合わせて色と矢印をセット
+    const activeIcon = songSortState.startsWith('count') ? countIcon : yearIcon;
+    activeIcon.classList.remove('text-gray-300');
+    activeIcon.classList.add('text-aiko-red');
+    activeIcon.setAttribute('data-lucide', songSortState.endsWith('desc') ? 'chevron-down' : 'chevron-up');
+
+    lucide.createIcons();
 }
 
 function renderPatternStats() {
@@ -2566,7 +2579,6 @@ function setupEventListeners() {
     renderSongRanking();
     document.getElementById('show-setlist-btn').style.display = 'none';
   });
-  document.getElementById('song-sort').addEventListener('change', renderSongRanking);
   document.getElementById('song-clear-btn').addEventListener('click', () => {
     document.getElementById('song-search-input').value = '';
     renderSongRanking();
