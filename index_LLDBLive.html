@@ -1759,10 +1759,10 @@ function renderLiveCountChart() {
   const datalabelsConfig = getDatalabelsConfig();
 
   const datasets = [
-    { label: 'Pop', data: years.map(y => breakdown.pop[y]), backgroundColor: '#FF69B4', stack: 'stack1', borderRadius: 2, datalabels: datalabelsConfig },
-    { label: 'Rock', data: years.map(y => breakdown.rock[y]), backgroundColor: '#3B82F6', stack: 'stack1', borderRadius: 2, datalabels: datalabelsConfig },
-    { label: 'Aloha', data: years.map(y => breakdown.aloha[y]), backgroundColor: '#EAB308', stack: 'stack1', borderRadius: 2, datalabels: datalabelsConfig },
-    { label: 'Other', data: years.map(y => breakdown.other[y]), backgroundColor: '#94A3B8', stack: 'stack1', borderRadius: 2, datalabels: datalabelsConfig }
+    { label: 'Pop', data: years.map(y => breakdown.pop[y]), backgroundColor: '#E63946', stack: 'stack1', borderRadius: 2, datalabels: datalabelsConfig },
+    { label: 'Rock', data: years.map(y => breakdown.rock[y]), backgroundColor: '#00BFFF', stack: 'stack1', borderRadius: 2, datalabels: datalabelsConfig },
+    { label: 'Aloha', data: years.map(y => breakdown.aloha[y]), backgroundColor: '#FFD700', stack: 'stack1', borderRadius: 2, datalabels: datalabelsConfig },
+    { label: 'Other', data: years.map(y => breakdown.other[y]), backgroundColor: '#9CA3AF', stack: 'stack1', borderRadius: 2, datalabels: datalabelsConfig }
   ];
 
   // 曲検索時は、演奏されなかった分をグレーで積む
@@ -1811,10 +1811,10 @@ function renderTotalLiveCategorySummary() {
 
   document.getElementById('live-category-counts').innerHTML = `
     <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-base">
-      <p class="text-pink-500 truncate">・Pop: ${counts.pop}</p>
-      <p class="text-yellow-500 truncate">・Aloha: ${counts.aloha}</p>
-      <p class="text-blue-500 truncate">・Rock: ${counts.rock}</p>
-      <p class="text-gray-400 truncate">・Event: ${counts.other}</p>
+      <p class="text-aiko-red truncate">・Pop: ${counts.pop}</p>
+      <p class="text-[#FFD700] truncate">・Aloha: ${counts.aloha}</p>
+      <p class="text-[#00BFFF] truncate">・Rock: ${counts.rock}</p>
+      <p class="text-[#9CA3AF] truncate">・Event: ${counts.other}</p>
     </div>
   `;
 
@@ -1830,7 +1830,7 @@ function renderTotalLiveCategorySummary() {
       labels: ['Pop', 'Rock', 'Aloha', 'Other'],
       datasets: [{
         data: [counts.pop, counts.rock, counts.aloha, counts.other],
-        backgroundColor: ['#FF69B4', '#3B82F6', '#EAB308', '#94A3B8'],
+        backgroundColor: ['#E63946', '#00BFFF', '#FFD700', '#9CA3AF'],
         borderWidth: 0
       }]
     },
@@ -2319,7 +2319,13 @@ function showLiveDetail(rec) {
 
   const setlistHeaderHtml = `<div class="flex justify-between items-end mt-8 mb-2"><h3 class="font-bold text-gray-700 text-lg cursor-pointer flex items-center gap-2" onclick="copySetlist()">🎵 セットリスト</h3>${legendHtml}</div>`;
 
-  const setlistSection = setlistHtml.trim() ? `${summaryHtml}${setlistHeaderHtml}<div class="card-base shadow-none border border-gray-100 pb-2 bg-white">${setlistHtml}</div>` : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3><div class="card-base text-gray-500 text-sm leading-relaxed bg-white">セットリストを知っている方がいましたら、よかったらぜひX(Twitter)の<a href="https://twitter.com/noki_dochibi" target="_blank" class="text-blue-500 underline">@noki_dochibi</a>まで教えてください。</div>`;
+  const setlistSection = setlistHtml.trim() 
+    ? `${summaryHtml}${setlistHeaderHtml}<div class="card-base shadow-none border border-gray-100 pb-2 bg-white">${setlistHtml}</div>` 
+    : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3>
+       <div class="card-base text-gray-500 text-sm leading-relaxed bg-white">
+         この日のセトリがわかる方は　<span class="text-blue-500 underline cursor-pointer font-bold" onclick="if(confirm('セトリ投稿フォームに移動しますか？')){ window.open('https://nokidochibi.github.io/LLDB_SetoriForm/', '_blank'); }">こちら</span>　から教えてください。<br>
+         セットリストは　2026年3月4日以降に更新予定です。
+       </div>`;
 
   detailContainer.innerHTML = `
     <div id="detail-header-area" class="pt-2 -mt-2 cursor-pointer pl-[70px]">
@@ -2625,10 +2631,10 @@ function renderRecordsTab() { // 独立した関数として定義
     // UI反映: カテゴリテキスト (2列表示・短縮表記)
             document.getElementById('user-category-counts').innerHTML = `
                 <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-base">
-                    <p class="text-pink-500 truncate">・Pop: ${catCounts.pop}</p>
-                    <p class="text-yellow-500 truncate">・Aloha: ${catCounts.aloha}</p>
-                    <p class="text-blue-500 truncate">・Rock: ${catCounts.rock}</p>
-                    <p class="text-gray-400 truncate">・Event: ${catCounts.other}</p>
+                    <p class="text-aiko-red truncate">・Pop: ${catCounts.pop}</p>
+                    <p class="text-[#FFD700] truncate">・Aloha: ${catCounts.aloha}</p>
+                    <p class="text-[#00BFFF] truncate">・Rock: ${catCounts.rock}</p>
+                    <p class="text-[#9CA3AF] truncate">・Event: ${catCounts.other}</p>
                 </div>
             `;
 
@@ -2720,7 +2726,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
             {
                 label: 'Pop',
                 data: years.map(y => songBreakdown.pop[y] || 0),
-                backgroundColor: '#FF69B4',
+                backgroundColor: '#E63946',
                 stack: 'stack1',
                 borderRadius: 2,
                 datalabels: datalabelsConfig
@@ -2728,7 +2734,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
             {
                 label: 'Rock',
                 data: years.map(y => songBreakdown.rock[y] || 0),
-                backgroundColor: '#3B82F6',
+                backgroundColor: '#00BFFF',
                 stack: 'stack1',
                 borderRadius: 2,
                 datalabels: datalabelsConfig
@@ -2736,7 +2742,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
             {
                 label: 'Aloha',
                 data: years.map(y => songBreakdown.aloha[y] || 0),
-                backgroundColor: '#EAB308',
+                backgroundColor: '#FFD700',
                 stack: 'stack1',
                 borderRadius: 2,
                 datalabels: datalabelsConfig
@@ -2744,7 +2750,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
             {
                 label: 'Other',
                 data: years.map(y => songBreakdown.other[y] || 0),
-                backgroundColor: '#94A3B8',
+                backgroundColor: '#9CA3AF',
                 stack: 'stack1',
                 borderRadius: 2,
                 datalabels: datalabelsConfig
@@ -2773,7 +2779,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
                 {
                     label: 'Pop',
                     data: years.map(y => breakdown.pop[y] || 0),
-                    backgroundColor: '#FF69B4',
+                    backgroundColor: '#E63946',
                     stack: 'stack1',
                     borderRadius: 2,
                     datalabels: datalabelsConfig
@@ -2781,7 +2787,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
                 {
                     label: 'Rock',
                     data: years.map(y => breakdown.rock[y] || 0),
-                    backgroundColor: '#3B82F6',
+                    backgroundColor: '#00BFFF',
                     stack: 'stack1',
                     borderRadius: 2,
                     datalabels: datalabelsConfig
@@ -2789,7 +2795,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
                 {
                     label: 'Aloha',
                     data: years.map(y => breakdown.aloha[y] || 0),
-                    backgroundColor: '#EAB308',
+                    backgroundColor: '#FFD700',
                     stack: 'stack1',
                     borderRadius: 2,
                     datalabels: datalabelsConfig
@@ -2797,7 +2803,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
                 {
                     label: 'Event/Other',
                     data: years.map(y => breakdown.other[y] || 0),
-                    backgroundColor: '#94A3B8',
+                    backgroundColor: '#9CA3AF',
                     stack: 'stack1',
                     borderRadius: 2,
                     datalabels: datalabelsConfig
@@ -2879,7 +2885,7 @@ function renderUserCharts(allYearly, userYearly, cat, targetSong = null, breakdo
             labels: ['Pop', 'Rock', 'Aloha', 'Other'],
             datasets: [{
                 data: [cat.pop, cat.rock, cat.aloha, cat.other],
-                backgroundColor: ['#FF69B4', '#3B82F6', '#EAB308', '#94A3B8'],
+                backgroundColor: ['#E63946', '#00BFFF', '#FFD700', '#9CA3AF'],
                 borderWidth: 0
             }]
         },
