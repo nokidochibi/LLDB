@@ -928,6 +928,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. データ読み込み開始 (キャッシュがあればそれを使い、なければfetch)
   loadAllData(isCachedLoaded);
 
+  // ★追加: アプリに戻ってきた時（スリープ復帰やタブ切り替え）に日付チェックを走らせる
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+       // 画面が表示されたら、少し待ってから「今日は何の日？」を再チェック
+       console.log("App resumed. Checking events...");
+       setTimeout(checkTodayEvents, 1500);
+    }
+  });
+
   // 4. アニメーション完了と初期化完了を待って画面を表示
   Promise.all([appInitializedPromise, animationFinishedPromise])
     .then(() => {
@@ -3072,14 +3081,26 @@ function handleError(error) {
   document.getElementById('live-list-container').innerHTML = `<p class="text-center text-red-500 py-8 text-sm">データ読み込み中にエラーが発生しました。<br>(${error.message})</p>`;
 }
 
-  // ★追加: 今日は何の日ロジック (完全版)
+  // ★追加: 今日は何の日ロジック (1日1回制限＆自動検知対応版)
 function checkTodayEvents() {
     // 日本時間の現在時刻を取得
     const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
     const todayMonth = now.getMonth() + 1;
     const todayDate = now.getDate();
+    const currentYear = now.getFullYear();
 
-    console.log(`Today (JST): ${todayMonth}/${todayDate}`);
+    // 「今日」を識別するキー (例: "2024-11-22")
+    const todayKey = `${currentYear}-${todayMonth}-${todayDate}`;
+    // 最後に挨拶した日付を取り出す
+    const lastGreetingDate = localStorage.getItem('lldb_last_greeting_date');
+
+    console.log(`Check Events: ${todayKey} (Last greeted: ${lastGreetingDate})`);
+
+    // もし今日すでに挨拶（ポップアップ表示）済みなら、静かに終了する
+    if (lastGreetingDate === todayKey) {
+        console.log("Today's greeting already done. Skip.");
+        return;
+    }
 
     anniversaryQueue = [];
 
@@ -3120,6 +3141,9 @@ function checkTodayEvents() {
     // キューがあれば処理開始
     if (anniversaryQueue.length > 0) {
         processNextAnniversary();
+        
+        // ★ここで「今日挨拶した」と記録する（これにより今日はもう出なくなる）
+        localStorage.setItem('lldb_last_greeting_date', todayKey);
     }
 }
 
