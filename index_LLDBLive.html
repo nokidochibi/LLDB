@@ -6,7 +6,6 @@
 <title>LLDB Live</title>
 <meta name="theme-color" content="#ef4444">
 
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-0D09G3X4F1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -17,7 +16,6 @@
   gtag('config', 'G-0D09G3X4F1', { 'send_page_view': false });
 </script>
 
-<!-- 外部ライブラリ -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -577,7 +575,6 @@ button { font-size: 13px !important; }
 </style>
 </head>
 <body>
-<!-- 紙吹雪用のキャンバス -->
 <canvas id="confetti-canvas"></canvas>
 
 <div id="app" class="mobile-frame bg-[#F8F9FA]">
@@ -585,17 +582,14 @@ button { font-size: 13px !important; }
 <main id="main-content" style="opacity: 0; transition: opacity 0.5s;">
   <div id="live-detail" style="display:none"></div>
 
-  <!-- 公演タブ -->
   <div id="tab-search" class="tab-content" style="display:block">
     <p class="text-gray-400 mb-1 text-xs text-right font-mono">Data updated: <span id="last-update-date">-</span></p>
     <div class="card-base bg-white border-0">
   <div class="flex gap-2 mb-2 items-center">
-    <!-- 左側: 検索窓 (flex-1 で幅50%確保) -->
     <div class="relative flex-1">
         <input type="text" id="search-input" placeholder="フリーワードで検索" class="w-full px-3 py-2 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-red-200 focus:border-red-400 transition">
     </div>
     
-    <!-- 右側: トグルセット (flex-1 で残り50%確保し、中身を横並び右寄せ) -->
     <div class="flex-1 flex items-center justify-end gap-2">
         <div class="flex items-center gap-1 cursor-pointer tap-trigger" onclick="window.parent.postMessage({type: 'openMyLLDB'}, '*')">
         <span class="text-[12px] font-bold text-gray-500">参戦したライブのみ</span>
@@ -635,14 +629,12 @@ button { font-size: 13px !important; }
     </div>
 
     <div id="live-list-container" class="space-y-3">
-        <!-- 初期プレースホルダー -->
         <div class="loading-placeholder">今日も都合よく生きる...</div>
         <div class="loading-placeholder">データを読み込み中...</div>
         <div class="loading-placeholder">少し待っててね...</div>
     </div>
   </div>
 
-  <!-- 楽曲タブ -->
   <div id="tab-song" class="tab-content" style="display:none">
     <div class="mb-5">
       <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-aiko-red"></i> 年別演奏回数</h3>
@@ -690,7 +682,6 @@ button { font-size: 13px !important; }
     <div id="song-ranking-container"></div>
   </div>
 
-  <!-- 場所タブ -->
   <div id="tab-venue" class="tab-content" style="display:none">
     <div class="mb-5">
       <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="bar-chart" class="w-4 h-4 text-aiko-red"></i> 年別開催回数</h3>
@@ -715,7 +706,6 @@ button { font-size: 13px !important; }
     <div id="region-ranking-container" class="mt-2" style="display:none"></div>
   </div>
     
-  <!-- 傾向タブ -->
   <div id="tab-pattern" class="tab-content" style="display:none">
     <div class="mb-5">
       <h3 class="font-bold mb-2 text-gray-700 text-base flex items-center gap-2"><i data-lucide="disc" class="w-4 h-4 text-aiko-red"></i> アルバム別演奏回数</h3>
@@ -732,8 +722,7 @@ button { font-size: 13px !important; }
     <div id="last-songs" class="card-base bg-white p-2"></div></div>
   </div>
 
-  <!-- 軌跡タブ (Historyアプリ移植デザイン) -->
- <div id="tab-records" class="tab-content" style="display:none">
+  <div id="tab-records" class="tab-content" style="display:none">
   <div id="records-unregistered" class="card-base bg-white text-center py-10 hidden">
     <p class="text-gray-500 text-sm">
       この機能は <a href="#" onclick="window.parent.postMessage({type: 'openMyLLDB'}, '*'); return false;" class="text-aiko-red underline font-bold">My LLDB</a> に登録すると使えるよ
@@ -845,7 +834,6 @@ button { font-size: 13px !important; }
   </div>
 </div>
 
-<!-- 新デザインのナビゲーション -->
 <nav>
   <div class="flex w-full">
     <a href="#" class="tab-item active" data-tab="search">
@@ -2910,12 +2898,10 @@ function setupEventListeners() {
     const songInput = document.getElementById('song-filter-input');
     songInput.value = '';
     songInput.placeholder = '曲名で絞り込み（楽曲タブで選択）';
-    // ★追加: トグルもオフにする
     document.getElementById('attended-filter-toggle').checked = false;
     applyFilters();
   });
 
-  // ★追加: 参戦フィルタトグルのリスナー
   document.getElementById('attended-filter-toggle').addEventListener('change', applyFilters);
 
   document.getElementById('song-search-input').addEventListener('input', () => {
@@ -3001,14 +2987,10 @@ function setupEventListeners() {
   });
 
   // ★追加: 記録タブでの曲選択処理
-  function selectUserSong(songName) {
-    // 1. 検索ボックスにセット
+  function selectUserSong(songName, skipScroll = false) {
     document.getElementById('record-song-search').value = songName;
-    
-    // 2. ランキングを絞り込み（1曲だけになるはず）
     renderUserSongRanking();
     
-    // 3. グラフを「その曲モード」に更新
     const allYearlyCounts = {};
     allLiveRecords.forEach(r => { if(r.year) allYearlyCounts[r.year] = (allYearlyCounts[r.year] || 0) + 1; });
     
@@ -3028,33 +3010,42 @@ function setupEventListeners() {
     });
 
     renderUserCharts(allYearlyCounts, userYearlyCounts, catCounts, songName);
-
-    // 4. 公演表示ボタンを表示
     document.getElementById('user-show-setlist-btn').style.display = 'inline-block';
     
-    // 5. 上部へスクロール
-    document.getElementById('app').scrollTo({ top: 0, behavior: 'smooth' });
+    if (!skipScroll) {
+        document.getElementById('app').scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
-  // setupEventListeners 内に追加
+  // ★追加: 記録タブのクリアボタン動作
   document.getElementById('record-song-clear-btn').addEventListener('click', () => {
       document.getElementById('record-song-search').value = '';
       renderUserSongRanking();
-      
-      // グラフを元に戻す（再描画）
-      renderRecordsTab(); // これを呼べば初期状態（全参戦モード）でグラフも再生成されます
-      
+      renderRecordsTab(); // 初期状態（全参戦モード）に戻す
       document.getElementById('user-show-setlist-btn').style.display = 'none';
   });
 
+  // ★追加: 記録タブのメドレートグル連動
+  document.getElementById('user-medley-toggle').addEventListener('change', () => {
+      const songName = document.getElementById('record-song-search').value;
+      if (songName) {
+          selectUserSong(songName, true); // スクロールせずにグラフ更新
+      } else {
+          renderUserSongRanking();
+      }
+  });
+
+  // ★追加: 記録タブの「公演表示」ボタン動作
   document.getElementById('user-show-setlist-btn').addEventListener('click', () => {
       const songName = document.getElementById('record-song-search').value;
       if (!songName) return;
       
-      // 公演タブの各要素をセット
       const songInput = document.getElementById('song-filter-input');
       const isMedleyIncluded = document.getElementById('user-medley-toggle').checked;
       
+      // ★修正: 検索処理が参照している「楽曲タブ」側のトグルも同期させる
+      document.getElementById('medley-toggle').checked = isMedleyIncluded;
+
       if (isMedleyIncluded) {
            songInput.value = `${songName}　※楽曲タブから選択`;
       } else {
@@ -3064,12 +3055,10 @@ function setupEventListeners() {
       // 参戦フィルタをONにする
       document.getElementById('attended-filter-toggle').checked = true;
       
-      // タブ遷移してフィルタ適用
       switchToTab('search');
       applyFilters();
   });
 
-  // selectUserSongをグローバル公開（HTMLから呼ぶため）
   window.selectUserSong = selectUserSong;
 }
 
@@ -3130,6 +3119,7 @@ function safeTrackEvent(eventName, params) {
     console.warn('GA4 Tracking Error:', e);
   }
 }
+
 // 親画面からのメッセージ（検索指示 or 更新指示）を受け取る
 window.addEventListener('message', (event) => {
   if (event.data.type === 'userDataUpdated') {
@@ -3292,6 +3282,8 @@ function deleteMemo() {
     document.getElementById('memo-textarea').value = '';
     saveMemo();
 }
+
 </script>
+
 </body>
 </html>
