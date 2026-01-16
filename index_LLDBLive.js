@@ -578,48 +578,82 @@ function renderVenueLiveCountChart() {
   });
 }
 
-function renderComponentChart(counts) {
-  const canvas = document.getElementById('component-chart');
-  if (!canvas) return;
-  
-  if (chartInstances.component) {
-    chartInstances.component.destroy();
-  }
+function renderHeatmap(setlist) {
+  const container = document.getElementById('heatmap-container');
+  if (!container) return;
 
-  const data = [
-    counts['表題曲'], 
-    counts['カップリング曲'], 
-    counts['アルバム曲'],
-    counts['その他']
-  ];
+  const startYear = 1998;
+  const endYear = new Date().getFullYear();
   
-  chartInstances.component = new Chart(canvas, {
-    type: 'doughnut',
-    data: {
-      labels: ['表題曲', 'カップリング', 'アルバム', 'その他'],
-      datasets: [{
-        data: data,
-        backgroundColor: [
-          THEME_COLORS.PINK,
-          '#3B82F6', // Blue (Maintain default or map to ROCK?) -> Keeping default blue as per original code logic for C/W
-          '#EAB308', // Yellow (Maintain default or map to ALOHA?) -> Keeping default yellow
-          '#E5E7EB'  // Gray
-        ],
-        borderWidth: 0,
-        hoverOffset: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false },
-        datalabels: { display: false }
-      },
-      cutout: '60%'
+  // ヒートマップ用のデータ集計
+  const counts = { '表題曲': {}, 'カップリング曲': {}, 'アルバム曲': {} };
+  
+  setlist.forEach(s => {
+    if (!s || s === '__MEDLEY_START__' || s === '__MEDLEY_END__') return;
+    const clean = s.replace(/_アンコール(?: #\d+)?/g, '').replace(/#\d+$/g, '').trim();
+    const info = songData[clean];
+    if (!info || !info.year) return;
+
+    let type = 'その他';
+    if (info.type) {
+         if (info.type.includes('表題') || info.type.includes('シングル')) type = '表題曲';
+         else if (info.type.includes('カップリング') || info.type.includes('C/W') || info.type.includes('B面')) type = 'カップリング曲';
+         else if (info.type.includes('アルバム') || info.type.includes('Album')) type = 'アルバム曲';
+    }
+    
+    if (counts[type]) {
+        counts[type][info.year] = (counts[type][info.year] || 0) + 1;
     }
   });
+
+  // ライブ開催年を取得（未来判定用）
+  const liveYear = currentDisplayingRecord && currentDisplayingRecord.year ? parseInt(currentDisplayingRecord.year) : endYear;
+
+  // HTML生成
+  let html = '<div class="flex items-end justify-between w-full pt-2 gap-px">';
+  
+  for (let y = startYear; y <= endYear; y++) {
+     const cTitle = counts['表題曲'][y] || 0;
+     const cCW = counts['カップリング曲'][y] || 0;
+     const cAlbum = counts['アルバム曲'][y] || 0;
+
+     // 濃さの計算
+     const getOpacity = (c) => c >= 3 ? 1 : c === 2 ? 0.7 : c === 1 ? 0.4 : 0.05;
+     
+     const colorTitle = `rgba(255, 105, 180, ${getOpacity(cTitle)})`;
+     const colorCW    = `rgba(59, 130, 246, ${getOpacity(cCW)})`;
+     const colorAlbum = `rgba(234, 179, 8, ${getOpacity(cAlbum)})`;
+
+     // セルのスタイル
+     const cellBase = "w-full h-5 flex items-center justify-center text-[8px] font-bold text-gray-700 leading-none select-none rounded-[1px] overflow-hidden";
+     
+     // 未来（ライブ年より後）かどうかで空セルの色を変える
+     const isFuture = y > liveYear;
+     const emptyStyle = isFuture 
+        ? "background-color: #d1d5db; color: transparent;" // 未来: 濃いグレー
+        : "background-color: #f3f4f6; color: transparent;"; // 過去・現在: 薄いグレー
+
+     html += `<div class="flex flex-col gap-px flex-1">`;
+
+     // 上段: 表題
+     let styleTitle = cTitle > 0 ? `background-color:${colorTitle}; color:${cTitle >= 3 ? 'white' : 'inherit'}` : emptyStyle;
+     html += `<div class="${cellBase}" style="${styleTitle}">${cTitle > 0 ? cTitle : ''}</div>`;
+     
+     // 中段: カップリング
+     let styleCW = cCW > 0 ? `background-color:${colorCW}; color:${cCW >= 3 ? 'white' : 'inherit'}` : emptyStyle;
+     html += `<div class="${cellBase}" style="${styleCW}">${cCW > 0 ? cCW : ''}</div>`;
+     
+     // 下段: アルバム
+     let styleAlbum = cAlbum > 0 ? `background-color:${colorAlbum}; color:${cAlbum >= 3 ? 'white' : 'inherit'}` : emptyStyle;
+     html += `<div class="${cellBase}" style="${styleAlbum}">${cAlbum > 0 ? cAlbum : ''}</div>`;
+
+     // 年ラベル
+     html += `<div class="w-full h-10 relative mt-1"><div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 text-[8px] text-gray-400 font-mono whitespace-nowrap">${y}</div></div>`;
+
+     html += `</div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 // -----------------------------------------------------------
@@ -1016,7 +1050,18 @@ function showLiveDetail(rec) {
 
   const legendHtml = `<div class="flex flex-col items-end justify-end pb-1"><div class="text-[10px] text-gray-400 leading-none mb-1 text-center w-full">リリース年</div><div class="flex items-center text-[10px] text-gray-400 leading-none"><span class="mr-1">1998</span><div class="w-20 h-[1px] bg-gray-300 mx-1 relative flex items-center justify-center"><div class="w-2 h-2 rounded-full shadow-sm" style="background-color: var(--aiko-pink);"></div></div><span class="ml-1">${maxYear}</span></div></div>`;
 
-  const summaryHtml = `<div class="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-between"><div class="flex-1"><div class="mb-2 text-sm font-bold text-gray-600">📊 このライブの成分表</div><div class="text-xs font-bold leading-relaxed"><div class="text-aiko-pink">● 表題曲: ${typeCounts['表題曲']}</div><div class="text-blue-500">● カップリング: ${typeCounts['カップリング曲']}</div><div class="text-yellow-500">● アルバム: ${typeCounts['アルバム曲']}</div></div></div><div style="width: 80px; height: 80px; flex-shrink: 0;"><canvas id="component-chart"></canvas></div></div>`;
+  const summaryHtml = `
+    <div class="mt-8 mb-4">
+      <div class="card-base bg-white p-4 border border-gray-100 shadow-sm">
+        <h3 class="font-bold text-gray-700 text-sm mb-2 flex items-center gap-2">📊 成分分布図</h3>
+        <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs font-bold mb-3">
+          <span class="text-aiko-pink">● 表題曲: ${typeCounts['表題曲']}</span>
+          <span class="text-blue-500">● カップリング: ${typeCounts['カップリング曲']}</span>
+          <span class="text-yellow-500">● アルバム: ${typeCounts['アルバム曲']}</span>
+        </div>
+        <div id="heatmap-container" class="w-full overflow-x-auto no-scrollbar pb-2"></div>
+      </div>
+    </div>`;
 
   const setlistHeaderHtml = `<div class="flex justify-between items-end mt-8 mb-2"><h3 class="font-bold text-gray-700 text-lg cursor-pointer flex items-center gap-2" onclick="copySetlist()">🎵 セットリスト</h3>${legendHtml}</div>`;
 
@@ -1031,20 +1076,30 @@ function showLiveDetail(rec) {
   // ★追加: 終演後ツイートの表示用HTML生成
   let tweetHtml = '';
   if (rec.afterLiveTweet) {
-      // x.com を twitter.com に置換 (埋め込み表示の互換性確保のため)
-      let tweetUrl = rec.afterLiveTweet.replace('x.com', 'twitter.com');
+      // 埋め込み用は twitter.com に統一（widgets.jsの互換性のため）
+      let embedUrl = rec.afterLiveTweet.replace('x.com', 'twitter.com');
+      // リンク用は元のURLを使用（リダイレクトを避けてアプリ起動率を高める）
+      let linkUrl = rec.afterLiveTweet;
+
       tweetHtml = `
         <div class="mt-10 pt-8 border-t border-dashed border-gray-200">
-           <h3 class="font-bold text-gray-700 text-lg mb-4 flex items-center gap-2">
+           <h3 class="font-bold text-gray-700 text-lg mb-4 flex items-center gap-2 justify-start">
              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor" style="color: #000000;">
                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
              </svg>
              <span style="color: #000000;">After Live</span>
            </h3>
-           <div class="flex justify-center" style="min-height: 200px;">
+
+           <div class="relative w-full flex justify-center" style="min-height: 200px;">
+             
              <blockquote class="twitter-tweet" data-lang="ja" data-theme="light" data-align="center">
-               <a href="${tweetUrl}"></a>
+               <a href="${embedUrl}"></a>
              </blockquote>
+
+             <a href="${linkUrl}" target="_blank" rel="noopener noreferrer" 
+                class="absolute inset-0 z-20 w-full h-full cursor-pointer" 
+                style="background: transparent;">
+             </a>
            </div>
         </div>`;
   }
@@ -1086,7 +1141,7 @@ function showLiveDetail(rec) {
       }
   }
 
-  setTimeout(() => renderComponentChart(typeCounts), 0);
+  setTimeout(() => renderHeatmap(rec.setlist), 0);
 }
 
 function hideDetailView() {
@@ -1095,10 +1150,7 @@ function hideDetailView() {
   document.getElementById('back-button-fixed').style.display = 'none';
   document.querySelector('nav').style.display = 'flex';
   
-  if (chartInstances.component) {
-    chartInstances.component.destroy();
-    chartInstances.component = null;
-  }
+  // ヒートマップはinnerHTML書き換えのため明示的な破棄は不要
 
   applyFilters();
 
