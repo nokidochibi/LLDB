@@ -647,8 +647,46 @@ function renderHeatmap(setlist) {
      // クリック時のアクション生成関数
       const getOnClick = (year, type, data) => {
         if (data.count === 0) return '';
-        const songList = data.songs.join('\\n・');
-        return `onclick="alert('${year}年 ${type}\\n・${songList}')"`;
+        
+        // 1行目: XXXX年 [タイプ]
+        let msg = `${year}年 ${type}`;
+
+        // カップリング曲またはアルバム曲の場合、収録元ごとにグループ化
+        if (type === 'カップリング曲' || type === 'アルバム曲') {
+           const groups = {}; // { 'タイトル': [曲名, 曲名...] }
+
+           data.songs.forEach(song => {
+             const info = songData[song];
+             let sourceTitle = '';
+             
+             // シングル/アルバムタイトルを取得
+             if (info) {
+                if (type === 'カップリング曲') sourceTitle = info.singleTitle;
+                else if (type === 'アルバム曲') sourceTitle = info.albumTitle;
+             }
+             
+             // タイトルがない場合は「不明」などにせず空文字扱いでグループ化
+             const key = sourceTitle || 'その他';
+             if (!groups[key]) groups[key] = [];
+             groups[key].push(song);
+           });
+
+           // フォーマットに従ってメッセージを作成
+           Object.keys(groups).forEach(src => {
+              msg += `\\n\\n`;
+              // タイトルがある場合は『』で囲んで表示
+              if (src !== 'その他') {
+                  msg += `『${src}』に収録の\\n`;
+              }
+              msg += groups[src].map(s => `・${s}`).join('\\n');
+           });
+
+        } else {
+           // 表題曲などは今まで通り単純リスト
+           msg += `\\n` + data.songs.map(s => `・${s}`).join('\\n');
+        }
+
+        return `onclick="alert('${msg}')"`;
       };
 
      // 上段: 表題
