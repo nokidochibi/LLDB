@@ -51,6 +51,8 @@ let selectedVenueInfo = null;
 let currentDisplayingRecord = null;
 let lastScrollPosition = 0;
 let isLoadingFinished = false;
+let isFullDataLoaded = false; // 全データの読み込み完了を管理するフラグ
+let loadingEmojiInterval = null; // ★追加: 読み込みアニメーション用タイマー
 
 // --- Initialization ---
 
@@ -121,13 +123,15 @@ function saveToCache(data) {
 }
 
 async function loadAllData(useCache = false) {
+  // キャッシュがあればそれを最優先（最速）
   if (useCache) {
       try {
           const cachedRaw = localStorage.getItem(CACHE_KEY);
           if (cachedRaw) {
               const cachedData = JSON.parse(cachedRaw);
               console.log("Loaded from cache.");
-              initializeApp(cachedData);
+              // キャッシュデータは「完全版」とみなしてフル描画
+              initializeApp(cachedData, true);
               return; 
           }
       } catch (e) {
@@ -135,17 +139,41 @@ async function loadAllData(useCache = false) {
       }
   }
 
+  // キャッシュがない場合: 2段階読み込みを実行
   try {
-    const response = await fetch(`${API_URL}?action=getAllData`);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
+    // 【Step 1】まずは軽いデータ(Basic)だけ取ってくる
+    const basicResponse = await fetch(`${API_URL}?action=getLiveBasicData`);
+    if (!basicResponse.ok) throw new Error(`HTTP error! status: ${basicResponse.status}`);
+    const basicData = await basicResponse.json();
 
-    if (data.status === 'error') {
-        throw new Error(data.message);
+    if (basicData.status === 'error') throw new Error(basicData.message);
+
+    // 軽いデータでとりあえず画面を表示（グラフなどはまだ描画しない = false）
+    initializeApp(basicData, false);
+    
+    // ロード画面を消す（ユーザーはここで操作可能になる）
+    finishLoading();
+
+    // 【Step 2】裏側で重い全データ(All)を取りに行く
+    console.log("Fetching full data in background...");
+    const fullResponse = await fetch(`${API_URL}?action=getAllData`);
+    if (!fullResponse.ok) throw new Error(`HTTP error! status: ${fullResponse.status}`);
+    const fullData = await fullResponse.json();
+
+    // 全データが届いたら先に画面を更新（ユーザーを待たせない）
+    initializeApp(fullData, true);
+    
+    // その後、裏側でキャッシュに保存する
+    setTimeout(() => saveToCache(fullData), 100);
+    
+    // 追加：もし詳細画面を開きっぱなしなら、最新データ（セトリ）で再表示する
+    if (document.body.classList.contains('detail-view') && currentDisplayingRecord) {
+        const latestRec = allLiveRecords.find(r => r.date === currentDisplayingRecord.date);
+        if (latestRec) {
+            showLiveDetail(latestRec);
+        }
     }
-
-    saveToCache(data);
-    initializeApp(data);
+    console.log("Full data loaded and merged.");
 
   } catch (error) {
       handleError(error); 
@@ -192,13 +220,17 @@ function finishLoading() {
   if (mainContent) {
       mainContent.style.opacity = '1';
   }
-  setTimeout(checkTodayEvents, 800);
+  // 起動直後の重複チェックを削除
   
   if (animationFinishedResolver) animationFinishedResolver();
 }
 
-function initializeApp(data) {
-  allLiveRecords = data.liveRecords || [];
+// isFullLoad引数を追加: trueなら全機能有効化、falseならリスト表示のみ
+function initializeApp(data, isFullLoad = true) {
+  // フラグ設定はデータ分析後に行うため、ここでは削除しました
+
+  allLiveRecords = data.liveRecords || [];
+  // 以下のデータはStep1では空の可能性があるため安全策をとる
   albumData = data.albumData || [];
   songData = data.songData || {};
   historyData = data.historyData || []; 
@@ -222,14 +254,9 @@ function initializeApp(data) {
     }
   }
 
-  analyzeSongStats(allLiveRecords);
-  analyzePatterns(allLiveRecords);
+  // フィルタの準備とリスト表示はStep1でも必ず行う
   populateFilters(allLiveRecords);
   
-  if (historyData.length > 0) {
-      renderHistoryTab();
-  }
-
   const searchInput = document.getElementById('search-input');
   if (searchInput && !searchInput.hasAttribute('data-listener-attached')) {
     setupEventListeners();
@@ -240,22 +267,57 @@ function initializeApp(data) {
   checkOrientation();
   window.addEventListener('resize', checkOrientation);
 
-  renderLiveCountChart();
-  renderTotalLiveCategorySummary();
-  renderAlbumChart();
-  renderSongRanking(); 
-  renderPatternStats();
-  renderVenueRanking();
-  renderVenueLiveCountChart();
+  // ★追加: 読み込み中表示を出す（Step1のときのみ実行）
+  if (!isFullLoad) {
+      renderSongRanking();
+      renderPatternStats();
+      renderVenueRanking();
+      renderRecordsTab();
+  }
 
-  const loadingDiv = document.getElementById('loading-container');
-  if (loadingDiv && loadingDiv.style.display === 'none') {
-      checkTodayEvents();
+  // 【重要】以下の重い処理は、全データが揃っている時(isFullLoad=true)のみ実行
+  if (isFullLoad) {
+      analyzeSongStats(allLiveRecords);
+      analyzePatterns(allLiveRecords);
+      
+      // ★修正: 分析が終わったこのタイミングでフラグを立てる
+      isFullDataLoaded = true;
+      if (loadingEmojiInterval) {
+          clearInterval(loadingEmojiInterval);
+          loadingEmojiInterval = null;
+      }
+
+      if (historyData.length > 0) {
+          renderHistoryTab();
+      }
+
+      // 修正①: 今見ているタブのグラフだけを最優先で描画する
+      const activeTab = document.querySelector('.tab-item.active');
+      if (activeTab) {
+          const tabId = activeTab.dataset.tab;
+          // 各描画関数の中で「データ読み込み中なら中断」というガードを入れているので、
+          // ここではシンプルに必要なものだけを呼び出します。
+          if (tabId === 'song') {
+              renderSongRanking();
+              renderLiveCountChart();
+              renderTotalLiveCategorySummary();
+          } else if (tabId === 'venue') {
+              renderVenueRanking();
+              renderVenueLiveCountChart();
+          } else if (tabId === 'pattern') {
+              renderPatternStats();
+              renderAlbumChart();
+          } else if (tabId === 'records') {
+              renderRecordsTab();
+          }
+      }
+      
+      // 修正②: 「今日は何の日」を表示
+      setTimeout(() => checkTodayEvents(true), 500);
   }
   
   if (appInitializedResolver) appInitializedResolver();
 }
-
 // --- Helper Functions ---
 
 function formatTourName(name) {
@@ -291,6 +353,9 @@ const chartCommonOptions = {
 function renderAlbumChart() {
   const canvas = document.getElementById('album-chart');
   if (!canvas || !albumData.length) return;
+  // すでにStep2のデータでグラフ作成済みなら何もしない
+  if (isFullDataLoaded && chartInstances.album && !canvas.dataset.needsUpdate) return;
+  canvas.removeAttribute('data-needs-update');
   if (chartInstances.album) {
     chartInstances.album.destroy();
     chartInstances.album = null;
@@ -334,6 +399,9 @@ function renderAlbumChart() {
 function renderLiveCountChart() {
   const canvas = document.getElementById('live-count-chart');
   if (!canvas) return;
+  // すでに完成済みなら何もしない
+  if (isFullDataLoaded && chartInstances.liveCount && !canvas.dataset.needsUpdate) return;
+  canvas.removeAttribute('data-needs-update');
   if (chartInstances.liveCount) chartInstances.liveCount.destroy();
 
   const songToSearch = document.getElementById('song-search-input').value.trim();
@@ -968,7 +1036,9 @@ function renderLiveList(records) {
 // -----------------------------------------------------------
 
 function showLiveDetail(rec) {
-  safeTrackEvent('select_content', { content_type: 'live_detail', item_id: rec.date, item_name: rec.tourName });
+  // 修正：データがなくても中断せず、そのまま進む（読み込み完了後に自動更新されるため）
+  
+  safeTrackEvent('select_content', { content_type: 'live_detail', item_id: rec.date, item_name: rec.tourName });
 
   lastScrollPosition = document.getElementById('app').scrollTop;
 
@@ -1186,13 +1256,16 @@ function showLiveDetail(rec) {
   // 修正: 右側に表示していた凡例変数を削除してスッキリさせました
   const setlistHeaderHtml = `<div class="flex justify-between items-end mt-8 mb-2"><h3 class="font-bold text-gray-700 text-lg cursor-pointer flex items-center gap-2" onclick="copySetlist()">🎵 セットリスト</h3></div>`;
 
-  const setlistSection = setlistHtml.trim() 
-    ? `${summaryHtml}${setlistHeaderHtml}<div class="card-base shadow-none border border-gray-100 pb-2 bg-white">${setlistHtml}</div>` 
-    : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3>
-       <div class="card-base text-gray-500 text-sm leading-relaxed bg-white">
-         この日のセトリがわかる方は　<span class="text-blue-500 underline cursor-pointer font-bold" onclick="if(confirm('セトリ投稿フォームに移動しますか？')){ window.open('https://nokidochibi.github.io/LLDB_SetoriForm/', '_blank'); }">こちら</span>　から教えてください。<br>
-         セットリストは　2026年3月4日以降に更新予定です。
-       </div>`;
+  // 修正：セトリデータがない場合、読み込み完了前なら「読み込み中(植物)」を表示、完了後なら「情報提供のお願い(左寄せ)」を表示
+  const setlistSection = setlistHtml.trim() 
+    ? `${summaryHtml}${setlistHeaderHtml}<div class="card-base shadow-none border border-gray-100 pb-2 bg-white">${setlistHtml}</div>` 
+    : (!isFullDataLoaded ? 
+        `<div class="py-10 text-center"><div id="loading-emoji" class="text-2xl mb-2">🌱</div><p class="text-gray-400 text-sm">セトリ読み込み中...</p></div>` 
+        : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3>
+<div class="card-base text-gray-500 text-sm leading-relaxed bg-white text-left">
+  この日のセトリがわかる方は <span class="text-blue-500 underline cursor-pointer font-bold" onclick="if(confirm('セトリ投稿フォームに移動しますか？')){ window.open('https://nokidochibi.github.io/LLDB_SetoriForm/', '_blank'); }">こちら</span> から教えてください。<br>
+  セットリストは 2026年3月4日以降に更新予定です。
+</div>`);
 
   // ★修正: 終演後ツイートの表示用HTML生成
   let tweetHtml = '';
@@ -1276,6 +1349,22 @@ function showLiveDetail(rec) {
   document.getElementById('app').scrollTop = 0;
   lucide.createIcons(); 
 
+  // ★追加: 読み込み中アニメーション（🌱→🌿→🌳）の開始
+  if (!isFullDataLoaded) {
+      if (loadingEmojiInterval) clearInterval(loadingEmojiInterval);
+      const emojis = ['🌱', '🌿', '🌳'];
+      let idx = 0;
+      const el = document.getElementById('loading-emoji');
+      if(el) {
+          loadingEmojiInterval = setInterval(() => {
+              idx = (idx + 1) % emojis.length;
+              const target = document.getElementById('loading-emoji');
+              if(target) target.textContent = emojis[idx];
+              else clearInterval(loadingEmojiInterval);
+          }, 1000);
+      }
+  }
+
   // ★追加: Twitter埋め込みウィジェットのロード処理
   if (rec.afterLiveTweet) {
       if (window.twttr && window.twttr.widgets) {
@@ -1298,6 +1387,12 @@ function showLiveDetail(rec) {
 }
 
 function hideDetailView() {
+  // ★追加: 画面を閉じる時にアニメーション停止
+  if (loadingEmojiInterval) {
+      clearInterval(loadingEmojiInterval);
+      loadingEmojiInterval = null;
+  }
+
   document.body.classList.remove('detail-view');
   document.getElementById('live-detail').style.display = 'none';
   document.getElementById('back-button-fixed').style.display = 'none';
@@ -1417,7 +1512,8 @@ function selectRegion(regionName) {
 }
 
 function switchToTab(tabId) {
-    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    // ガード処理を削除（読み込み中でも切り替えを許可）
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
     const targetTabItem = document.querySelector(`.tab-item[data-tab="${tabId}"]`);
     if (targetTabItem) targetTabItem.classList.add('active');
 
@@ -1433,13 +1529,22 @@ function switchToTab(tabId) {
     }
 
     if (tabId === 'song') {
+        // ★追加: タブ切り替え時に必ず再描画する
+        renderSongRanking();
+        renderLiveCountChart();
+        // 既存のリサイズ処理
         if(chartInstances.liveCount) chartInstances.liveCount.resize();
     }
     if (tabId === 'pattern') {
+        // ★追加: タブ切り替え時に必ず再描画する
+        renderPatternStats();
         renderAlbumChart();
     }
-    if (tabId === 'venue' && chartInstances.venueLiveCount) {
-        chartInstances.venueLiveCount.resize();
+    if (tabId === 'venue') {
+        // ★追加: タブ切り替え時に必ず再描画する
+        renderVenueRanking();
+        renderVenueLiveCountChart();
+        if(chartInstances.venueLiveCount) chartInstances.venueLiveCount.resize();
     }
 }
 
@@ -1466,6 +1571,27 @@ function renderRecordsTab() {
     const isRegistered = userUserData.settings && userUserData.settings.syncId;
     const unregisteredDiv = document.getElementById('records-unregistered');
     const contentDiv = document.getElementById('records-content');
+
+    // ★追加: データ読み込み中の表示（DOM破壊を防ぐため動的生成）
+    let loadingDiv = document.getElementById('records-loading-indicator');
+    
+    if (!isFullDataLoaded) {
+        contentDiv.classList.add('hidden');
+        unregisteredDiv.classList.add('hidden'); // 未登録画面も隠す
+
+        if (!loadingDiv) {
+            loadingDiv = document.createElement('div');
+            loadingDiv.id = 'records-loading-indicator';
+            loadingDiv.className = 'text-center py-12';
+            loadingDiv.innerHTML = '<div class="text-2xl mb-2 animate-bounce">🌱</div><p class="text-gray-400 text-sm">データ読み込み中...<br>少し待っててね</p>';
+            // contentDivの親要素に追加（contentDivの直前）
+            contentDiv.parentNode.insertBefore(loadingDiv, contentDiv);
+        }
+        return;
+    }
+
+    // 読み込み完了時はローディングを削除
+    if (loadingDiv) loadingDiv.remove();
 
     if (!isRegistered) {
         unregisteredDiv.classList.remove('hidden');
@@ -1761,7 +1887,14 @@ function renderUserSongRanking() {
 function renderSongRanking() {
   const container = document.getElementById('song-ranking-container');
   if (!container) return;
-  const sortOrder = songSortState; 
+
+  // ★追加: データ読み込み中の表示
+  if (!isFullDataLoaded) {
+      container.innerHTML = '<div class="text-center py-12"><div class="text-2xl mb-2 animate-bounce">🌱</div><p class="text-gray-400 text-sm">データ読み込み中...<br>少し待っててね</p></div>';
+      return;
+  }
+
+  const sortOrder = songSortState;
   const searchTerm = document.getElementById('song-search-input').value.toLowerCase();
 
   updateSortIcons();
@@ -1846,6 +1979,16 @@ function updateSortIcons() {
 
 function renderPatternStats() {
   const types = ['opening', 'encore', 'last'];
+  
+  // ★追加: データ読み込み中の表示
+  if (!isFullDataLoaded) {
+      types.forEach(type => {
+          const container = document.getElementById(type + '-songs');
+          if (container) container.innerHTML = '<div class="text-center py-8"><div class="text-xl mb-1 animate-bounce">🌱</div><p class="text-gray-400 text-xs">データ読み込み中...<br>少し待っててね</p></div>';
+      });
+      return;
+  }
+
   types.forEach(type => {
     const container = document.getElementById(type + '-songs');
     if (!container) return;
@@ -1866,6 +2009,14 @@ function renderVenueRanking() {
   const venueContainer = document.getElementById('venue-ranking-container');
   const regionContainer = document.getElementById('region-ranking-container');
   if (!venueContainer || !regionContainer) return;
+
+  // ★追加: データ読み込み中の表示
+  if (!isFullDataLoaded) {
+      const loadingHtml = '<div class="text-center py-12"><div class="text-2xl mb-2 animate-bounce">🌱</div><p class="text-gray-400 text-sm">データ読み込み中...<br>少し待っててね</p></div>';
+      venueContainer.innerHTML = loadingHtml;
+      regionContainer.innerHTML = loadingHtml;
+      return;
+  }
 
   const vcs = {}, rcs = {};
   allLiveRecords.forEach(rec => {
@@ -2237,7 +2388,7 @@ window.findAndShowLive = function(dateStr, tourName) {
 // Daily Events & Anniversary Logic
 // -----------------------------------------------------------
 
-function checkTodayEvents() {
+function checkTodayEvents(isFullCheck = false) {
     const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
     const todayMonth = now.getMonth() + 1;
     const todayDate = now.getDate();
@@ -2286,6 +2437,10 @@ function checkTodayEvents() {
 
     if (anniversaryQueue.length > 0) {
         processNextAnniversary();
+    }
+    // 表示するものがある・ないに関わらず、Step2（全データ）のチェックが完了したら
+    // 「今日の分は完璧にチェック済み」として記録する
+    if (isFullCheck) {
         localStorage.setItem('lldb_last_greeting_date', todayKey);
     }
 }
@@ -2946,4 +3101,77 @@ function deleteMemo() {
     if(!confirm('メモを削除しますか？')) return;
     document.getElementById('memo-textarea').value = '';
     saveMemo();
+}
+
+// ★追加: 傾向タブの詳細モーダル表示
+function showModal(songName, type) {
+    if (!songName) return;
+    
+    // タイトルの決定
+    let title = '';
+    if (type === 'opening') title = `「${songName}」<br>オープニング曲の実績`;
+    else if (type === 'encore') title = `「${songName}」<br>アンコール曲の実績`;
+    else if (type === 'last') title = `「${songName}」<br>ラストソングの実績`;
+
+    // 該当するライブを検索
+    const hits = [];
+    allLiveRecords.forEach(rec => {
+        let isMatch = false;
+        
+        // メドレーなどを除いたクリーンなリストを作成して判定
+        const cleanSetlist = [];
+        let inMedley = false;
+        rec.setlist.forEach(s => {
+            if (s === '__MEDLEY_START__') { inMedley = true; return; }
+            if (s === '__MEDLEY_END__') { inMedley = false; return; }
+            if (inMedley) return;
+            const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
+            if (clean && clean !== 'メドレー' && !clean.includes('[') && !clean.includes(']')) {
+                cleanSetlist.push(clean);
+            }
+        });
+
+        if (type === 'opening') {
+            if (cleanSetlist.length > 0 && cleanSetlist[0] === songName) isMatch = true;
+        } else if (type === 'last') {
+            if (cleanSetlist.length > 0 && cleanSetlist[cleanSetlist.length - 1] === songName) isMatch = true;
+        } else if (type === 'encore') {
+            // アンコールは元のセットリストから判定
+            let inMedleyEncore = false;
+            rec.setlist.forEach(s => {
+                if (s === '__MEDLEY_START__') { inMedleyEncore = true; return; }
+                if (s === '__MEDLEY_END__') { inMedleyEncore = false; return; }
+                if (inMedleyEncore) return;
+                if (s.includes('_アンコール')) {
+                    const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
+                    if (clean === songName) isMatch = true;
+                }
+            });
+        }
+
+        if (isMatch) hits.push(rec);
+    });
+
+    // モーダルHTML生成
+    hits.sort((a, b) => new Date(b.date) - new Date(a.date));
+    let listHtml = hits.map(rec => `
+        <div class="card-base p-3 mb-2 clickable-item border border-gray-100 bg-white" onclick="closeModal(); showLiveDetail(allLiveRecords.find(r => r.date === '${rec.date}'))">
+            <div class="text-xs text-gray-500">${rec.date}</div>
+            <div class="font-bold text-gray-700">${rec.tourName}</div>
+            <div class="text-xs text-gray-400 text-right mt-1">${rec.venue}</div>
+        </div>
+    `).join('');
+
+    if (hits.length === 0) listHtml = '<p class="text-center text-gray-400 my-4">データが見つかりませんでした</p>';
+
+    const html = `
+        <h2 class="font-bold text-center text-lg mb-4 text-aiko-pink leading-tight">${title}</h2>
+        <p class="text-right text-xs text-gray-400 mb-2">計 ${hits.length} 回</p>
+        <div class="overflow-y-auto max-h-[60vh]">
+            ${listHtml}
+        </div>
+    `;
+
+    document.getElementById('modal-body').innerHTML = html;
+    document.getElementById('modal-overlay').style.display = 'flex';
 }
