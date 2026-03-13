@@ -517,7 +517,7 @@ function renderLiveCountChart() {
 function renderTotalLiveCategorySummary(targetSong = null) {
   // 文言更新
   const labelEl = document.getElementById('song-stats-label');
-  if (labelEl) labelEl.textContent = targetSong ? 'この曲の演奏回数' : '全ライブ開催回数';
+  if (labelEl) labelEl.textContent = targetSong ? 'この曲の演奏公演数' : '全ライブ開催回数';
 
   let targetRecords = allLiveRecords;
   
