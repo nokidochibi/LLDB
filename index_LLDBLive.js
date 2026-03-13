@@ -53,6 +53,7 @@ let lastScrollPosition = 0;
 let isLoadingFinished = false;
 let isFullDataLoaded = false; // 全データの読み込み完了を管理するフラグ
 let loadingEmojiInterval = null; // ★追加: 読み込みアニメーション用タイマー
+let isVoteRankingLoaded = false; // ★追加: 投票ランキングの取得状態
 
 // --- Initialization ---
 
@@ -307,6 +308,7 @@ function initializeApp(data, isFullLoad = true) {
           } else if (tabId === 'pattern') {
               renderPatternStats();
               renderAlbumChart();
+              fetchAndRenderVoteRanking(); // ★追加
           } else if (tabId === 'records') {
               renderRecordsTab();
           }
@@ -1534,6 +1536,11 @@ function switchToTab(tabId) {
         // ★追加: タブ切り替え時に必ず再描画する
         renderSongRanking();
         renderLiveCountChart();
+        
+        // ★追加: 検索窓に曲名が入っていればそれを考慮して回数を再計算
+        const currentSong = document.getElementById('song-search-input').value;
+        renderTotalLiveCategorySummary(currentSong);
+        
         // 既存のリサイズ処理
         if(chartInstances.liveCount) chartInstances.liveCount.resize();
     }
@@ -1541,6 +1548,7 @@ function switchToTab(tabId) {
         // ★追加: タブ切り替え時に必ず再描画する
         renderPatternStats();
         renderAlbumChart();
+        fetchAndRenderVoteRanking(); // ★追加
     }
     if (tabId === 'venue') {
         // ★追加: タブ切り替え時に必ず再描画する
@@ -2018,6 +2026,71 @@ function renderPatternStats() {
       </div>`
     }).join('');
   });
+}
+
+// ★追加: 投票ランキングデータの取得と描画
+async function fetchAndRenderVoteRanking() {
+  const container = document.getElementById('vote-ranking-container');
+  if (!container) return;
+  
+  // ★修正: タブを開くたびに最新を取得するようスキップ判定を削除し、取得中はローディング表示を出す
+  container.innerHTML = '<div class="card-base bg-white p-4 text-center text-sm text-gray-400"><i class="animate-spin w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full inline-block align-middle mr-2"></i>最新のランキングを取得中...</div>';
+
+  try {
+    const response = await fetch(`${API_URL}?action=getVoteRanking`);
+    if (!response.ok) throw new Error('Network error');
+    const result = await response.json();
+
+    if (result.status === 'success' && result.rankings && result.rankings.length > 0) {
+      isVoteRankingLoaded = true;
+      let html = '';
+      
+      result.rankings.forEach((q, index) => {
+        // ★修正：上位20曲を取得
+        const top20 = q.items.slice(0, 20);
+        let itemsHtml = '';
+        
+        if (top20.length === 0) {
+          itemsHtml = '<p class="text-xs text-gray-400 py-2 text-center">まだ投票がありません</p>';
+        } else {
+          itemsHtml = top20.map((item, i) => {
+            const rankColor = i < 3 ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][i] : 'text-gray-400';
+            return `
+            <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <span class="font-bold italic ${rankColor} w-5 text-center text-xs">${i + 1}</span>
+                <span class="text-sm font-bold text-gray-700 truncate">${item.song}</span>
+              </div>
+              <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">${item.count}票</span>
+            </div>`;
+          }).join('');
+        }
+
+        // ★修正：アコーディオンUIに変更 (details/summaryタグを使用)
+        html += `
+        <details class="card-base bg-white p-0 shadow-sm border border-gray-100 overflow-hidden group" ${index === 0 ? 'open' : ''}>
+          <summary class="flex items-center justify-between p-4 cursor-pointer list-none bg-white">
+            <div class="text-sm font-bold text-gray-700 pr-2">
+              <span class="text-aiko-red mr-1">Q${index + 1}.</span> ${q.title}
+            </div>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <div class="px-4 pb-4 border-t border-gray-50">
+            ${itemsHtml}
+            ${q.items.length > 20 ? `<p class="text-[10px] text-gray-300 text-center mt-2">（21位以下は省略）</p>` : ''}
+          </div>
+        </details>`;
+      });
+
+      container.innerHTML = html;
+      if(typeof lucide !== 'undefined') lucide.createIcons(); // アイコン再描画
+    } else {
+      container.innerHTML = '<div class="card-base bg-white p-4 text-center text-sm text-gray-400">まだ投票データがありません</div>';
+    }
+  } catch (error) {
+    console.error('Error fetching vote ranking:', error);
+    container.innerHTML = '<div class="card-base bg-white p-4 text-center text-sm text-red-400">データの取得に失敗しました</div>';
+  }
 }
 
 function renderVenueRanking() {
