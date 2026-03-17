@@ -2259,6 +2259,20 @@ function setupEventListeners() {
     if(modal) modal.addEventListener('click', e => { if (e.target === e.currentTarget) e.target.style.display = 'none'; });
   });
 
+  // ★追加: 投票ボタンを押した時の動作（ログイン状態で分岐）
+  const patternVoteBtn = document.getElementById('pattern-vote-btn');
+  if (patternVoteBtn) {
+      patternVoteBtn.addEventListener('click', () => {
+          if (userUserData.settings && userUserData.settings.syncId) {
+              // ログイン済み：親画面の投票モーダルを開く
+              window.parent.postMessage({ type: 'openVoteModal' }, '*');
+          } else {
+              // 未ログイン：記録タブへ遷移してログインを促す
+              switchToTab('records');
+          }
+      });
+  }
+
   ['tour-select', 'year-select', 'region-select'].forEach(id => {
       const el = document.getElementById(id);
       if(el) {
