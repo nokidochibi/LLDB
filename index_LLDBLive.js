@@ -143,28 +143,18 @@ async function loadAllData(useCache = false) {
       }
   }
 
-  // キャッシュがない場合: 2段階読み込みを実行
+  // キャッシュがない場合: Cloudflareから一括で読み込みを実行
   try {
-    // 【Step 1】まずは軽いデータ(Basic)だけ取ってくる
-    const basicResponse = await fetch(`${API_URL}?action=getLiveBasicData`);
-    if (!basicResponse.ok) throw new Error(`HTTP error! status: ${basicResponse.status}`);
-    const basicData = await basicResponse.json();
+    // Cloudflareから爆速で全データを一括取得
+    console.log("Fetching full data from Cloudflare...");
+    const cfUrl = "https://lldb.noki-dochibi.workers.dev/";
+    const response = await fetch(cfUrl);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const fullData = await response.json();
 
-    if (basicData.status === 'error') throw new Error(basicData.message);
+    if (fullData.status === 'error') throw new Error(fullData.message);
 
-    // 軽いデータでとりあえず画面を表示（グラフなどはまだ描画しない = false）
-    initializeApp(basicData, false);
-    
-    // ロード画面を消す（ユーザーはここで操作可能になる）
-    finishLoading();
-
-    // 【Step 2】裏側で重い全データ(All)を取りに行く
-    console.log("Fetching full data in background...");
-    const fullResponse = await fetch(`${API_URL}?action=getAllData`);
-    if (!fullResponse.ok) throw new Error(`HTTP error! status: ${fullResponse.status}`);
-    const fullData = await fullResponse.json();
-
-    // 全データが届いたら先に画面を更新（ユーザーを待たせない）
+    // 全データが一瞬で届くので、そのまま完全版として画面を更新
     initializeApp(fullData, true);
     
     // その後、裏側でキャッシュに保存する
@@ -206,7 +196,7 @@ function startLoadingAnimation(mode) {
           });
 
   setTimeout(() => {
-    finishLoading();
+    if (animationFinishedResolver) animationFinishedResolver();
   }, (mode === 'smart' ? 1200 : 5500));
 }
 
@@ -222,11 +212,9 @@ function finishLoading() {
   }
   const mainContent = document.getElementById('main-content');
   if (mainContent) {
-      mainContent.style.opacity = '1';
+    mainContent.style.opacity = '1';
   }
   // 起動直後の重複チェックを削除
-  
-  if (animationFinishedResolver) animationFinishedResolver();
 }
 
 // isFullLoad引数を追加: trueなら全機能有効化、falseならリスト表示のみ
@@ -3240,7 +3228,8 @@ window.addEventListener('message', (event) => {
 
 async function fetchAndHotSwap() {
   try {
-    const response = await fetch(`${API_URL}?action=getAllData`);
+    const cfUrl = "https://lldb.noki-dochibi.workers.dev/";
+    const response = await fetch(cfUrl);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
 
