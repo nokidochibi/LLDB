@@ -302,6 +302,8 @@ renderVenueLiveCountChart();
 renderVenueCategorySummary();
 } else if (tabId === 'pattern') {
               renderPatternStats();
+              renderIntervalRanking(); // ★追加: 秘蔵期間ランキング
+              renderCurrentIntervalRanking(); // ★追加: 更新中の秘蔵ランキング
               renderAlbumChart();
               fetchAndRenderVoteRanking(); // ★追加
           } else if (tabId === 'records') {
@@ -925,6 +927,8 @@ function analyzeSongStats(records) {
 
 function analyzePatterns(records) {
   const o = {}, e = {}, l = {};
+  const tourOpeningSongs = {}; // 追加: ツアーごとのオープニング曲記録用
+
   records.forEach(rec => {
     const cleanSetlist = [];
     let inMedley = false;
@@ -942,8 +946,22 @@ function analyzePatterns(records) {
     });
 
     if (cleanSetlist.length > 0) {
-        o[cleanSetlist[0]] = (o[cleanSetlist[0]] || 0) + 1;
-        l[cleanSetlist[cleanSetlist.length - 1]] = (l[cleanSetlist[cleanSetlist.length - 1]] || 0) + 1;
+        // オープニング曲 (ツアーごとに1回のみカウント)
+        const opSong = cleanSetlist[0];
+        const tourName = rec.tourName;
+        
+        if (!tourOpeningSongs[tourName]) {
+            tourOpeningSongs[tourName] = new Set();
+        }
+        
+        if (!tourOpeningSongs[tourName].has(opSong)) {
+            tourOpeningSongs[tourName].add(opSong);
+            o[opSong] = (o[opSong] || 0) + 1;
+        }
+
+        // 大トリ曲 (従来通り)
+        const lastSong = cleanSetlist[cleanSetlist.length - 1];
+        l[lastSong] = (l[lastSong] || 0) + 1;
     }
 
     let inMedleyForEncore = false;
@@ -1008,10 +1026,11 @@ function populateFilters(records, skipApply = false) {
 function applyFilters() {
   const songFilterInput = document.getElementById('song-filter-input');
   let songFilterValue = songFilterInput.value;
-  songFilterValue = songFilterValue.replace('（楽曲タブから選択）', '').replace('　※楽曲タブから選択', '').replace('(メドレー除外)', '');
+  // ★修正: 環境によって文字化けしないよう、全角・半角それぞれ明示的に指定して確実に消去する
+  songFilterValue = songFilterValue.replace(' ※楽曲タブから選択', '').replace(' ※楽曲タブから選択', '').replace('※楽曲タブから選択', '').replace('（楽曲タブから選択）', '').replace('(メドレー除外)', '').trim();
 
   const isMedleyIncluded = document.getElementById('medley-toggle').checked;
-  const isAttendedOnly = document.getElementById('attended-filter-toggle').checked;
+  const isAttendedOnly = document.getElementById('attended-filter-toggle').checked; // ←この1行を復活させます
 
   const filters = {
     search: document.getElementById('search-input').value.toLowerCase(),
@@ -1651,6 +1670,8 @@ function switchToTab(tabId) {
     if (tabId === 'pattern') {
         // ★追加: タブ切り替え時に必ず再描画する
         renderPatternStats();
+        renderIntervalRanking(); // ★追加: 秘蔵期間ランキング
+        renderCurrentIntervalRanking(); // ★追加: 更新中の秘蔵ランキング
         renderAlbumChart();
         fetchAndRenderVoteRanking(); // ★追加
     }
@@ -2108,7 +2129,6 @@ function updateSortIcons() {
 function renderPatternStats() {
   const types = ['opening', 'encore', 'last'];
   
-  // ★追加: データ読み込み中の表示
   if (!isFullDataLoaded) {
       types.forEach(type => {
           const container = document.getElementById(type + '-songs');
@@ -2120,17 +2140,225 @@ function renderPatternStats() {
   types.forEach(type => {
     const container = document.getElementById(type + '-songs');
     if (!container) return;
-    const data = Object.entries(patternStats[type + 'Songs']).sort((a, b) => b[1] - a[1]).slice(0, 10);
-    container.innerHTML = data.map(([song, count], i) => {
-      const rankColor = i < 3 ? ['text-aiko-pink','text-aiko-yellow','text-aiko-blue'][i] : 'text-gray-300';
-      const borderClass = i !== data.length -1 ? 'border-b border-gray-100' : '';
-      return `<div class="p-3 clickable-item flex items-center ${borderClass}" onclick="showModal('${song.replace(/'/g, "\\'")}', '${type}')">
-        <span class="rank-number ${rankColor}">${i + 1}</span>
-        <span class="song-title text-gray-700">${song}</span>
-        <span class="song-count">${count} <span>回</span></span>
+    const sortedData = Object.entries(patternStats[type + 'Songs']).sort((a, b) => b[1] - a[1]);
+    
+    let currentRank = 1;
+    let currentVal = -1;
+    let rankResults = [];
+
+    for (let i = 0; i < sortedData.length; i++) {
+        const count = sortedData[i][1];
+        const song = sortedData[i][0];
+        
+        if (currentVal === -1) {
+            currentVal = count;
+        } else if (count < currentVal) {
+            currentRank++;
+            currentVal = count;
+        }
+        
+        if (currentRank > 10) break;
+
+        rankResults.push({ rank: currentRank, song: song, count: count });
+    }
+
+    if (rankResults.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 my-4 text-xs">データがありません</p>';
+        return;
+    }
+
+    container.innerHTML = rankResults.map((item, i) => {
+      const rankColor = item.rank === 1 ? 'text-aiko-pink' : item.rank === 2 ? 'text-aiko-yellow' : item.rank === 3 ? 'text-aiko-blue' : 'text-gray-300';
+      const borderClass = i !== rankResults.length - 1 ? 'border-b border-gray-100' : '';
+      return `<div class="py-3 clickable-item flex items-center ${borderClass}" onclick="showModal('${item.song.replace(/'/g, "\\'")}', '${type}')">
+        <span class="rank-number ${rankColor} w-6 text-center shrink-0">${item.rank}</span>
+        <span class="song-title text-gray-700">${item.song}</span>
+        <span class="song-count">${item.count} <span>回</span></span>
       </div>`
     }).join('');
   });
+}
+
+// ★追加: 秘蔵期間が長かった曲ランキング
+function renderIntervalRanking() {
+  const container = document.getElementById('interval-songs');
+  if (!container) return;
+
+  if (!isFullDataLoaded) {
+      container.innerHTML = '<div class="text-center py-8"><div class="text-xl mb-1 animate-bounce">🌱</div><p class="text-gray-400 text-xs">データ読み込み中...<br>少し待っててね</p></div>';
+      return;
+  }
+
+  const intervals = {};
+  const sortedRecords = [...allLiveRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  sortedRecords.forEach(rec => {
+    if (!rec.year) return;
+    const currentYear = parseInt(rec.year);
+    const playedSongs = new Set();
+    
+    rec.setlist.forEach(s => {
+      if (s === '__MEDLEY_START__' || s === '__MEDLEY_END__') return;
+      const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
+      if (clean && clean !== 'メドレー' && !clean.includes('[') && !clean.includes(']')) playedSongs.add(clean);
+    });
+
+    playedSongs.forEach(song => {
+      if (!intervals[song]) {
+        intervals[song] = { lastYear: currentYear, maxInt: 0, details: "" };
+      } else {
+        const diff = currentYear - intervals[song].lastYear;
+        if (diff > intervals[song].maxInt) {
+          intervals[song].maxInt = diff;
+          intervals[song].details = `${intervals[song].lastYear}年 → ${currentYear}年`;
+        }
+        intervals[song].lastYear = currentYear;
+      }
+    });
+  });
+
+  const sortedIntervals = Object.entries(intervals)
+    .filter(x => x[1].maxInt > 0)
+    .sort((a, b) => b[1].maxInt - a[1].maxInt);
+
+  let currentRank = 1;
+  let currentVal = -1;
+  let rankResults = [];
+  
+  for (let i = 0; i < sortedIntervals.length; i++) {
+      if (currentVal === -1) {
+          currentVal = sortedIntervals[i][1].maxInt;
+      } else if (sortedIntervals[i][1].maxInt < currentVal) {
+          currentRank++;
+          currentVal = sortedIntervals[i][1].maxInt;
+      }
+      
+      // TOP10順位まで取得（同率含む）
+      if (currentRank > 10) break;
+
+      rankResults.push({
+          rank: currentRank,
+          song: sortedIntervals[i][0],
+          years: sortedIntervals[i][1].maxInt,
+          details: sortedIntervals[i][1].details
+      });
+  }
+
+  if (rankResults.length === 0) {
+      container.innerHTML = '<p class="text-center text-gray-400 my-4 text-xs">データがありません</p>';
+      return;
+  }
+
+  let html = '';
+  rankResults.forEach((item, index) => {
+      const rankColor = item.rank === 1 ? 'text-aiko-pink' : item.rank === 2 ? 'text-aiko-yellow' : item.rank === 3 ? 'text-aiko-blue' : 'text-gray-300';
+      const borderClass = index !== rankResults.length - 1 ? 'border-b border-gray-100' : '';
+      
+      html += `<div class="py-3 clickable-item flex items-center justify-between ${borderClass}" onclick="selectSong('${item.song.replace(/'/g, "\\'")}')">
+          <div class="flex items-center flex-1 overflow-hidden pr-2">
+              <span class="rank-number ${rankColor} w-6 text-center shrink-0">${item.rank}</span>
+              <span class="song-title text-gray-700 truncate">${item.song}</span>
+          </div>
+          <div class="text-right shrink-0">
+              <div class="font-bold text-aiko-red text-sm leading-tight">${item.years} <span class="text-[10px] font-normal text-gray-500">年振り</span></div>
+              <div class="text-[9px] text-gray-400 mt-0.5">${item.details}</div>
+          </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// ★追加: 秘蔵期間が長い曲（更新中）ランキング
+function renderCurrentIntervalRanking() {
+  const container = document.getElementById('current-interval-songs');
+  if (!container) return;
+
+  if (!isFullDataLoaded) {
+      container.innerHTML = '<div class="text-center py-8"><div class="text-xl mb-1 animate-bounce">🌱</div><p class="text-gray-400 text-xs">データ読み込み中...<br>少し待っててね</p></div>';
+      return;
+  }
+
+  // ★修正: 確実に「今年（現在）」を基準にする
+  const currentYearNow = new Date().getFullYear();
+
+  const lastPlayedYear = {};
+
+  allLiveRecords.forEach(rec => {
+    if (!rec.year) return;
+    const recYear = parseInt(rec.year);
+    
+    rec.setlist.forEach(s => {
+      if (s === '__MEDLEY_START__' || s === '__MEDLEY_END__') return;
+      const clean = s.replace(/_アンコール/g, '').replace(/#\d+$/g, '').trim();
+      if (clean && clean !== 'メドレー' && !clean.includes('[') && !clean.includes(']')) {
+          if (!lastPlayedYear[clean] || recYear > lastPlayedYear[clean]) {
+              lastPlayedYear[clean] = recYear;
+          }
+      }
+    });
+  });
+
+  const intervals = [];
+  Object.keys(lastPlayedYear).forEach(song => {
+      const diff = currentYearNow - lastPlayedYear[song]; 
+      if (diff > 0) {
+          intervals.push({
+              song: song,
+              years: diff,
+              lastYear: lastPlayedYear[song]
+          });
+      }
+  });
+
+  intervals.sort((a, b) => b.years - a.years);
+
+  let currentRank = 1;
+  let currentVal = -1;
+  let rankResults = [];
+  
+  for (let i = 0; i < intervals.length; i++) {
+      if (currentVal === -1) {
+          currentVal = intervals[i].years;
+      } else if (intervals[i].years < currentVal) {
+          currentRank++;
+          currentVal = intervals[i].years;
+      }
+      
+      // TOP10順位まで取得（同率含む）
+      if (currentRank > 10) break;
+
+      rankResults.push({
+          rank: currentRank,
+          song: intervals[i].song,
+          years: intervals[i].years,
+          details: `${intervals[i].lastYear}年 → 現在`
+      });
+  }
+
+  if (rankResults.length === 0) {
+      container.innerHTML = '<p class="text-center text-gray-400 my-4 text-xs">データがありません</p>';
+      return;
+  }
+
+  let html = '';
+  rankResults.forEach((item, index) => {
+      const rankColor = item.rank === 1 ? 'text-aiko-pink' : item.rank === 2 ? 'text-aiko-yellow' : item.rank === 3 ? 'text-aiko-blue' : 'text-gray-300';
+      const borderClass = index !== rankResults.length - 1 ? 'border-b border-gray-100' : '';
+      
+      html += `<div class="py-3 clickable-item flex items-center justify-between ${borderClass}" onclick="selectSong('${item.song.replace(/'/g, "\\'")}')">
+          <div class="flex items-center flex-1 overflow-hidden pr-2">
+              <span class="rank-number ${rankColor} w-6 text-center shrink-0">${item.rank}</span>
+              <span class="song-title text-gray-700 truncate">${item.song}</span>
+          </div>
+          <div class="text-right shrink-0">
+              <div class="font-bold text-aiko-red text-sm leading-tight">${item.years} <span class="text-[10px] font-normal text-gray-500">年</span></div>
+              <div class="text-[9px] text-gray-400 mt-0.5">${item.details}</div>
+          </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
 }
 
 // ★追加: 投票ランキングデータの取得と描画
@@ -2183,9 +2411,9 @@ async function fetchAndRenderVoteRanking() {
           }).join('');
         }
 
-        // アコーディオンUI (全件表示)
+       // アコーディオンUI (全件表示)
         html += `
-        <details class="card-base bg-white p-0 shadow-sm border border-gray-100 overflow-hidden group" ${index === 0 ? 'open' : ''}>
+        <details class="card-base bg-white p-0 shadow-sm border border-gray-100 overflow-hidden group">
           <summary class="flex items-center justify-between p-4 cursor-pointer list-none bg-white">
             <div class="text-sm font-bold text-gray-700 pr-2">
               <span class="text-aiko-red mr-1">Q${index + 1}.</span> ${q.title}
@@ -2542,6 +2770,8 @@ function handleError(error) {
       fatal: true
   });
   document.getElementById('live-list-container').innerHTML = `<p class="text-center text-red-500 py-8 text-sm">データ読み込み中にエラーが発生しました。<br>(${error.message})</p>`;
+  
+  if (appInitializedResolver) appInitializedResolver();
 }
 
 // -----------------------------------------------------------
@@ -2625,6 +2855,29 @@ window.findAndShowLive = function(dateStr, tourName) {
     document.getElementById('year-select').value = '';
     document.getElementById('region-select').value = '';
     document.getElementById('song-filter-input').value = '';
+    switchToTab('search');
+    applyFilters();
+}
+
+// ★追加: ツアー名と曲名で絞り込んだ状態で公演タブへ遷移する関数
+window.searchByTourAndSong = function(tourName, songName) {
+    document.getElementById('tour-select').value = '';
+    document.getElementById('year-select').value = '';
+    document.getElementById('region-select').value = '';
+    document.getElementById('attended-filter-toggle').checked = false;
+    
+    document.getElementById('search-input').value = tourName;
+    
+    const isMedleyIncluded = document.getElementById('medley-toggle').checked;
+    const songInput = document.getElementById('song-filter-input');
+    
+    // ★修正: コピペ時の変換を防ぐため、全角スペースをプログラム用の記号（\u3000）で指定して確実に入れる！
+    if (isMedleyIncluded) {
+        songInput.value = songName + '\u3000※楽曲タブから選択';
+    } else {
+        songInput.value = songName + '(メドレー除外)\u3000※楽曲タブから選択';
+    }
+    
     switchToTab('search');
     applyFilters();
 }
@@ -3636,19 +3889,43 @@ function showModal(songName, type) {
 
     // モーダルHTML生成
     hits.sort((a, b) => new Date(b.date) - new Date(a.date));
-    let listHtml = hits.map(rec => `
-        <div class="card-base p-3 mb-2 clickable-item border border-gray-100 bg-white" onclick="closeModal(); showLiveDetail(allLiveRecords.find(r => r.date === '${rec.date}'))">
-            <div class="text-xs text-gray-500">${rec.date}</div>
-            <div class="font-bold text-gray-700">${rec.tourName}</div>
-            <div class="text-xs text-gray-400 text-right mt-1">${rec.venue}</div>
-        </div>
-    `).join('');
+    
+    let listHtml = '';
+    let countDisplay = '';
+
+    if (type === 'opening') {
+        // ツアー名で重複排除してまとめる
+        const tourHitsMap = new Map();
+        hits.forEach(rec => {
+            if (!tourHitsMap.has(rec.tourName)) {
+                tourHitsMap.set(rec.tourName, rec);
+            }
+        });
+        const tourHits = Array.from(tourHitsMap.values());
+        countDisplay = `計 ${tourHits.length} ツアー`;
+        
+        listHtml = tourHits.map(rec => `
+            <div class="card-base p-4 mb-2 clickable-item border border-gray-100 bg-white" onclick="closeModal(); searchByTourAndSong('${rec.tourName.replace(/'/g, "\\'")}', '${songName.replace(/'/g, "\\'")}')">
+                <div class="font-bold text-gray-700 text-center text-lg">${rec.tourName}</div>
+                <div class="text-xs text-gray-400 text-center mt-2 flex items-center justify-center gap-1"><i data-lucide="search" class="w-3 h-3"></i> このツアーの公演を検索</div>
+            </div>
+        `).join('');
+    } else {
+        countDisplay = `計 ${hits.length} 回`;
+        listHtml = hits.map(rec => `
+            <div class="card-base p-3 mb-2 clickable-item border border-gray-100 bg-white" onclick="closeModal(); showLiveDetail(allLiveRecords.find(r => r.date === '${rec.date}'))">
+                <div class="text-xs text-gray-500">${rec.date}</div>
+                <div class="font-bold text-gray-700">${rec.tourName}</div>
+                <div class="text-xs text-gray-400 text-right mt-1">${rec.venue}</div>
+            </div>
+        `).join('');
+    }
 
     if (hits.length === 0) listHtml = '<p class="text-center text-gray-400 my-4">データが見つかりませんでした</p>';
 
     const html = `
         <h2 class="font-bold text-center text-lg mb-4 text-aiko-pink leading-tight">${title}</h2>
-        <p class="text-right text-xs text-gray-400 mb-2">計 ${hits.length} 回</p>
+        <p class="text-right text-xs text-gray-400 mb-2">${countDisplay}</p>
         <div class="overflow-y-auto max-h-[60vh]">
             ${listHtml}
         </div>
