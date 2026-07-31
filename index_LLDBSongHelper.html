@@ -11,7 +11,6 @@
     
     <link rel="apple-touch-icon" href="https://unavatar.io/twitter/noki_dochibi">
     <link rel="icon" href="https://unavatar.io/twitter/noki_dochibi">
-
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0D09G3X4F1"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -19,7 +18,6 @@
       gtag('js', new Date());
       gtag('config', 'G-0D09G3X4F1', { 'send_page_view': false });
     </script>
-
     <title>LLDB Song Helper</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -35,14 +33,12 @@
             --bubble-color: #F4A261;
             --nav-height: 85px;
         }
-
         body { 
             font-family: 'Noto Sans JP', sans-serif; 
             background-color: var(--bg-color);
             transition: background-color 0.3s ease, color 0.3s ease; 
             overflow: hidden;
         }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -54,15 +50,12 @@
             0%, 100% { opacity: 1; }
             50% { opacity: .5; }
         }
-
         .message-row { scroll-margin-top: 6rem; }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-
         .highlight-text {
             color: #ea580c;
             font-weight: bold;
@@ -70,7 +63,6 @@
             padding: 0 2px;
             border-radius: 2px;
         }
-
         /* 吹き出し (Default) */
         .bubble { position: relative; border-radius: 1.2rem; transition: background-color 0.3s, color 0.3s; }
         
@@ -85,7 +77,6 @@
             border-style: solid; border-width: 6px 10px 6px 0;
             border-color: transparent #ffffff transparent transparent;
         }
-
         /* =========================================
            2. Footer & Tabs
            ========================================= */
@@ -102,7 +93,6 @@
             padding-bottom: 0;
             transition: transform 0.3s ease;
         }
-
         /* 入力フォームエリア */
         #search-form {
             padding: 10px 14px;
@@ -111,14 +101,13 @@
             transition: height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
             overflow: hidden;
         }
-        /* 一覧タブ表示時はフォームを隠すクラス */
+        /* 一覧タブ等表示時はフォームを隠すクラス */
         #search-form.hidden-form {
             height: 0;
             padding: 0;
             opacity: 0;
             border-bottom: none;
         }
-
         textarea#search-input {
             resize: none;
             overflow: hidden;
@@ -129,7 +118,6 @@
             padding-bottom: 8px;
         }
         textarea#search-input:focus { overflow-y: auto; }
-
         #footer-tab-area {
             display: flex;
             width: 100%;
@@ -137,7 +125,6 @@
             height: calc(var(--nav-height) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
         }
-
         .tab-btn {
             flex: 1;
             display: flex;
@@ -153,30 +140,17 @@
             transition: all 0.2s;
             height: 100%;
         }
-
         .tab-btn.active { font-weight: bold; color: var(--main-orange); }
         body.theme-shiritori .tab-btn.active { color: var(--main-pink); }
         .tab-btn.active svg { stroke-width: 2.5px; }
-
-        /* Request UI */
-        .letter-card {
-            background: white; border-radius: 20px;
-            border: 1px solid #f1f5f9; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            overflow: hidden; margin-bottom: 20px;
-        }
-        .letter-q { background-color: #fffaf5; padding: 16px; border-bottom: 1px dashed #fed7aa; }
-        .letter-a { padding: 16px; background-color: white; }
-
+        
         /* Dark Mode */
         body.dark-mode { background-color: #0f172a; color: #e2e8f0; }
         body.dark-mode footer { background-color: #1e293b; border-color: #334155; }
         body.dark-mode #search-form { background-color: #1e293b; border-bottom-color: #334155; }
         body.dark-mode .bubble-left { background-color: #334155; color: #f1f5f9; }
         body.dark-mode .bubble-left::before { border-color: transparent #334155 transparent transparent; }
-        body.dark-mode .letter-card { background-color: #1e293b; border-color: #334155; }
-        body.dark-mode .letter-q { background-color: #334155; border-bottom-color: #475569; }
         body.dark-mode .bg-gray-100 { background-color: #334155; }
-
         /* Shiritori Hints */
         .hint-btn {
             display: inline-flex; align-items: center; gap: 4px;
@@ -196,14 +170,12 @@
             cursor: pointer; border: 1px solid #475569; transition: background-color 0.2s;
         }
         .hint-item:hover { background-color: #475569; }
-
         /* Modal Transitions */
         .modal-enter { opacity: 0; transform: scale(0.95); }
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.2s ease-out, transform 0.2s ease-out; }
     </style>
 </head>
 <body id="app-body" class="theme-lyrics h-screen flex flex-col transition-colors duration-300">
-
     <main id="chat-container-lyrics" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar pb-48"> 
         <div class="flex items-start space-x-2">
             <img class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()" alt="icon">
@@ -231,7 +203,6 @@
             <span id="active-filter-count">フィルタ適用中</span>
             <button onclick="clearAllFilters()" class="text-orange-600 underline font-medium">全フィルタ解除</button>
         </div>
-
         <div class="h-full overflow-auto pb-32"> 
             <table class="w-full text-left border-collapse table-fixed">
                 <thead class="bg-gray-50 sticky top-0 z-10 shadow-sm text-xs text-gray-500 uppercase font-semibold">
@@ -262,21 +233,58 @@
         </div>
     </main>
 
-    <main id="chat-container-request" class="flex-1 overflow-y-auto p-4 no-scrollbar pb-48 hidden">
-        <div class="mb-6">
-            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <span class="text-2xl">📋</span> リクエスト
-            </h2>
-            <div class="bg-orange-50 border border-orange-100 rounded-xl p-3 mt-3 flex items-start gap-2">
-                <i data-lucide="shield-check" class="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0"></i>
-                <p class="text-[11px] text-orange-700 leading-relaxed">
-                    Song Helperが調査依頼や改善要望、質問などに答えるよ。楽しく使っていただくために、リクエストを掲載しない場合もあるよ🌸
-                </p>
+    <!-- 開発者用ビュー -->
+    <main id="container-dev" class="flex-1 overflow-hidden relative hidden bg-white">
+        <!-- パスコード画面 -->
+        <div id="dev-view-passcode" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-30 transition-transform duration-300">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center w-[85%] max-w-sm">
+                <i data-lucide="lock" class="w-8 h-8 mx-auto text-gray-300 mb-4"></i>
+                <h2 class="text-lg font-bold text-gray-700 mb-4">開発者モード</h2>
+                <input type="password" id="dev-passcode-input" pattern="[0-9]*" inputmode="numeric" class="w-full text-center tracking-[0.5em] text-2xl py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-300 focus:outline-none mb-4" placeholder="••••">
+                <button onclick="checkDevPasscode()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl shadow hover:bg-gray-700 active:scale-95 transition-transform">
+                    ロック解除
+                </button>
+                <p id="dev-passcode-error" class="text-xs text-red-500 mt-3 hidden">パスコードが違います</p>
             </div>
         </div>
-        <div id="request-list" class="space-y-4">
-            <div class="text-center py-10 text-gray-400 text-xs animate-pulse" id="request-loading">
-                リクエストを読み込み中...
+
+        <!-- インデックス（デンモク）画面 -->
+        <div id="dev-view-index" class="absolute inset-0 bg-white z-20 flex flex-col transition-transform duration-300 translate-x-full">
+            <div class="bg-gray-800 text-white p-4 flex items-center justify-center shadow-md relative z-10 shrink-0">
+                <h2 class="font-bold text-lg">歌詞インデックス</h2>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 pb-32">
+                <div class="grid grid-cols-5 gap-2" id="dev-index-grid">
+                    <!-- JSで動的生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 曲リスト画面 -->
+        <div id="dev-view-songlist" class="absolute inset-0 bg-gray-50 z-30 flex flex-col transition-transform duration-300 translate-x-full">
+            <div class="bg-gray-800 text-white p-4 flex items-center justify-between shadow-md relative z-10 shrink-0">
+                <button onclick="devNavBack('index')" class="p-2 -ml-2 text-gray-300 hover:text-white transition-colors">
+                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                </button>
+                <h2 class="font-bold text-lg" id="dev-songlist-title">リスト</h2>
+                <div class="w-10"></div>
+            </div>
+            <div class="flex-1 overflow-y-auto pb-32" id="dev-songlist-content">
+                <!-- JSで動的生成 -->
+            </div>
+        </div>
+
+        <!-- 歌詞画面 -->
+        <div id="dev-view-lyrics" class="absolute inset-0 bg-white z-40 flex flex-col transition-transform duration-300 translate-x-full">
+            <div class="bg-gray-800 text-white p-4 flex items-center justify-between shadow-md relative z-10 shrink-0">
+                <button onclick="devNavBack('songlist')" class="p-2 -ml-2 text-gray-300 hover:text-white transition-colors">
+                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                </button>
+                <h2 class="font-bold text-sm truncate px-2" id="dev-lyrics-title">歌詞</h2>
+                <div class="w-10"></div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 pb-32 text-gray-700 leading-loose text-sm font-medium" id="dev-lyrics-content">
+                <!-- JSで動的生成 -->
             </div>
         </div>
     </main>
@@ -308,7 +316,6 @@
                 </button>
             </div>
         </form>
-
         <div id="footer-tab-area">
             <button id="tab-lyrics" data-tab="lyrics" onclick="switchTab('lyrics')" class="tab-btn active">
                 <i data-lucide="music" class="w-6 h-6"></i>
@@ -325,9 +332,9 @@
                 <span class="text-[10px] font-bold">一覧</span>
             </button>
             <div class="w-[1px] bg-gray-50 my-3"></div>
-            <button id="tab-request" data-tab="request" onclick="switchTab('request')" class="tab-btn">
-                <i data-lucide="clipboard-list" class="w-6 h-6"></i>
-                <span class="text-[10px] font-bold">リクエスト</span>
+            <button id="tab-dev" data-tab="dev" onclick="switchTab('dev')" class="tab-btn">
+                <i data-lucide="terminal" class="w-6 h-6"></i>
+                <span class="text-[10px] font-bold">開発者用</span>
             </button>
         </div>
     </footer>
@@ -353,7 +360,6 @@
                     <button onclick="toggleAllFilters(false)" class="text-gray-500">全解除</button>
                 </div>
             </div>
-
             <div class="px-4 py-3 border-b border-gray-100 flex gap-2 justify-center bg-white">
                 <button onclick="applySort('asc')" class="flex-1 py-2 px-3 bg-gray-50 hover:bg-orange-50 text-gray-600 hover:text-orange-600 rounded-lg text-xs font-bold border border-gray-200 transition flex items-center justify-center gap-2">
                     <i data-lucide="arrow-up" class="w-3 h-3"></i> 昇順
@@ -365,7 +371,6 @@
             
             <div id="filter-options-list" class="flex-1 overflow-y-auto p-2 space-y-1">
             </div>
-
             <div class="p-4 border-t border-gray-100 bg-white pb-safe">
                 <button onclick="applyFilter()" class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl shadow hover:bg-orange-600 active:scale-95 transition-transform">
                     OK
@@ -401,13 +406,13 @@
                         <p class="text-xs leading-5">曲名やアルバム名から、詳細な情報を教えます。</p>
                     </div>
                     <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
-                        <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="list-music" class="w-4 h-4"></i> 一覧リスト (New)</h3>
+                        <h3 class="font-bold text-orange-600 flex items-center gap-2 mb-2"><i data-lucide="list-music" class="w-4 h-4"></i> 一覧リスト</h3>
                         <p class="text-xs leading-5">全曲リストを表示。時期や編曲者などで絞り込みができます。</p>
                     </div>
                 </div>
                 <div class="text-center pt-6 border-t border-gray-100">
                     <p class="text-[10px] text-gray-400 mb-2">Developed by @noki_dochibi</p>
-                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v2.3.2</p>
+                    <p class="text-[10px] text-gray-300 mt-4 font-mono tracking-wider">v3.0.0</p>
                 </div>
             </div>
         </div>
@@ -437,10 +442,9 @@
     </div>
 
     <script>
-        const APP_VERSION = 'v2.3.2';
+        const APP_VERSION = 'v3.0.0';
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzy7CNn83anQMEsvNxyK3zHMtTRtjHk6XZ-jWBNllRNxcXv41hKw-TenGoGjfpps6rLUw/exec"; 
         const ICON_URL = `https://unavatar.io/twitter/noki_dochibi?v=${APP_VERSION}`;
-
         let currentMode = 'lyrics'; 
         let lastMode = 'lyrics'; 
         let isDarkMode = false; 
@@ -450,18 +454,21 @@
         let filteredSongs = [];
         let activeFilters = { era: [], title: [], arranger: [], duration: [] };
         let currentFilterColumn = '';
-        let currentSort = { column: null, order: 'asc' }; // ソート状態
-        let targetSongForSearch = ''; // 検索対象の一時保存用
-        let isLoadingList = false; // ★追加: 読み込み重複防止フラグ
+        let currentSort = { column: null, order: 'asc' };
+        let targetSongForSearch = '';
+        let isLoadingList = false;
 
-        // 💡 爆速検索用データ (★追加)
+        // 開発者モード State
+        let isDevUnlocked = false;
+        let devCurrentView = 'passcode';
+
+        // 💡 爆速検索用データ
         let fullHelperData = null;
 
         const LOADING_MESSAGES = {
             lyrics: ["aikoからのtelepathyを受信中...", "そんなことよりパーティ抜け出さない？"],
             title: ["おっ！その曲なら確かね...", "俺もそれ好きだよ！待ってて..."],
             shiritori: ["俺に勝負を仕掛けるとはいい度胸だ。", "なるほど、そう来たか..."],
-            request: ["リクエストを受け付けています📮"],
             list: ["データを読み込んでいます..."]
         };
 
@@ -470,7 +477,7 @@
             containers: {
                 lyrics: document.getElementById('chat-container-lyrics'),
                 title: document.getElementById('chat-container-title'),
-                request: document.getElementById('chat-container-request'),
+                dev: document.getElementById('container-dev'),
                 shiritori: document.getElementById('chat-container-shiritori'),
                 list: document.getElementById('container-list')
             },
@@ -480,24 +487,19 @@
             modal: document.getElementById('readme-modal'),
             tabBtns: document.querySelectorAll('.tab-btn'),
             botIcons: document.querySelectorAll('.bot-icon'),
-            requestList: document.getElementById('request-list'),
             footerTabs: document.getElementById('footer-tab-area')
         };
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             dom.botIcons.forEach(img => img.src = ICON_URL);
-            fetchRequests(); 
             setupAutoResizeTextarea();
-
-            // 💡 アプリ起動時にCloudflareから全データを一括取得 (★追加)
+            setupDevSwipeEvents();
             fetchFullData();
         });
 
-        // 💡 Cloudflareから爆速で全データを読み込む処理 (★追加)
         async function fetchFullData() {
             try {
-                // Cloudflareの新しい引き出し（/song）へ取りに行く
                 const res = await fetch("https://lldb.noki-dochibi.workers.dev/song");
                 if (res.ok) {
                     fullHelperData = await res.json();
@@ -528,7 +530,6 @@
             dom.tabBtns.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tab === mode);
             });
-
             Object.keys(dom.containers).forEach(key => {
                 dom.containers[key].classList.toggle('hidden', key !== mode);
             });
@@ -540,39 +541,35 @@
             }
 
             // モードごとのフォーム制御
-            if (mode === 'list') {
+            if (mode === 'list' || mode === 'dev') {
                 dom.searchForm.classList.add('hidden-form'); // フォーム隠す
-                if (allSongs.length === 0) {
-                     loadSongsData(); // 初回データロード
-                } else {
-                    // ★追加: データがあるのにDOMが空の場合の対策（デグレ防止）
-                    const tbody = document.getElementById('song-list-body');
-                    if (tbody && tbody.children.length === 0) {
-                        renderSongList();
+                
+                if (mode === 'list') {
+                    if (allSongs.length === 0) {
+                         loadSongsData();
+                    } else {
+                        const tbody = document.getElementById('song-list-body');
+                        if (tbody && tbody.children.length === 0) {
+                            renderSongList();
+                        }
                     }
+                } else if (mode === 'dev') {
+                    initDevView();
                 }
-                // ★追加: 念のためアイコン再描画
+                
                 setTimeout(() => lucide.createIcons(), 50);
-
             } else {
                 dom.searchForm.classList.remove('hidden-form'); // フォーム表示
                 if (mode === 'lyrics') {
                     dom.searchInput.placeholder = "例：あれは";
                 } else if (mode === 'title') {
                     dom.searchInput.placeholder = "例：ポニーテール";
-                } else if (mode === 'request') {
-                    dom.searchInput.placeholder = "調査や改善のリクエストを書いてね📮";
-                    fetchRequests();
                 } else if (mode === 'shiritori') {
                     dom.searchInput.placeholder = "曲名を入力してね";
                 }
                 
                 const activeContainer = dom.containers[mode];
-                if (mode === 'request') {
-                    activeContainer.scrollTop = 0;
-                } else {
-                    activeContainer.scrollTop = activeContainer.scrollHeight;
-                }
+                activeContainer.scrollTop = activeContainer.scrollHeight;
             }
         };
 
@@ -605,28 +602,17 @@
             e.preventDefault();
             const query = dom.searchInput.value.trim();
             if (!query) return;
-
             safeTrackEvent('search', { search_term: query, search_category: currentMode });
-
-            if (currentMode === 'request') {
-                if (!confirm("この内容で送信しますか？")) return;
-                handleRequestPost(query);
-                dom.searchInput.value = '';
-                resetTextareaHeight(); 
-                return;
-            }
-
+            
             addMessage(query, 'user');
             dom.searchInput.value = '';
             resetTextareaHeight(); 
-
-            // 💡 爆速検索の分岐
+            
             if (!fullHelperData) {
                 addMessage("データを読み込み中です。もう数秒待ってから試してみてね！", 'bot');
                 return;
             }
-
-            // 一瞬すぎて気づかないレベルですが、演出としてローディングを挟む
+            
             const loadingId = addLoading();
             setTimeout(() => {
                 removeLoading(loadingId);
@@ -647,7 +633,7 @@
                     console.error("検索エラー:", error);
                     addMessage("検索中にエラーが発生したよ。もう一度試してみて！", 'bot');
                 }
-            }, 50); // 0.05秒だけ待ってあげる（アニメーションのチラつき防止）
+            }, 50);
         });
 
         window.sendShiritoriAnswer = function(answer) {
@@ -656,12 +642,10 @@
              addMessage(query, 'user');
              dom.searchInput.value = '';
              resetTextareaHeight();
-
              if (!fullHelperData) {
                  addMessage("データを読み込み中です...", 'bot');
                  return;
              }
-
              const loadingId = addLoading();
              setTimeout(() => {
                  removeLoading(loadingId);
@@ -670,74 +654,6 @@
                  else addMessage("ごめんね、うまく探せなかったみたい...", 'bot');
              }, 50);
         };
-
-        async function handleRequestPost(query) {
-            const card = document.createElement('div');
-            card.className = "letter-card animate-fade-in border-dashed bg-orange-50/20";
-            card.innerHTML = `
-                <div class="letter-q bg-transparent border-none">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-[10px] font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">確認中</span>
-                        <span class="text-[10px] text-gray-400">ただいま</span>
-                    </div>
-                    <p class="text-sm text-gray-700 leading-relaxed font-bold">${query.replace(/\n/g, '<br>')}</p>
-                    <p class="text-[10px] text-gray-400 mt-2 italic">※リクエストを送信しました。内容を確認した後に全体へ公開されます🌸</p>
-                </div>
-            `;
-            dom.requestList.insertBefore(card, dom.requestList.firstChild);
-            showToast("リクエストを送ったよ！📮");
-            dom.containers.request.scrollTop = 0;
-
-            try {
-                await fetch(`${GAS_API_URL}?action=postRequest&q=${encodeURIComponent(query)}`);
-            } catch(e) { 
-                console.error("Post failed", e); 
-                safeTrackEvent('exception', { description: "postRequest: " + e.message, fatal: false });
-            }
-        }
-
-        async function fetchRequests() {
-            try {
-                const res = await fetch(`${GAS_API_URL}?action=getRequests`);
-                const json = await res.json();
-                if (json.status === 'success') renderRequests(json.data);
-            } catch(e) { 
-                console.error("Fetch failed", e); 
-                safeTrackEvent('exception', { description: "fetchRequests: " + e.message, fatal: false });
-            }
-        }
-
-        function renderRequests(data) {
-            if (data.length === 0) {
-                dom.requestList.innerHTML = '<p class="text-center py-10 text-gray-400 text-xs">まだリクエストはありません。</p>';
-                return;
-            }
-            dom.requestList.innerHTML = data.map(item => `
-                <div class="letter-card animate-fade-in">
-                    <div class="letter-q">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[10px] font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">掲載中</span>
-                            <span class="text-[10px] text-gray-400">${item.date}</span>
-                        </div>
-                        <p class="text-sm text-gray-700 leading-relaxed font-bold">${item.question.replace(/\n/g, '<br>')}</p>
-                    </div>
-                    <div class="letter-a">
-                        <div class="flex items-start gap-3">
-                            <img src="${ICON_URL}" class="w-8 h-8 rounded-full border border-gray-100">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="text-[10px] font-bold text-gray-800">Song Helper</span>
-                                </div>
-                                <p class="text-sm text-gray-600 leading-relaxed">
-                                    ${item.answer ? item.answer.replace(/\n/g, '<br>') : '<span class="text-gray-300 italic">回答をお待ちください...🌸</span>'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            dom.containers.request.scrollTop = 0;
-        }
 
         function handleLyricsResults(data) {
             if (!data.results || data.results.length === 0) {
@@ -835,7 +751,6 @@
                     </div>
                 `;
             }
-
             if (data.result === 'unknown_song') {
                 addMessage(data.message, 'bot');
                 safeTrackEvent('level_end', { level_name: 'shiritori', success: false, method: 'unknown_song' });
@@ -869,14 +784,12 @@
             if (type === 'user') {
                 userStyle = 'style="background-color: var(--bubble-color);"';
             }
-
             const iconHtml = type === 'bot' ? `<img src="${ICON_URL}" class="bot-icon w-10 h-10 rounded-full border border-gray-200 bg-white flex-shrink-0 shadow-sm z-10 trigger-secret cursor-pointer" onclick="activateSecretMode()">` : '';
             div.innerHTML = type === 'bot' 
                 ? `${iconHtml}<div class="${bubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm leading-relaxed">${content}</div>` 
                 : `<div class="${bubbleClass} px-4 py-3 shadow-sm max-w-[85%] text-sm leading-relaxed" ${userStyle}>${content}</div>`;
             
             container.appendChild(div);
-
             if (scrollType === 'bottom') {
                 scrollToBottom();
             } else if (scrollType === 'start') {
@@ -917,18 +830,16 @@
             safeTrackEvent('share', { method: 'clipboard', content_type: 'lyrics_phrase', item_name: text.substring(0, 20) });
         }
 
-        // --- List Feature (New) ---
-
+        // --- List Feature ---
         function loadSongsData() {
-            if (isLoadingList) return; // ★追加: 重複防止
+            if (isLoadingList) return;
             isLoadingList = true;
-
-            // キャッシュチェック
+            
             const cached = localStorage.getItem('lldb_song_list');
             const version = localStorage.getItem('lldb_song_version');
             const loadingEl = document.getElementById('list-loading');
             let hasRenderedCache = false;
-
+            
             if (cached) {
                 try {
                     allSongs = JSON.parse(cached);
@@ -939,19 +850,14 @@
                     }
                 } catch(e) {}
             }
-
-            // バックエンドからデータ取得
-            // ★追加: キャッシュ回避のためのタイムスタンプ付与
+            
             fetch(`${GAS_API_URL}?action=get_data&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.songList) {
                         allSongs = data.songList;
-
-                        // バージョン更新 または キャッシュ表示していなければ描画＆保存
                         if (!version || version != data.version || !hasRenderedCache) {
                             renderSongList();
-
                             try {
                                 localStorage.setItem('lldb_song_list', JSON.stringify(allSongs));
                                 localStorage.setItem('lldb_song_version', data.version);
@@ -959,7 +865,6 @@
                         }
                         loadingEl.classList.add('hidden');
                     } else {
-                        // データ形式が不正、またはエラーの場合
                         console.error('Data error:', data);
                         if (!hasRenderedCache) {
                             loadingEl.innerText = "データの取得に失敗しました。";
@@ -975,7 +880,7 @@
                     }
                 })
                 .finally(() => {
-                    isLoadingList = false; // ★追加: フラグ解除
+                    isLoadingList = false;
                 });
         }
 
@@ -993,10 +898,8 @@
             const tbody = document.getElementById('song-list-body');
             tbody.innerHTML = '';
             
-            // ★追加: 描画が走る＝データがある状態なので、ローディングは隠す
             document.getElementById('list-loading').classList.add('hidden');
-
-            // 1. フィルタリング
+            
             filteredSongs = allSongs.filter(song => {
                 if (activeFilters.era.length > 0 && !activeFilters.era.includes(song.era)) return false;
                 if (activeFilters.arranger.length > 0 && !activeFilters.arranger.includes(song.arranger)) return false;
@@ -1007,49 +910,41 @@
                 }
                 return true;
             });
-
-            // 2. ソート処理
+            
             if (currentSort.column) {
                 filteredSongs.sort((a, b) => {
                     let valA = a[currentSort.column] || '';
                     let valB = b[currentSort.column] || '';
                     
-                    // 時間の場合は '4:30' などを比較可能な数値にする特別処理
                     if (currentSort.column === 'duration') {
                         valA = parseDuration(valA);
                         valB = parseDuration(valB);
                     }
-                    // 曲名の特別処理（読み仮名優先）
                     else if (currentSort.column === 'title') {
                         valA = (a.reading || a.title).toString();
                         valB = (b.reading || b.title).toString();
                     }
-
                     if (valA < valB) return currentSort.order === 'asc' ? -1 : 1;
                     if (valA > valB) return currentSort.order === 'asc' ? 1 : -1;
                     return 0;
                 });
             }
-
-            // 3. ヘッダーアイコンの更新
+            
             updateHeaderIcons();
             
-            // Filter Bar Toggle
             const hasFilter = Object.values(activeFilters).some(arr => arr.length > 0);
             document.getElementById('filter-bar').classList.toggle('hidden', !hasFilter);
-
+            
             if (filteredSongs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 text-xs">条件に合う曲が見つかりません</td></tr>';
                 return;
             }
-
-            // 4. 描画
+            
             filteredSongs.forEach((song, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-orange-50 transition-colors border-b border-gray-100 group cursor-pointer active:scale-[0.99] transition-transform'; 
                 
                 tr.onclick = () => openConfirmModal(song.title);
-
                 tr.innerHTML = `
                     <td class="p-1 text-sm text-gray-400 align-middle text-center font-mono">
                         ${index + 1}
@@ -1072,14 +967,12 @@
             lucide.createIcons();
         }
 
-        // ソート用のヘルパー関数
         function parseDuration(timeStr) {
             if (!timeStr || timeStr === '-' || timeStr === '不明') return 0;
             const parts = timeStr.split(':');
             return parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
         }
 
-        // ヘッダーアイコン更新
         function updateHeaderIcons() {
             const map = { era: 'icon-filter-era', title: 'icon-filter-title', arranger: 'icon-filter-arranger', duration: 'icon-filter-duration' };
             
@@ -1089,9 +982,7 @@
                 
                 const isActive = activeFilters[key].length > 0;
                 const isSorted = currentSort.column === key;
-
                 iconEl.classList.remove('text-gray-300', 'text-black', 'fill-black', 'text-orange-500');
-
                 if (isActive) {
                     iconEl.classList.add('text-black', 'fill-black');
                 } else if (isSorted) {
@@ -1103,14 +994,12 @@
             lucide.createIcons();
         }
 
-        // ソート実行
         function applySort(order) {
             currentSort = { column: currentFilterColumn, order: order };
             renderSongList();
             closeFilterModal();
         }
 
-        // 確認モーダル制御
         function openConfirmModal(title) {
             targetSongForSearch = title;
             document.getElementById('confirm-song-title').textContent = title;
@@ -1127,7 +1016,6 @@
             
             const title = targetSongForSearch;
             closeConfirmModal();
-
             switchTab('title');
             
             setTimeout(() => {
@@ -1136,7 +1024,6 @@
             }, 100); 
         }
 
-        // Filter Modal Logic
         window.openFilterModal = function(column) {
             currentFilterColumn = column;
             const modal = document.getElementById('filter-modal');
@@ -1144,7 +1031,6 @@
             const list = document.getElementById('filter-options-list');
             const helperMsg = document.getElementById('filter-helper-msg');
             const colNameDisplay = document.getElementById('filter-column-name');
-
             let options = new Set();
             let msg = "";
             let colLabel = "";
@@ -1229,7 +1115,6 @@
             }
         }
 
-        // ★追加: 親画面（Hub）からの更新指令を受け取る
         window.addEventListener('message', (event) => {
             if (event.data.type === 'forceUpdateData') {
                 console.log("Received update command from Hub.", event.data.newVersion);
@@ -1237,20 +1122,16 @@
             }
         });
 
-        // ★追加: 裏でデータを取得してキャッシュを更新し、画面を書き換える
         async function fetchAndHotSwap() {
             try {
                 const response = await fetch(`${GAS_API_URL}?action=get_data`);
                 const data = await response.json();
-
                 if (data && data.songList) {
                     allSongs = data.songList;
-                    // キャッシュを上書き保存
                     localStorage.setItem('lldb_song_list', JSON.stringify(allSongs));
                     if (data.version) {
                         localStorage.setItem('lldb_song_version', data.version);
                     }
-                    // 画面を再描画（もし一覧タブを開いていたら即反映される）
                     if (currentMode === 'list') {
                         renderSongList();
                     }
@@ -1262,10 +1143,284 @@
         }
 
         // ======================================================================
+        // 開発者用ビューのロジック (Dev Mode Logic)
+        // ======================================================================
+        
+        function initDevView() {
+            if (!isDevUnlocked) {
+                document.getElementById('dev-view-passcode').style.transform = 'translateY(0)';
+                document.getElementById('dev-view-index').style.transform = 'translateX(100%)';
+                document.getElementById('dev-view-songlist').style.transform = 'translateX(100%)';
+                document.getElementById('dev-view-lyrics').style.transform = 'translateX(100%)';
+                devCurrentView = 'passcode';
+            } else {
+                devNavTo('index');
+            }
+        }
+
+        window.checkDevPasscode = function() {
+            const input = document.getElementById('dev-passcode-input').value;
+            if (input === '1122') {
+                isDevUnlocked = true;
+                document.getElementById('dev-passcode-error').classList.add('hidden');
+                document.getElementById('dev-passcode-input').value = '';
+                buildDevIndex();
+                devNavTo('index');
+            } else {
+                document.getElementById('dev-passcode-error').classList.remove('hidden');
+            }
+        };
+
+        function devNavTo(targetView) {
+            document.getElementById('dev-view-passcode').style.transform = 'translateY(100%)';
+            
+            if (targetView === 'index') {
+                document.getElementById('dev-view-index').style.transform = 'translateX(0)';
+                document.getElementById('dev-view-songlist').style.transform = 'translateX(100%)';
+                document.getElementById('dev-view-lyrics').style.transform = 'translateX(100%)';
+                devCurrentView = 'index';
+            } else if (targetView === 'songlist') {
+                document.getElementById('dev-view-index').style.transform = 'translateX(0)'; // 背景として残す
+                document.getElementById('dev-view-songlist').style.transform = 'translateX(0)';
+                document.getElementById('dev-view-lyrics').style.transform = 'translateX(100%)';
+                devCurrentView = 'songlist';
+            } else if (targetView === 'lyrics') {
+                document.getElementById('dev-view-songlist').style.transform = 'translateX(0)'; // 背景として残す
+                document.getElementById('dev-view-lyrics').style.transform = 'translateX(0)';
+                devCurrentView = 'lyrics';
+            }
+        }
+
+        window.devNavBack = function(targetView) {
+            if (targetView === 'index') {
+                document.getElementById('dev-view-songlist').style.transform = 'translateX(100%)';
+                document.getElementById('dev-view-lyrics').style.transform = 'translateX(100%)';
+                devCurrentView = 'index';
+            } else if (targetView === 'songlist') {
+                document.getElementById('dev-view-lyrics').style.transform = 'translateX(100%)';
+                devCurrentView = 'songlist';
+            }
+        };
+
+        function buildDevIndex() {
+            const grid = document.getElementById('dev-index-grid');
+            const gojuon = [
+                'あ','い','う','え','お',
+                'か','き','く','け','こ',
+                'さ','し','す','せ','そ',
+                'た','ち','つ','て','と',
+                'な','に','ぬ','ね','の',
+                'は','ひ','ふ','へ','ほ',
+                'ま','み','む','め','も',
+                'や','','ゆ','','よ',
+                'ら','り','る','れ','ろ',
+                'わ','','を','','ん'
+            ];
+            
+            // 歌詞データに存在するユニークな曲名を取得
+            const availableLyricsTitles = new Set();
+            if (fullHelperData && fullHelperData.lyricsData) {
+                fullHelperData.lyricsData.forEach(item => {
+                    if (item.title) {
+                        availableLyricsTitles.add(item.title);
+                    }
+                });
+            }
+            
+            let html = '';
+            gojuon.forEach(char => {
+                if (char === '') {
+                    html += `<div></div>`;
+                } else {
+                    const matchChars = getMatchingChars(char);
+                    let count = 0;
+                    
+                    if (fullHelperData && fullHelperData.songData) {
+                        const countedSongs = new Set();
+                        fullHelperData.songData.forEach(song => {
+                            // 歌詞データに存在しない曲はスキップ
+                            if (!availableLyricsTitles.has(song.songName)) return;
+                            
+                            const kana = song.songKana;
+                            if (kana) {
+                                const firstChar = kana.charAt(0);
+                                if (matchChars.includes(firstChar)) {
+                                    countedSongs.add(song.songName);
+                                }
+                            }
+                        });
+                        count = countedSongs.size;
+                    }
+
+                    if (count > 0) {
+                        html += `
+                            <button onclick="openDevSongList('${char}')" class="bg-white hover:bg-orange-50 active:bg-orange-100 text-gray-700 py-2 rounded-xl shadow-sm border border-gray-200 transition-colors flex flex-col items-center justify-center">
+                                <span class="font-bold text-lg leading-none">${char}</span>
+                                <span class="text-[10px] text-orange-500 font-bold mt-1">${count}曲</span>
+                            </button>
+                        `;
+                    } else {
+                        html += `
+                            <button disabled class="bg-gray-50 text-gray-300 py-2 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center cursor-not-allowed opacity-60">
+                                <span class="font-bold text-lg leading-none">${char}</span>
+                                <span class="text-[10px] text-gray-400 font-bold mt-1">0曲</span>
+                            </button>
+                        `;
+                    }
+                }
+            });
+            
+            grid.innerHTML = html;
+        }
+
+        function getMatchingChars(char) {
+            const map = {
+                'か': ['か','が'], 'き': ['き','ぎ'], 'く': ['く','ぐ'], 'け': ['け','げ'], 'こ': ['こ','ご'],
+                'さ': ['さ','ざ'], 'し': ['し','じ'], 'す': ['す','ず'], 'せ': ['せ','ぜ'], 'そ': ['そ','ぞ'],
+                'た': ['た','だ'], 'ち': ['ち','ぢ'], 'つ': ['つ','づ','っ'], 'て': ['て','で'], 'と': ['と','ど'],
+                'は': ['は','ば','ぱ'], 'ひ': ['ひ','び','ぴ'], 'ふ': ['ふ','ぶ','ぷ'], 'へ': ['へ','べ','ぺ'], 'ほ': ['ほ','ぼ','ぽ'],
+                'あ': ['あ','ぁ'], 'い': ['い','ぃ'], 'う': ['う','ぅ','ヴ'], 'え': ['え','ぇ'], 'お': ['お','ぉ'],
+                'や': ['や','ゃ'], 'ゆ': ['ゆ','ゅ'], 'よ': ['よ','ょ'], 'わ': ['わ','ゎ']
+            };
+            return map[char] || [char];
+        }
+
+        window.openDevSongList = function(charLabel) {
+            if (!fullHelperData || !fullHelperData.songData || !fullHelperData.lyricsData) {
+                alert('データを読み込み中です');
+                return;
+            }
+
+            document.getElementById('dev-songlist-title').textContent = `${charLabel} から始まる曲`;
+            const content = document.getElementById('dev-songlist-content');
+            
+            const matchChars = getMatchingChars(charLabel);
+
+            // 歌詞データに存在するユニークな曲名を取得
+            const availableLyricsTitles = new Set();
+            fullHelperData.lyricsData.forEach(item => {
+                if (item.title) {
+                    availableLyricsTitles.add(item.title);
+                }
+            });
+
+            // 曲の絞り込み (重複排除のためMapを使用)
+            const songsSet = new Map();
+            fullHelperData.songData.forEach(song => {
+                // 歌詞データに存在しない曲はスキップ
+                if (!availableLyricsTitles.has(song.songName)) return;
+
+                const kana = song.songKana;
+                if (!kana) return;
+                const firstChar = kana.charAt(0);
+                
+                if (matchChars.includes(firstChar)) {
+                    songsSet.set(song.songName, song);
+                }
+            });
+
+            const songs = Array.from(songsSet.values()).sort((a, b) => a.songKana.localeCompare(b.songKana, 'ja'));
+
+            if (songs.length === 0) {
+                content.innerHTML = '<div class="p-6 text-center text-gray-400">該当する曲がありません</div>';
+            } else {
+                content.innerHTML = songs.map(song => `
+                    <div onclick="openDevLyrics('${song.songName.replace(/'/g, "\\'")}')" class="p-4 border-b border-gray-100 bg-white hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-colors flex justify-between items-center">
+                        <span class="font-bold text-gray-700">${song.songName}</span>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>
+                    </div>
+                `).join('');
+            }
+            
+            content.scrollTop = 0; // スクロール位置のリセット
+            lucide.createIcons();
+            
+            // DOMの描画を待ってから遷移アニメーションを開始し、カクつきを防ぐ
+            setTimeout(() => {
+                devNavTo('songlist');
+            }, 20);
+        };
+
+        window.openDevLyrics = function(songName) {
+            document.getElementById('dev-lyrics-title').textContent = songName;
+            const content = document.getElementById('dev-lyrics-content');
+
+            // 歌詞データの取得
+            let lyricsHtml = "";
+            if (fullHelperData && fullHelperData.lyricsData) {
+                // filterを使って、該当する曲名の行を全て抽出する
+                const lyricsRows = fullHelperData.lyricsData.filter(l => l.title === songName);
+                
+                if (lyricsRows && lyricsRows.length > 0) {
+                    // 各行のフレーズを結合（スプレッドシート上ではB列に歌詞が縦に並んでいる構造のため）
+                    lyricsHtml = lyricsRows
+                        .map(row => {
+                            if (row.phrases && row.phrases.length > 0) {
+                                return row.phrases[0].trim();
+                            }
+                            return "";
+                        })
+                        .filter(p => p !== "")
+                        .join('<br>'); // 抽出したフレーズを改行でつなぐ
+                }
+            }
+
+            if (lyricsHtml) {
+                content.innerHTML = lyricsHtml; 
+            } else {
+                content.innerHTML = '<div class="py-10 text-gray-400 text-center">この曲の歌詞データはありませんでした。</div>';
+            }
+            
+            content.scrollTop = 0; // スクロール位置のリセット
+
+            // DOMの描画を待ってから遷移アニメーションを開始し、カクつきを防ぐ
+            setTimeout(() => {
+                devNavTo('lyrics');
+            }, 20);
+        };
+
+        // スワイプバック処理 (右スワイプで戻る)
+        function setupDevSwipeEvents() {
+            let startX = 0;
+            let currentX = 0;
+            let isSwiping = false;
+
+            const handleTouchStart = (e) => {
+                startX = e.touches[0].clientX;
+                isSwiping = true;
+            };
+
+            const handleTouchMove = (e) => {
+                if (!isSwiping) return;
+                currentX = e.touches[0].clientX;
+            };
+
+            const handleTouchEnd = () => {
+                if (!isSwiping) return;
+                isSwiping = false;
+                
+                const diffX = currentX - startX;
+                
+                // 右方向に70px以上スワイプされたら戻る処理
+                if (diffX > 70) {
+                    if (devCurrentView === 'lyrics') {
+                        devNavBack('songlist');
+                    } else if (devCurrentView === 'songlist') {
+                        devNavBack('index');
+                    }
+                }
+            };
+
+            const devContainer = document.getElementById('container-dev');
+            devContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
+            devContainer.addEventListener('touchmove', handleTouchMove, { passive: true });
+            devContainer.addEventListener('touchend', handleTouchEnd);
+        }
+
+        // ======================================================================
         // 💡 爆速検索エンジン (Client-side Search Logic)
         // ======================================================================
-
-        // 1. 歌詞検索
+        
         function localSearchLyrics(query) {
             const qLower = query.toLowerCase();
             const qNormalized = _normalizeString(query);
@@ -1274,7 +1429,6 @@
             let actualQuery = null;
             const lyricsData = fullHelperData.lyricsData;
 
-            // ① 完全・部分一致
             for(let item of lyricsData) {
                 if(item.rawText.toLowerCase().includes(qLower)) {
                     let phrase = item.phrases.reduce((a, b) => a.length > b.length ? a : b, "");
@@ -1282,7 +1436,6 @@
                 }
             }
 
-            // ② 正規化検索（もしかして検索）
             if(results.length === 0 && qNormalized.length > 0) {
                 for(let item of lyricsData) {
                     const norm = _normalizeString(item.rawText);
@@ -1297,7 +1450,6 @@
                 }
             }
 
-            // ③ あいまい検索
             if(results.length === 0 && query.length >= 2) {
                 for(let item of lyricsData) {
                     if(_hasMostChars(query, item.rawText)) {
@@ -1315,11 +1467,9 @@
                 const rnd = lyricsData[Math.floor(Math.random() * lyricsData.length)];
                 randomMsg = rnd.phrases[0] ? String(rnd.phrases[0]).replace(/\r?\n/g, ' ') : "";
             }
-
             return { status: 'success', mode: 'lyrics', results, query, random_message: randomMsg, fuzzy_type: fuzzyType, actual_query: actualQuery };
         }
 
-        // 2. タイトル検索
         function localSearchTitle(query) {
             const qLower = query.toLowerCase();
             let songMatches = [];
@@ -1349,7 +1499,6 @@
                 else if(sglTitle.includes(qLower) && row.singleTitle !== '未収録' && row.singleTitle !== '') diskMatches.push({type:'single', name:row.singleTitle, row});
             }
 
-            // ディスクごとのグループ化
             const uniqueDiskNames = [...new Set(diskMatches.map(m=>m.name))];
             let albums = [];
             uniqueDiskNames.forEach(diskName => {
@@ -1367,7 +1516,6 @@
             return { status:'success', mode:'title', query, songs: songMatches, albums };
         }
 
-        // 3. しりとりロジック
         function localPlayShiritori(query) {
             const data = fullHelperData.songData;
             if(!data || data.length === 0) return { status: 'success', mode: 'shiritori', result: 'unknown_song', message: 'データベースが空っぽみたい...' };
@@ -1424,7 +1572,7 @@
             return { status: 'success', mode: 'shiritori', result: 'continue', user_song: userSong, bot_song: selectedSong, next_char: botLastChar, hints: nextHints, all_candidates: allCandidates, message: `「${userSong.title}」だね。<br>それなら...「${selectedSong.title}」！<br>次は「${botLastChar}」から始まる曲だよ！` };
         }
 
-        // --- 以下は文字列処理などのヘルパー関数 ---
+        // --- Helpers ---
         function _normalizeString(str) {
             if (!str) return "";
             let s = String(str).replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) { return String.fromCharCode(s.charCodeAt(0) - 0xFEE0); });
@@ -1467,15 +1615,13 @@
         function _calculateAikoAgeLocal(dateStr) {
             if (!dateStr || dateStr === '不明' || dateStr === '未収録') return null;
             const birthDate = new Date(1975, 10, 22);
-            const targetDate = new Date(dateStr.replace(/\//g, '-')); // iOS対応のためハイフン置換
+            const targetDate = new Date(dateStr.replace(/\//g, '-')); 
             if(isNaN(targetDate.getTime())) return null;
             let age = targetDate.getFullYear() - birthDate.getFullYear();
             const m = targetDate.getMonth() - birthDate.getMonth();
             if (m < 0 || (m === 0 && targetDate.getDate() < birthDate.getDate())) age--;
             return age;
         }
-
     </script>
 </body>
 </html>
-```eof
