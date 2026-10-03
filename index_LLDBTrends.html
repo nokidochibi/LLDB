@@ -118,7 +118,81 @@
             box-shadow: 0 2px 4px rgba(29, 53, 87, 0.3);
         }
         .category-checkbox-hidden { display: none; }
-
+        /* 比較モード用コントロールバナー */
+        #compareBanner {
+            display: none;
+            margin: 8px 10px 12px 10px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1px solid #fde68a;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        #compareBanner.active {
+            display: flex;
+        }
+        .compare-hint-text {
+            font-size: 11px;
+            font-weight: 700;
+            color: #b45309;
+            line-height: 1.4;
+        }
+        .btn-compare-launch {
+            background-color: #f59e0b;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 13px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+            cursor: pointer;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .btn-compare-launch:active {
+            transform: scale(0.96);
+            background-color: #d97706;
+        }
+        .compare-toggle-btn {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 3px 2px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.2s;
+            user-select: none;
+            line-height: 1.15;
+            width: 100%;
+            max-width: 36px;
+            box-sizing: border-box;
+        }
+        /* 比較モードONの時：グレー文字色 */
+        .compare-toggle-btn.mode-on {
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+        }
+        /* 比較モードOFFの時：山吹色文字色 */
+        .compare-toggle-btn.mode-off {
+            background-color: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+        .compare-check-input {
+            width: 18px;
+            height: 18px;
+            accent-color: #f59e0b;
+            cursor: pointer;
+        }
         /* テーブルコンテナ */
         .table-container {
             position: relative;
@@ -140,7 +214,6 @@
             padding: 0 4px;
             border-radius: 4px;
         }
-
         /* テーブルスタイル */
         table {
             width: 100%;
@@ -182,7 +255,6 @@
         
         th:first-child { border-top-left-radius: 12px; }
         th:last-child { border-top-right-radius: 12px; }
-
         td {
             padding: 10px 4px;
             border-bottom: 1px solid #f1f5f9;
@@ -193,11 +265,9 @@
             text-overflow: ellipsis;
             background-color: white;
         }
-
         tr:nth-child(even) td { background-color: #fcfcfc; }
         tr:last-child td:first-child { border-bottom-left-radius: 12px; }
         tr:last-child td:last-child { border-bottom-right-radius: 12px; }
-
         /* ソートアイコン */
         .sortable th::after {
             content: ''; display: inline-block; vertical-align: middle; margin-left: 2px;
@@ -210,50 +280,43 @@
         .sortable th.desc::after {
             border-top: 4px solid var(--accent-color); border-bottom: none;
         }
-
         /* =========================================
-           ★ 列幅設定 (User's Favorite Layout)
+           ★ 列幅設定（1列目を「公開日」の2/3程度に設定）
            ========================================= */
         
-        /* 基本設定：1列目は最低幅を確保 */
-        th:nth-child(1), td:nth-child(1) { white-space: nowrap; min-width: 36px; }
-
-        /* PC (>= 1025px) - 境界を変更 */
+        /* 基本設定：1列目は折り返しを制御 */
+        th:nth-child(1), td:nth-child(1) { white-space: nowrap; }
+        /* PC (>= 1025px): 公開日12.5% → 1列目約8.3% (2/3) */
         @media (min-width: 1025px) {
             th { font-size: 0.9em; }
             td { font-size: 1em; }
-
-            th:nth-child(1), td:nth-child(1) { width: 8%; text-align: center; font-weight: bold; color: #94a3b8; }
-            th:nth-child(2), td:nth-child(2) { width: 39.5%; text-align: left; padding-right: 15px; }
+            th:nth-child(1), td:nth-child(1) { width: 8.3%; text-align: center; font-weight: bold; color: #94a3b8; padding: 12px 1px; }
+            th:nth-child(2), td:nth-child(2) { width: 39.2%; text-align: left; padding-right: 15px; }
             th:nth-child(3), td:nth-child(3) { width: 15%; text-align: right; font-weight: bold; padding: 0 10px; }
             th:nth-child(4), td:nth-child(4) { width: 12.5%; text-align: center; }
             th:nth-child(5), td:nth-child(5) { width: 12.5%; text-align: right; }
             th:nth-child(6), td:nth-child(6) { width: 12.5%; text-align: right; }
         }
-
-        /* Tablet & Mobile Landscape (max 1024px) - 範囲を広げて大型スマホ横向きに対応 */
+        /* Tablet & Mobile Landscape (max 1024px): 公開日10% → 1列目約6.7% (2/3) */
         @media (max-width: 1024px) {
             .table-container { margin: 25px 2px 0 2px; }
             th { font-size: 0.8em; padding: 8px 1px; }
             td { font-size: 0.9em; }
             
-            /* # 6% (5%だと厳しいので微増+min-width確保) */
             th:nth-child(1), td:nth-child(1) { 
-                width: 6%; 
-                min-width: 40px; /* 3桁確保用 */
+                width: 6.7%; 
                 text-align: center; 
                 font-weight: bold; 
                 color: #94a3b8;
-                text-overflow: clip; /* 省略記号回避 */
+                text-overflow: clip; 
+                padding: 8px 1px;
             }
-            /* タイトル 34% (35%から微調整) */
             th:nth-child(2), td:nth-child(2) { 
-                width: 34%; 
+                width: 33.3%; 
                 text-align: left; 
                 padding-right: 4px; 
                 line-height: 1.4; 
             }
-            /* 視聴回数 30% */
             th:nth-child(3), td:nth-child(3) { 
                 width: 30%; 
                 text-align: right; 
@@ -261,56 +324,38 @@
                 padding: 0 4px; 
                 white-space: nowrap; 
             }
-            /* 公開日 10% */
             th:nth-child(4), td:nth-child(4) { width: 10%; text-align: center; }
-            /* 平均/日（全） 10% */
             th:nth-child(5), td:nth-child(5) { width: 10%; text-align: right; padding-right: 2px; }
-            /* 平均/日（7日） 10% */
             th:nth-child(6), td:nth-child(6) { width: 10%; text-align: right; padding-right: 2px; }
         }
-
-        /* Mobile Portrait (max 480px) */
+        /* Mobile Portrait (max 480px): 公開日13% → 1列目約8.7% (2/3) */
         @media (max-width: 480px) {
-            /* ベースの文字サイズを統一 */
             th { font-size: 11px; padding: 12px 1px; }
             td { font-size: 12px; padding: 8px 1px; }
-
-            /* ★ 3桁対応：幅を広げて、省略記号(...)を強制無効化 */
             th:nth-child(1), td:nth-child(1) { 
-                width: 18%; /* 余裕を持って広げる */
+                width: 8.7%; 
                 text-align: center; 
                 font-weight: bold; 
                 color: #94a3b8; 
                 font-size: 11px; 
-                text-overflow: clip; /* ...を表示させない */
+                text-overflow: clip; 
+                padding: 12px 1px;
             }
-            
-            /* タイトル列：幅を調整 */
             th:nth-child(2), td:nth-child(2) { 
-                width: 26%; /* バランス調整 */
-                font-size: 13px; /* タイトルは読みやすく少し大きく */
+                width: 35.3%; 
+                font-size: 13px; 
                 line-height: 1.4;
             }
-            
-            /* 視聴回数列 */
             th:nth-child(3), td:nth-child(3) { 
                 width: 19%; 
                 font-weight: bold;
             }
-            
-            /* 公開日列 */
             th:nth-child(4), td:nth-child(4) { 
                 width: 13%; 
-                font-size: 11px; /* 日付は小さめでOK */
+                font-size: 11px; 
             }
-            
-            /* 平均/日列 - スマホでは中央揃えに */
             th:nth-child(5), td:nth-child(5) { width: 12%; text-align: center; }
-            
-            /* 平均/7日列 - スマホでは中央揃えに */
             th:nth-child(6), td:nth-child(6) { width: 12%; text-align: center; }
-            
-            /* スマホでは絵文字と数値を中央揃えにする */
             .emoji-number-container {
                 align-items: center !important;
             }
@@ -482,6 +527,18 @@
             </div>
         </div>
 
+        <!-- 比較モードバナー（比較モード時に表示） -->
+        <div id="compareBanner">
+            <div class="compare-hint-text">
+                【比較モード】<br>
+                動画を選んで<br>ボタンを押してね →<br>（10個まで）
+            </div>
+            <button class="btn-compare-launch" onclick="openCompareGraph()">
+                <i data-lucide="line-chart" class="w-4 h-4"></i>
+                選んだ動画のグラフを表示 (<span id="compareCountDisplay">0</span>)
+            </button>
+        </div>
+
         <!-- 左寄せ (固定ヘッダーから出してスクロールで流れるように変更) -->
         <span class="subtitle">「視聴回数」とかタップしたら順番入れ替わるで</span>
         
@@ -577,6 +634,23 @@
     let followersDataLoaded = false;
     let dailyViewsChartInstance = null;
     let chartInstances = { youtube: null, twitter: null };
+
+    // 比較モード用State
+    let isCompareMode = false;
+    const selectedCompareUrls = new Set();
+    const MAX_COMPARE_LIMIT = 10;
+    const COMPARE_COLORS = [
+        '#e11d48', // Rose
+        '#2563eb', // Blue
+        '#059669', // Emerald
+        '#d97706', // Amber
+        '#7c3aed', // Purple
+        '#db2777', // Pink
+        '#0891b2', // Cyan
+        '#4b5563', // Slate
+        '#ca8a04', // Yellow
+        '#4f46e5'  // Indigo
+    ];
 
     document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
@@ -750,37 +824,99 @@
         displayData(adaptedData);
     }
 
-    function displayData(data) {
-        videoData = data.data;
-        tableHeaders = data.headers;
-        maxTotalViews = data.maxTotalViews;
+    function toggleCompareMode() {
+        isCompareMode = !isCompareMode;
+        
+        // OFFからONに切り替えたときは前回のチェックをすべてクリア
+        if (isCompareMode) {
+            selectedCompareUrls.clear();
+            updateCompareCountDisplay();
+        }
+        
+        const banner = document.getElementById('compareBanner');
+        if (banner) {
+            banner.classList.toggle('active', isCompareMode);
+        }
+        
+        safeTrackEvent('select_content', {
+            content_type: 'trends_compare_mode',
+            status: isCompareMode ? 'open' : 'close'
+        });
+        
+        updateTableHeader();
+        updateTableBody(filteredVideoData);
+        updateStickyOffset();
+    }
 
+    function handleCompareCheckbox(checkbox, url) {
+        if (checkbox.checked) {
+            if (selectedCompareUrls.size >= MAX_COMPARE_LIMIT) {
+                checkbox.checked = false;
+                showToast(`比較できる動画は最大${MAX_COMPARE_LIMIT}個までです`);
+                return;
+            }
+            selectedCompareUrls.add(url);
+        } else {
+            selectedCompareUrls.delete(url);
+        }
+        updateCompareCountDisplay();
+    }
+
+    function updateCompareCountDisplay() {
+        const display = document.getElementById('compareCountDisplay');
+        if (display) {
+            display.textContent = selectedCompareUrls.size;
+        }
+    }
+
+    function updateTableHeader() {
         const thead = document.getElementById('tableHeader');
-        thead.innerHTML = '<th style="cursor:default; width:4%;">#</th>';
+        if (!thead) return;
+        thead.innerHTML = '';
+        
+        const thFirst = document.createElement('th');
+        thFirst.style.cursor = 'pointer';
+        thFirst.onclick = toggleCompareMode;
+        
+        // ON時：「比較<br>OFF」（グレー文字色） / OFF時：「比較<br>ON」（山吹色文字色）
+        if (isCompareMode) {
+            thFirst.innerHTML = `<span class="compare-toggle-btn mode-on">比較<br>OFF</span>`;
+        } else {
+            thFirst.innerHTML = `<span class="compare-toggle-btn mode-off">比較<br>ON</span>`;
+        }
+        thead.appendChild(thFirst);
+
         tableHeaders.forEach(h => {
             const th = document.createElement('th');
             th.innerHTML = h.text;
             if(h.key !== 'url') {
                 th.classList.add('sortable');
+                if (currentSortColumn === h.key) {
+                    th.classList.add(currentSortDirection);
+                }
                 th.onclick = () => {
                     const dir = (currentSortColumn === h.key && currentSortDirection === 'asc') ? 'desc' :
                                 (currentSortColumn === h.key && currentSortDirection === 'desc') ? 'asc' :
                                 (h.key === 'publishedDate') ? 'asc' : 'desc';
                     
-                    // ★追加: ソート操作の計測
                     safeTrackEvent('select_content', {
                         content_type: 'trends_sort',
                         item_id: h.key,
                         item_category: dir
                     });
-
                     sortTable(h.key, h.type, dir);
                 };
             }
             thead.appendChild(th);
         });
+    }
 
-        // 更新日時の表示処理
+    function displayData(data) {
+        videoData = data.data;
+        tableHeaders = data.headers;
+        maxTotalViews = data.maxTotalViews;
+        updateTableHeader();
+
         const timeDisplay = document.getElementById('lastUpdateTimeDisplay');
         if(data.lastUpdateTime) {
             timeDisplay.textContent = `※${data.lastUpdateTime}更新`;
@@ -788,7 +924,6 @@
         } else {
             timeDisplay.style.display = 'none';
         }
-
         document.getElementById('loading').style.display = 'none';
         document.getElementById('tableContainer').style.display = 'block';
         
@@ -853,7 +988,18 @@
 
         data.forEach((row, i) => {
             const tr = document.createElement('tr');
-            tr.innerHTML += `<td style="text-align:center; font-weight:bold; color:#94a3b8;">${i+1}</td>`;
+            
+            // 1列目: 通常時は順位、比較モード時はチェックボックス
+            if (isCompareMode) {
+                const isChecked = selectedCompareUrls.has(row.url) ? 'checked' : '';
+                tr.innerHTML += `
+                    <td style="text-align:center; padding:4px;">
+                        <input type="checkbox" class="compare-check-input" ${isChecked} onchange="handleCompareCheckbox(this, '${row.url.replace(/'/g, "\\'")}')">
+                    </td>
+                `;
+            } else {
+                tr.innerHTML += `<td style="text-align:center; font-weight:bold; color:#94a3b8;">${i+1}</td>`;
+            }
             
             tableHeaders.forEach(h => {
                 let td = document.createElement('td');
@@ -914,7 +1060,6 @@
     }
 
     async function openGraph(url, title) {
-        // GA4 Tracking
         safeTrackEvent('select_content', {
             content_type: 'trend_graph',
             item_name: title
@@ -925,14 +1070,11 @@
         if(dailyViewsChartInstance) { dailyViewsChartInstance.destroy(); dailyViewsChartInstance = null; }
         
         try {
-            // ★変更: 通信せずに、ローカルに保持した全データから該当URLのデータを探す
             if (fullTrendGraphsData && fullTrendGraphsData[url] && fullTrendGraphsData[url].length > 0) {
                 document.getElementById('graphLoading').style.display = 'none';
                 document.getElementById('dailyViewsChart').style.display = 'block';
                 document.getElementById('noGraphData').style.display = 'none';
                 
-                // GASで軽量化した配列形式 [["2024/01/01", 100], ...] を
-                // Chart.jsで使えるオブジェクト形式 [{date: "2024/01/01", views: 100}, ...] に戻す
                 const formattedData = fullTrendGraphsData[url].map(d => ({
                     date: d[0],
                     views: d[1]
@@ -948,6 +1090,138 @@
             console.error("グラフ描画エラー:", e);
             document.getElementById('graphLoading').textContent = "エラーが発生しました";
         }
+    }
+
+    function openCompareGraph() {
+        if (selectedCompareUrls.size === 0) {
+            showToast("比較したい動画を1つ以上選んでね");
+            return;
+        }
+
+        const selectedUrls = Array.from(selectedCompareUrls);
+        const selectedTitles = selectedUrls.map(url => {
+            const row = videoData.find(v => v.url === url);
+            return row ? row.title : '不明な動画';
+        });
+
+        safeTrackEvent('select_content', {
+            content_type: 'compare_graph',
+            item_name: selectedTitles.join(' / ')
+        });
+
+        document.getElementById('graphModal').classList.add('open');
+        document.getElementById('graphTitle').textContent = `動画推移の比較 (${selectedUrls.length}曲)`;
+        
+        if(dailyViewsChartInstance) { dailyViewsChartInstance.destroy(); dailyViewsChartInstance = null; }
+
+        if (!fullTrendGraphsData) {
+            document.getElementById('graphLoading').textContent = "データを読み込み中です...";
+            return;
+        }
+
+        // 全日付のユニーク配列を作成（時系列昇順）
+        const allDatesSet = new Set();
+        selectedUrls.forEach(url => {
+            const history = fullTrendGraphsData[url] || [];
+            history.forEach(d => allDatesSet.add(d[0]));
+        });
+        const sortedDates = Array.from(allDatesSet).sort((a, b) => new Date(a) - new Date(b));
+
+        if (sortedDates.length === 0) {
+            document.getElementById('graphLoading').style.display = 'none';
+            document.getElementById('dailyViewsChart').style.display = 'none';
+            document.getElementById('noGraphData').style.display = 'block';
+            return;
+        }
+
+        // 各曲のデータセットを生成
+        const datasets = selectedUrls.map((url, index) => {
+            const vRow = videoData.find(v => v.url === url);
+            let displayTitle = vRow ? vRow.title : `動画 ${index + 1}`;
+            // タイトルを短縮表示（『曲名』部分を優先）
+            const bracketMatch = displayTitle.match(/[『「]([^』」]+)[』」]/);
+            if (bracketMatch && bracketMatch[1]) {
+                displayTitle = bracketMatch[1];
+            } else {
+                displayTitle = displayTitle.substring(0, 14);
+            }
+
+            const rawData = fullTrendGraphsData[url] || [];
+            const dataMap = {};
+            rawData.forEach(d => { dataMap[d[0]] = d[1]; });
+
+            const dataPoints = sortedDates.map(date => (dataMap[date] !== undefined ? dataMap[date] : null));
+            const color = COMPARE_COLORS[index % COMPARE_COLORS.length];
+
+            return {
+                label: displayTitle,
+                data: dataPoints,
+                borderColor: color,
+                backgroundColor: color + '20',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.2,
+                pointRadius: 2,
+                spanGaps: true
+            };
+        });
+
+        document.getElementById('graphLoading').style.display = 'none';
+        document.getElementById('dailyViewsChart').style.display = 'block';
+        document.getElementById('noGraphData').style.display = 'none';
+
+        const ctx = document.getElementById('dailyViewsChart').getContext('2d');
+        dailyViewsChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: sortedDates,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            font: { size: 11, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(ctx) {
+                                const val = ctx.parsed.y;
+                                return `\({ctx.dataset.label}:\){val !== null ? val.toLocaleString() + ' 回' : '記録なし'}`;
+                            }
+                        }
+                    },
+                    zoom: {
+                        pan: { enabled: true, mode: 'x' },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'x'
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { maxTicksLimit: 6 } },
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 10000000) return (value / 10000000).toFixed(0) + '千万';
+                                if (value >= 10000) return (value / 10000).toFixed(0) + '万';
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     function renderGraph(data) {
