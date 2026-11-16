@@ -248,8 +248,26 @@ function initializeApp(data, isFullLoad = true) {
     }
   }
 
-  // フィルタの準備とリスト表示はStep1でも必ず行う
-  populateFilters(allLiveRecords);
+// ★追加: 楽曲・会場タブに「何月何日時点」の注意書きを表示（セトリ未登録の未来公演は除く）
+try {
+  const asofLatest = allLiveRecords
+    .filter(rec => (rec.songCount || 0) > 0)
+    .reduce((latest, rec) => {
+      const d = new Date(rec.date);
+      return d > latest ? d : latest;
+    }, new Date(0));
+  if (!isNaN(asofLatest.getTime())) {
+    const asofText = `※${asofLatest.getFullYear()}/${('0' + (asofLatest.getMonth() + 1)).slice(-2)}/${('0' + asofLatest.getDate()).slice(-2)} 時点`;
+    const songNote = document.getElementById('song-asof-note');
+    if (songNote) songNote.textContent = asofText;
+    const venueNote = document.getElementById('venue-asof-note');
+    if (venueNote) venueNote.textContent = asofText;
+  }
+} catch(e) { console.error(e); }
+
+// フィルタの準備とリスト表示はStep1でも必ず行う
+populateFilters(allLiveRecords);
+
   
   const searchInput = document.getElementById('search-input');
   if (searchInput && !searchInput.hasAttribute('data-listener-attached')) {
@@ -1400,7 +1418,7 @@ function showLiveDetail(rec) {
         : `<h3 class="font-bold mb-3 text-gray-700 text-lg">🎵 セットリスト</h3>
 <div class="card-base text-gray-500 text-sm leading-relaxed bg-white text-left">
   この日のセトリがわかる方は <span class="text-blue-500 underline cursor-pointer font-bold" onclick="if(confirm('セトリ投稿フォームに移動しますか？')){ window.open('https://nokidochibi.github.io/LLDB_SetoriForm/', '_blank'); }">こちら</span> から教えてください。<br>
-  セットリストは順次更新予定です。
+  セットリストは 2026年3月4日以降に更新予定です。
 </div>`);
 
   // ★修正: 終演後ツイートの表示用HTML生成
